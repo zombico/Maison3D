@@ -8,6 +8,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "spike:scan": "node 00-spike-room-scan/server.mjs"
+    "spike:scan": "node 00-spike-room-scan/server.mjs",
+    "spike:loop": "node 01-spike-muse-loop/cli.mjs serve",
+    "spike:loop:https": "node 01-spike-muse-loop/cli.mjs serve --https"
   }
 }

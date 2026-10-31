@@ -24,3 +24,16 @@ Optional, scans straight to the laptop: connect the headset over USB with develo
 They land in `00-spike-room-scan/scans/` (ignored by git: it is your home).
 
 Coordinates are WebXR `local-floor`: y up, metres, -z forward where the session started.
+
+## 01: the Muse loop
+
+Talk to the agent from inside the room: hold the trigger, speak, let go. What you said and what you pointed at go to
+a small server; the agent, waiting in `listen`, changes the scene and answers; the headset swaps the change in and
+reads the answer aloud without leaving AR. The scene is one cube. The agent's side is in
+[`01-spike-muse-loop/AGENTS.md`](01-spike-muse-loop/AGENTS.md): tell Muse to read it and start.
+
+- In a Muse sandbox: `npm run spike:loop`, then open the sandbox's preview address with the printed `/?t=…`.
+- On a laptop on the headset's Wi-Fi: `npm run spike:loop:https`, open the printed `https://<laptop-ip>:8443/?t=…`
+  and accept the certificate warning once.
+- Before entering AR, press **Hold to talk** once on the page: it asks for the microphone and shows whether this
+  browser can recognise speech. Typing in the page sends the same thing.

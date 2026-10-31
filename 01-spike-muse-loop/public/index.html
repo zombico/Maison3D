@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Maison3D loop</title>
+  <style>
+    body { margin: 0; padding: 24px; background: #15130f; color: #ece6da; font: 16px/1.5 system-ui, sans-serif; }
+    h1 { font-size: 22px; margin: 0 0 4px; }
+    h2 { font-size: 18px; margin: 28px 0 8px; }
+    p { margin: 0 0 16px; color: #b9b1a3; max-width: 46em; }
+    button { font: inherit; font-size: 20px; padding: 14px 28px; border-radius: 10px; border: 0; background: #e4b363; color: #15130f; cursor: pointer; }
+    button:disabled { background: #4a453c; color: #8a8273; cursor: default; }
+    button.small { font-size: 16px; padding: 8px 16px; }
+    .bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    input { font: inherit; padding: 8px 10px; border-radius: 8px; border: 1px solid #4a453c; background: #0d0c09; color: #ece6da; flex: 1 1 260px; }
+    pre { background: #0d0c09; padding: 12px; border-radius: 8px; white-space: pre-wrap; margin: 0; }
+    .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #6b6458; margin-right: 6px; }
+    .dot.on { background: #5bd16a; }
+  </style>
+</head>
+<body>
+  <h1>Maison3D loop</h1>
+  <p>
+    Talk to the agent from inside the room. In AR, <b>hold the trigger</b> (or pinch and hold), say what you want,
+    and let go: what you pointed at goes with it. The agent changes the cube, and its answer is shown and read aloud,
+    without leaving AR.
+  </p>
+  <p><span class="dot" id="listenDot"></span><span id="listenText">connecting…</span> · <span id="link">…</span></p>
+  <div class="bar">
+    <button id="enter" disabled>Checking WebXR…</button>
+    <button id="talk" class="small">Hold to talk</button>
+  </div>
+
+  <h2>Or type it</h2>
+  <form class="bar" id="typed">
+    <input id="text" placeholder="make it red and put it on the table" autocomplete="off">
+    <button class="small">Send</button>
+  </form>
+
+  <h2>What happened</h2>
+  <pre id="log"></pre>
+
+  <script type="importmap">
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }
+  </script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
