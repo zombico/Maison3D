@@ -2,6 +2,10 @@
 // Plain WebXR (plane-detection, mesh-detection) so the answer is about the platform, not a wrapper.
 // Everything is recorded in the session's local-floor space: y up, metres, -z forward at session start.
 import * as THREE from 'three';
+import { keepScan } from './store.js';
+import { SEND, sendScan } from './send.js';
+import { refreshSaved } from './saved.js';
+import { countLabels } from './plan.js';
 
 const AUTO_SAVE_MS = 3000;           // after the first plane appears
 const MESH_GEOMETRY_LIMIT = 4096;    // vertices; bounded (furniture) meshes are far smaller, the global mesh is not
@@ -160,15 +164,11 @@ function capture(session, frame, ref, reason) {
   };
 }
 
-async function post(scan) {
-  const res = await fetch('/api/scan', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(scan),
-  });
-  if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
-  const { file, summary } = await res.json();
-  log(`saved ${file}: planes ${JSON.stringify(summary.planes)}, meshes ${JSON.stringify(summary.meshes)}`);
+// kept in this browser always; posted to the laptop too when the page was opened with ?send=
+async function keep(scan) {
+  const { name, persisted } = keepScan(scan);
+  log(`kept ${name}${persisted ? '' : ' (too big to persist: download it before reloading)'}: planes ${JSON.stringify(countLabels(scan.planes))}, meshes ${JSON.stringify(countLabels(scan.meshes))}`);
+  if (SEND) log(`sent ${(await sendScan(scan)).file}`);
 }
 
 // --- haptics: the only feedback inside the headset ---------------------------------------------------------
@@ -219,7 +219,7 @@ function onFrame(time, frame) {
       const { reason, source } = pending;
       pending = null;
       lastScan = capture(session, frame, ref, reason);
-      post(lastScan).then(() => pulse(source, 2), (e) => { log(`save failed: ${e.message}`); pulse(source, 3); });
+      keep(lastScan).then(() => pulse(source, 2), (e) => { log(`save failed: ${e.message}`); pulse(source, 3); });
     }
   }
   renderer.render(scene, camera);
@@ -255,6 +255,7 @@ async function enter() {
     autoSaved = false;
     lastScan = null;
     enterBtn.disabled = false;
+    refreshSaved();
   });
 
   await renderer.xr.setSession(session);
@@ -264,10 +265,10 @@ async function enter() {
 async function init() {
   if (!navigator.xr) {
     enterBtn.textContent = 'No WebXR here';
-    log('navigator.xr is missing: open this page in the Quest browser at http://localhost:8080 (after adb reverse)');
+    log('navigator.xr is missing: open this page in the Quest browser');
     return;
   }
-  if (!window.isSecureContext) log('not a secure context: WebXR needs https or http://localhost');
+  if (!window.isSecureContext) log('not a secure context: WebXR needs https');
   const ok = await navigator.xr.isSessionSupported('immersive-ar').catch(() => false);
   enterBtn.textContent = ok ? 'Enter room' : 'immersive-ar not supported';
   enterBtn.disabled = !ok;

@@ -12,7 +12,15 @@
     button:disabled { background: #4a453c; color: #8a8273; cursor: default; }
     label { display: block; margin: 16px 0; color: #b9b1a3; }
     pre { background: #0d0c09; padding: 12px; border-radius: 8px; white-space: pre-wrap; min-height: 6em; }
-    a { color: #e4b363; }
+    h2 { font-size: 18px; margin: 28px 0 8px; }
+    .bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    select { font: inherit; padding: 8px; max-width: 100%; }
+    button.small { font-size: 16px; padding: 8px 16px; }
+    button.quiet { background: #4a453c; color: #ece6da; }
+    .row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; }
+    svg { background: #0d0c09; border-radius: 8px; width: min(100%, 640px); height: auto; aspect-ratio: 1; }
+    #info { flex: 1 1 280px; margin: 0; overflow: auto; }
+    svg text { font: 0.18px system-ui, sans-serif; fill: #ece6da; }
   </style>
 </head>
 <body>
@@ -20,17 +28,30 @@
   <p>
     Enters passthrough AR and reads what the headset knows about this room: its planes (floor, walls, ceiling, door
     and window frames) and meshes (furniture boxes, the global mesh), drawn over the real room.
-    <b>Trigger</b> (or pinch) saves a scan to the laptop. <b>Grip</b> asks the headset to run Space Setup.
-    A scan is also saved automatically a few seconds after the room appears.
+    <b>Trigger</b> (or pinch) saves a scan. <b>Grip</b> asks the headset to run Space Setup.
+    A scan is also saved automatically a few seconds after the room appears. A double buzz means saved.
+    Scans stay in this browser: exit to see them below, and download one to share it.
   </p>
   <button id="enter" disabled>Checking WebXR…</button>
   <label><input type="checkbox" id="full"> include the global mesh geometry (large)</label>
   <pre id="status"></pre>
-  <p><a href="view.html">Saved scans (top-down viewer)</a></p>
+
+  <h2>Saved scans</h2>
+  <div class="bar">
+    <select id="pick"></select>
+    <button id="download" class="small">Download</button>
+    <button id="send" class="small" hidden>Send to laptop</button>
+    <button id="clear" class="small quiet">Forget all</button>
+  </div>
+  <div class="row">
+    <svg id="plan" viewBox="0 0 10 10"></svg>
+    <pre id="info"></pre>
+  </div>
 
   <script type="importmap">
-    { "imports": { "three": "/vendor/three/three.module.js" } }
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }
   </script>
+  <script type="module" src="saved.js"></script>
   <script type="module" src="scan.js"></script>
 </body>
 </html>

@@ -1,6 +1,7 @@
-// Spike 00: serves the room-scan page to the headset and saves what it posts.
-// Loopback only: reach it from the Quest with `adb reverse tcp:8080 tcp:8080`, then open http://localhost:8080
-// (localhost is a secure context, so WebXR works without certificates).
+// Spike 00, optional: receives scans on the laptop and serves the pages for desktop work.
+// The headset opens the page from an https host (GitHub Pages) with ?send=http://localhost:8080 and reaches this
+// server over USB with `adb reverse tcp:8080 tcp:8080`. Loopback only; CORS is open because the page's origin is
+// the https host, and the private-network preflight header lets a public page reach localhost.
 import http from 'node:http';
 import { readFile, writeFile, mkdir, readdir } from 'node:fs/promises';
 import { join, extname, dirname, normalize, sep } from 'node:path';
@@ -9,7 +10,6 @@ import { fileURLToPath } from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = join(here, 'public');
 const SCANS = join(here, 'scans');
-const THREE_BUILD = join(here, '..', 'node_modules', 'three', 'build');
 const PORT = Number(process.env.PORT) || 8080;
 const MAX_BODY = 64 * 1024 * 1024;
 const TYPES = {
@@ -20,8 +20,15 @@ const TYPES = {
   '.css': 'text/css; charset=utf-8',
 };
 
+const CORS = {
+  'access-control-allow-origin': '*',
+  'access-control-allow-methods': 'GET, POST, OPTIONS',
+  'access-control-allow-headers': 'content-type',
+  'access-control-allow-private-network': 'true',
+};
+
 function send(res, status, body, type = 'text/plain; charset=utf-8') {
-  res.writeHead(status, { 'content-type': type, 'cache-control': 'no-store' });
+  res.writeHead(status, { 'content-type': type, 'cache-control': 'no-store', ...CORS });
   res.end(body);
 }
 
@@ -100,7 +107,7 @@ const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, 'http://localhost');
     if (req.method === 'POST' && url.pathname === '/api/scan') return await saveScan(req, res);
     if (req.method === 'GET' && url.pathname === '/api/scans') return send(res, 200, JSON.stringify(await listScans()), TYPES['.json']);
-    if (req.method === 'GET' && url.pathname.startsWith('/vendor/three/')) return await serveFile(res, THREE_BUILD, url.pathname.slice('/vendor/three/'.length));
+    if (req.method === 'OPTIONS') return send(res, 204, '');
     if (req.method === 'GET' && url.pathname.startsWith('/scans/')) return await serveFile(res, SCANS, url.pathname.slice('/scans/'.length));
     if (req.method === 'GET') return await serveFile(res, PUBLIC, url.pathname === '/' ? 'index.html' : url.pathname.slice(1));
     send(res, 405, 'method not allowed');
@@ -111,6 +118,6 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, '127.0.0.1', () => {
-  console.log(`room-scan spike on http://localhost:${PORT}  (headset: adb reverse tcp:${PORT} tcp:${PORT})`);
+  console.log(`scan receiver on http://localhost:${PORT}  (headset: adb reverse tcp:${PORT} tcp:${PORT}, page ?send=http://localhost:${PORT})`);
   console.log(`desktop viewer: http://localhost:${PORT}/view.html`);
 });

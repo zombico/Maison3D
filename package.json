@@ -9,8 +9,5 @@
   },
   "scripts": {
     "spike:scan": "node 00-spike-room-scan/server.mjs"
-  },
-  "dependencies": {
-    "three": "0.170.0"
   }
 }
