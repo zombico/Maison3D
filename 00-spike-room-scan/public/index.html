@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Maison3D room scan</title>
+  <style>
+    body { margin: 0; padding: 24px; background: #15130f; color: #ece6da; font: 16px/1.5 system-ui, sans-serif; }
+    h1 { font-size: 22px; margin: 0 0 4px; }
+    p { margin: 0 0 16px; color: #b9b1a3; max-width: 46em; }
+    button { font: inherit; font-size: 20px; padding: 14px 28px; border-radius: 10px; border: 0; background: #e4b363; color: #15130f; cursor: pointer; }
+    button:disabled { background: #4a453c; color: #8a8273; cursor: default; }
+    label { display: block; margin: 16px 0; color: #b9b1a3; }
+    pre { background: #0d0c09; padding: 12px; border-radius: 8px; white-space: pre-wrap; min-height: 6em; }
+    a { color: #e4b363; }
+  </style>
+</head>
+<body>
+  <h1>Room scan spike</h1>
+  <p>
+    Enters passthrough AR and reads what the headset knows about this room: its planes (floor, walls, ceiling, door
+    and window frames) and meshes (furniture boxes, the global mesh), drawn over the real room.
+    <b>Trigger</b> (or pinch) saves a scan to the laptop. <b>Grip</b> asks the headset to run Space Setup.
+    A scan is also saved automatically a few seconds after the room appears.
+  </p>
+  <button id="enter" disabled>Checking WebXR…</button>
+  <label><input type="checkbox" id="full"> include the global mesh geometry (large)</label>
+  <pre id="status"></pre>
+  <p><a href="view.html">Saved scans (top-down viewer)</a></p>
+
+  <script type="importmap">
+    { "imports": { "three": "/vendor/three/three.module.js" } }
+  </script>
+  <script type="module" src="scan.js"></script>
+</body>
+</html>
