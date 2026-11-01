@@ -279,13 +279,93 @@ function placePanel(first) {
 }
 
 // --- talking: hold the trigger, speak, let go -----------------------------------------------------------------
+// The Quest browser has no SpeechRecognition and its keyboard does not open inside XR (the xr-voice tests found
+// both), so the headset records with MediaRecorder and transcribes in the page with a small Whisper model: no key,
+// and the audio never leaves the headset. Only the words go to the server.
 
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const TRANSFORMERS = 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.js';
+const MODEL = 'Xenova/whisper-tiny.en';
+const MIN_RECORDING_MS = 400;
+
+const voice = { mic: 'not asked', model: 'not loaded' };
+let micStream = null;
+let transcriber = null;
+let modelLoading = null;
+
+function setVoice(key, value) {
+  voice[key] = value;
+  $('voiceState').textContent = `microphone: ${voice.mic} · voice model: ${voice.model}`;
+}
+
+async function ensureMic() {
+  if (micStream) return micStream;
+  if (!navigator.mediaDevices?.getUserMedia) throw new Error('no microphone access in this browser');
+  micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  setVoice('mic', 'allowed');
+  return micStream;
+}
+
+function ensureModel() {
+  modelLoading ??= (async () => {
+    setVoice('model', 'loading…');
+    const mod = await import(TRANSFORMERS);
+    mod.env.allowLocalModels = false;
+    if (mod.env.backends?.onnx?.wasm) mod.env.backends.onnx.wasm.numThreads = 1;
+    transcriber = await mod.pipeline('automatic-speech-recognition', MODEL, {
+      quantized: true,
+      progress_callback: (p) => {
+        if (p?.status !== 'progress' || p.progress == null) return;
+        const pct = Math.round(p.progress); // transformers.js reports 0–100
+        setVoice('model', `loading ${pct}%`);
+        if (session) panelSet('Loading voice model', `${pct}%`, 'first time only', 'busy');
+      },
+    });
+    setVoice('model', 'ready');
+    return transcriber;
+  })().catch((e) => {
+    modelLoading = null;
+    setVoice('model', `failed: ${e.message}`);
+    throw e;
+  });
+  return modelLoading;
+}
+
+async function to16kMono(blob) {
+  const ctx = new AudioContext();
+  try {
+    const decoded = await ctx.decodeAudioData(await blob.arrayBuffer());
+    const mono = new Float32Array(decoded.length);
+    for (let c = 0; c < decoded.numberOfChannels; c++) {
+      const ch = decoded.getChannelData(c);
+      for (let i = 0; i < ch.length; i++) mono[i] += ch[i] / decoded.numberOfChannels;
+    }
+    if (decoded.sampleRate === 16000) return mono;
+    const offline = new OfflineAudioContext(1, Math.ceil(decoded.duration * 16000), 16000);
+    const buf = offline.createBuffer(1, mono.length, decoded.sampleRate);
+    buf.getChannelData(0).set(mono);
+    const src = offline.createBufferSource();
+    src.buffer = buf;
+    src.connect(offline.destination);
+    src.start();
+    return (await offline.startRendering()).getChannelData(0);
+  } finally {
+    ctx.close().catch(() => {});
+  }
+}
+
+function pickMime() {
+  for (const m of ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus']) {
+    if (window.MediaRecorder?.isTypeSupported?.(m)) return m;
+  }
+  return '';
+}
+
 const raycaster = new THREE.Raycaster();
 const marker = new THREE.Mesh(new THREE.RingGeometry(0.03, 0.045, 32), new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, depthTest: false }));
 marker.visible = false;
 scene.add(marker);
-let talk = null; // { controller, text, error, rec, pointing }
+let talk = null;      // { controller, recorder, chunks, mime, startedAt, pointing }
+let transcribing = false;
 
 function aim(controller) {
   if (!controller) return null;
@@ -306,52 +386,57 @@ function pulse(controller, strength = 0.5, ms = 60) {
 }
 
 function startTalking(controller) {
-  if (talk) return;
-  if (!SR) {
-    panelSet('No speech recognition', 'This browser cannot listen.', 'type on the page, or talk to the agent in its tab', 'error');
-    log('no SpeechRecognition in this browser');
+  if (talk || transcribing) return;
+  if (!micStream || !transcriber) {
+    // asking from inside XR may work once the browser has a grant; the page buttons are the sure way
+    panelSet('Not ready yet', !micStream ? 'Allowing the microphone…' : 'Loading the voice model…', 'or use the buttons on the page first', 'busy');
+    (async () => { await ensureMic(); await ensureModel(); panelIdle(); })().catch((e) => panelSet('Voice not ready', e.message, 'on the page: Allow mic, then Load voice model', 'error'));
     return;
   }
   window.speechSynthesis?.cancel();
-  const t = { controller, text: '', error: null, rec: new SR(), pointing: null };
+  const mime = pickMime();
+  const t = { controller, chunks: [], mime, startedAt: performance.now(), pointing: null,
+    recorder: new MediaRecorder(micStream, mime ? { mimeType: mime } : undefined) };
   talk = t;
-  t.rec.lang = navigator.language || 'en-US';
-  t.rec.continuous = true;
-  t.rec.interimResults = true;
-  t.rec.onresult = (e) => {
-    t.text = [...e.results].map((res) => res[0].transcript).join(' ').replace(/\s+/g, ' ').trim();
-    panelSet('Listening', t.text, 'let go to send', 'busy');
-  };
-  t.rec.onerror = (e) => { t.error = e.error; };
-  t.rec.onend = () => finishTalking(t);
-  try {
-    t.rec.start();
-  } catch (e) {
-    t.error = e.message;
-    finishTalking(t);
-    return;
-  }
+  t.recorder.ondataavailable = (e) => { if (e.data?.size) t.chunks.push(e.data); };
+  t.recorder.onstop = () => transcribe(t);
+  t.recorder.start();
   pulse(controller);
-  panelSet('Listening', '…', 'let go to send', 'busy');
+  panelSet('Listening', 'speak, then let go', '', 'busy');
 }
 
 function stopTalking(controller) {
   if (!talk || talk.controller !== controller) return;
   talk.pointing = pointing(controller);
-  talk.rec.stop(); // onend sends it
+  talk.recorder.stop(); // onstop transcribes and sends
 }
 
-function finishTalking(t) {
-  if (talk !== t) return;
+async function transcribe(t) {
   talk = null;
   marker.visible = false;
-  if (t.text) {
-    say(t.text, t.pointing ?? pointing(t.controller));
-    pulse(t.controller, 0.7, 80);
-  } else {
-    panelSet("Didn't catch that", t.error ? `speech: ${t.error}` : 'nothing heard', 'hold the trigger and speak', 'error');
-    log(`nothing heard${t.error ? ` (${t.error})` : ''}`);
+  if (performance.now() - t.startedAt < MIN_RECORDING_MS || !t.chunks.length) {
+    panelSet("Didn't catch that", 'hold the trigger while you speak', '', 'error');
+    return;
   }
+  transcribing = true;
+  panelSet('Transcribing', '…', 'on the headset, a few seconds', 'busy');
+  let text = '';
+  try {
+    const audio = await to16kMono(new Blob(t.chunks, { type: t.mime || 'audio/webm' }));
+    text = String((await transcriber(audio))?.text ?? '').trim();
+  } catch (e) {
+    log(`transcription failed: ${e.message}`);
+    panelSet('Transcription failed', e.message, '', 'error');
+    return;
+  } finally {
+    transcribing = false;
+  }
+  if (!text || /^[[(].*[\])]$/.test(text)) { // Whisper marks silence as [BLANK_AUDIO] or (silence)
+    panelSet("Didn't catch that", 'nothing heard', 'hold the trigger and speak', 'error');
+    return;
+  }
+  pulse(t.controller, 0.7, 80);
+  say(text, t.pointing ?? pointing(t.controller));
 }
 
 // --- the session ---------------------------------------------------------------------------------------------
@@ -369,6 +454,10 @@ const controllers = [0, 1].map((i) => {
 });
 
 let session = null;
+let mode = 'immersive-ar'; // or immersive-vr where AR is not offered: the cube over a grid instead of the room
+const grid = new THREE.GridHelper(8, 16, 0x6b6458, 0x3a362f);
+grid.visible = false;
+scene.add(grid);
 let firstPlaneAt = 0;
 let roomSent = false;
 let panelPlaced = false;
@@ -408,16 +497,18 @@ function onFrame(time, frame) {
 async function enter() {
   $('enter').disabled = true;
   try {
-    session = await navigator.xr.requestSession('immersive-ar', {
+    session = await navigator.xr.requestSession(mode, {
       requiredFeatures: ['local-floor'],
-      optionalFeatures: ['plane-detection', 'mesh-detection', 'hand-tracking'],
+      optionalFeatures: mode === 'immersive-ar' ? ['plane-detection', 'mesh-detection', 'hand-tracking'] : ['hand-tracking'],
     });
   } catch (e) {
-    log(`could not enter AR: ${e.message}`);
+    log(`could not enter ${mode}: ${e.message}`);
     $('enter').disabled = false;
     return;
   }
-  log(`in AR; features: ${JSON.stringify(session.enabledFeatures ?? 'not reported')}`);
+  log(`in ${mode}; features: ${JSON.stringify(session.enabledFeatures ?? 'not reported')}`);
+  grid.visible = mode === 'immersive-vr';
+  renderer.setClearColor(0x15130f, mode === 'immersive-vr' ? 1 : 0);
   session.addEventListener('end', () => {
     for (const d of room.values()) scene.remove(d.obj);
     room.clear();
@@ -427,7 +518,7 @@ async function enter() {
     roomSent = false;
     panelPlaced = false;
     $('enter').disabled = false;
-    log('left AR');
+    log(`left ${mode}`);
   });
   panelIdle();
   await renderer.xr.setSession(session);
@@ -444,23 +535,29 @@ $('typed').addEventListener('submit', (e) => {
   say(text, null);
 });
 
-// the page's own hold-to-talk: try speech before entering AR (it also asks for the microphone once)
+// voice setup on the flat page, where permission prompts and the model download can be seen
+$('mic').addEventListener('click', () => ensureMic().catch((e) => setVoice('mic', `refused: ${e.message}`)));
+$('model').addEventListener('click', () => ensureModel().catch(() => {}));
+
+// the page's own hold-to-talk, to try the voice path before entering XR
 const talkBtn = $('talk');
-talkBtn.addEventListener('pointerdown', () => { startTalking(null); talkBtn.textContent = 'Listening… let go to send'; });
+talkBtn.addEventListener('pointerdown', () => { startTalking(null); if (talk) talkBtn.textContent = 'Listening… let go to send'; });
 for (const ev of ['pointerup', 'pointerleave']) {
   talkBtn.addEventListener(ev, () => { stopTalking(null); talkBtn.textContent = 'Hold to talk'; });
 }
-if (!SR) { talkBtn.disabled = true; talkBtn.textContent = 'No speech recognition here'; }
+if (!window.MediaRecorder) { talkBtn.disabled = true; talkBtn.textContent = 'No recording in this browser'; }
 
 async function init() {
   if (!token) log('no token in the address: open the URL the server printed (it ends in ?t=…)');
   connect();
   if (!navigator.xr) { $('enter').textContent = 'No WebXR here'; return; }
-  const ok = await navigator.xr.isSessionSupported('immersive-ar').catch(() => false);
-  $('enter').textContent = ok ? 'Enter AR' : 'immersive-ar not supported';
-  $('enter').disabled = !ok;
+  const ar = await navigator.xr.isSessionSupported('immersive-ar').catch(() => false);
+  const vr = ar || (await navigator.xr.isSessionSupported('immersive-vr').catch(() => false));
+  mode = ar ? 'immersive-ar' : 'immersive-vr';
+  $('enter').textContent = ar ? 'Enter AR' : vr ? 'Enter VR (no AR here)' : 'No immersive mode here';
+  $('enter').disabled = !vr;
   $('enter').addEventListener('click', enter);
-  log(`speech recognition: ${SR ? 'yes' : 'no'}; speech synthesis: ${window.speechSynthesis ? 'yes' : 'no'}`);
+  log(`recording: ${window.MediaRecorder ? 'yes' : 'no'}; speech synthesis: ${window.speechSynthesis ? 'yes' : 'no'}`);
 }
 
 panelIdle();

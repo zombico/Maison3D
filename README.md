@@ -35,5 +35,7 @@ reads the answer aloud without leaving AR. The scene is one cube. The agent's si
 - In a Muse sandbox: `npm run spike:loop`, then open the sandbox's preview address with the printed `/?t=…`.
 - On a laptop on the headset's Wi-Fi: `npm run spike:loop:https`, open the printed `https://<laptop-ip>:8443/?t=…`
   and accept the certificate warning once.
-- Before entering AR, press **Hold to talk** once on the page: it asks for the microphone and shows whether this
-  browser can recognise speech. Typing in the page sends the same thing.
+- Before entering AR, on the page: **Allow mic**, **Load voice model** (about 40 MB the first time), and try
+  **Hold to talk**. The Quest browser has no speech recognition of its own, so the headset records and transcribes
+  in the page with a small Whisper model; only the words reach the server. Typing in the page sends the same thing.
+- Where AR is not offered, the button enters VR with the cube over a grid.

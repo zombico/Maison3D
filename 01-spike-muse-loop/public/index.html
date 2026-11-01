@@ -23,14 +23,19 @@
   <h1>Maison3D loop</h1>
   <p>
     Talk to the agent from inside the room. In AR, <b>hold the trigger</b> (or pinch and hold), say what you want,
-    and let go: what you pointed at goes with it. The agent changes the cube, and its answer is shown and read aloud,
-    without leaving AR.
+    and let go: what you pointed at goes with it. Your words are transcribed on the headset, the agent changes the
+    cube, and its answer is shown and read aloud, without leaving AR.
   </p>
+  <p><b>First, on this page:</b> 1. Allow mic. 2. Load voice model (about 40 MB the first time, then cached).
+    3. Try Hold to talk. Then Enter AR.</p>
   <p><span class="dot" id="listenDot"></span><span id="listenText">connecting…</span> · <span id="link">…</span></p>
   <div class="bar">
+    <button id="mic" class="small">1. Allow mic</button>
+    <button id="model" class="small">2. Load voice model</button>
+    <button id="talk" class="small">3. Hold to talk</button>
     <button id="enter" disabled>Checking WebXR…</button>
-    <button id="talk" class="small">Hold to talk</button>
   </div>
+  <p id="voiceState">microphone: not asked · voice model: not loaded</p>
 
   <h2>Or type it</h2>
   <form class="bar" id="typed">
