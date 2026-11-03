@@ -100,7 +100,14 @@ Once, on the laptop: put the key in `.env` at the repository root (ignored by gi
 META_API_KEY=…
 ```
 
-`MAISON_MODEL` picks another model (default `muse-spark-1.3`); `META_API_BASE` another endpoint.
+`MAISON_MODEL` picks another model (default `muse-spark-1.3`), `MAISON_EFFORT` its reasoning effort (default
+`minimal`, for a spoken turn that answers in a second or two), `META_API_BASE` another endpoint.
+
+In the headset: hold **A** to talk (it keeps listening a quarter of a second after you let go), **B** reads the room
+again, **X** brings the panel in front of you and **Y** the cube. "Bring it here", "in front of me", "on the big
+table", "where I'm pointing" all place it. Replies are spoken with the headset's English voice when it has one, and
+otherwise with the Mac's (`say`), sent to the headset as audio. Maison3D Talk replaces Maison3D Scan for daily use;
+the scan app stays for comparing what the headset knows about a room.
 
 Try the model part without the headset, against the room in spike 05's sample:
 

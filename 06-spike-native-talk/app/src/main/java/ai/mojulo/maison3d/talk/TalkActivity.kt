@@ -44,7 +44,8 @@ import org.json.JSONObject
  * Spike 06: talk to the room from inside it. Hold A and speak, let go: the words (as audio), what the right
  * controller pointed at, the room and the cube go to the laptop server, which transcribes them, asks Muse, and
  * answers with a reply and the cube's new state. The headset moves the cube and reads the reply aloud without
- * leaving passthrough. B reads the room again; X, Y or a right-thumbstick click brings the panel back in front of you.
+ * leaving passthrough. B reads the room again; X or a right-thumbstick click brings the panel back in front of you, Y
+ * the cube.
  */
 class TalkActivity : AppSystemActivity() {
   private lateinit var mruk: MRUKFeature
@@ -57,6 +58,12 @@ class TalkActivity : AppSystemActivity() {
   @Volatile private var panel: Entity? = null
   @Volatile private var cubeEntity: Entity? = null
   @Volatile private var placePanel = true
+  @Volatile private var placeCube = false
+  @Volatile private var headPose: Pose? = null
+  // let go of A: keep listening a quarter of a second more, so the last word is not cut off, then send the turn
+  // with where the controller pointed at the moment you let go (all on the frame loop, like every room query)
+  private var stopAtNs = 0L
+  private var stopPointer: Pose? = null
   @Volatile private var busy = false
   @Volatile private var pendingReload = false
 
@@ -121,7 +128,7 @@ class TalkActivity : AppSystemActivity() {
             listOf(
                 Mesh(Uri.parse("mesh://box")).apply { hittable = MeshCollision.NoCollision },
                 Box(Vector3(-0.5f), Vector3(0.5f)),
-                Material().apply { baseColor = color4(cube.color) },
+                cubeMaterial(cube.color),
                 Transform(),
                 Scale(Vector3(cube.size)),
                 Visible(false),
@@ -200,7 +207,7 @@ class TalkActivity : AppSystemActivity() {
     val pointing = controller?.let { room.pointAt(it.t, it.q.times(Vector3(0f, 0f, 1f)).normalize()) }
     busy = true
     setSaid("…")
-    turns.send(wav, pointing, room.describe(), cubeJson(), speaker.needsServerVoice) { r ->
+    turns.send(wav, pointing, room.describe().put("viewer", headPose?.let(::viewerJson) ?: JSONObject.NULL), cubeJson(), speaker.needsServerVoice) { r ->
       busy = false
       r.onSuccess { answer ->
         setSaid(answer.optString("said", "").ifEmpty { "(nothing heard)" })
@@ -230,7 +237,23 @@ class TalkActivity : AppSystemActivity() {
     val at = j.optJSONArray("at")?.let { a -> Vector3(a.getDouble(0).toFloat(), a.getDouble(1).toFloat(), a.getDouble(2).toFloat()) }
     cube = Cube(j.optString("color", cube.color), j.optDouble("size", cube.size.toDouble()).toFloat(), at ?: cube.at, j.optBoolean("spin", cube.spin))
     cubeChanged = true
+    log("cube: ${cube.color}, ${"%.2f".format(cube.size)} m at ${cube.at?.let(::fmt)}${if (cube.spin) ", spinning" else ""}")
   }
+
+  private fun fmt(v: Vector3) = "(%.2f, %.2f, %.2f)".format(v.x, v.y, v.z)
+
+  /** Where you are and which way you face, so "in front of me" has an answer. */
+  private fun viewerJson(head: Pose): JSONObject {
+    val f = head.q.times(Vector3(0f, 0f, 1f))
+    return JSONObject().put("position", Room.vec(head.t)).put("forward", Room.vec(Vector3(f.x, 0f, f.z).normalize()))
+  }
+
+  /** Unlit, so the colour reads the same in any room light and stands out over passthrough. */
+  private fun cubeMaterial(css: String) =
+      Material().apply {
+        baseColor = color4(css)
+        unlit = true
+      }
 
   // --- each frame --------------------------------------------------------------------------------------------
 
@@ -247,15 +270,24 @@ class TalkActivity : AppSystemActivity() {
       val body = localBody() ?: return
       val head = body.head.tryGetComponent<Transform>()?.transform?.takeIf { it != Pose() }
       val right = body.rightHand.tryGetComponent<Transform>()?.transform
+      if (head != null) headPose = head
 
       body.rightHand.tryGetComponent<Controller>()?.let { c ->
         if (pressed(c, ButtonBits.ButtonA)) startTalking()
-        if (released(c, ButtonBits.ButtonA)) stopTalking(right)
+        if (released(c, ButtonBits.ButtonA) && recorder.isRecording) {
+          stopAtNs = now + 250_000_000L
+          stopPointer = right
+        }
         if (pressed(c, ButtonBits.ButtonB)) pendingReload = true
         if (pressed(c, ButtonBits.ButtonThumbRClick)) placePanel = true
       }
       body.leftHand.tryGetComponent<Controller>()?.let { c ->
-        if (pressed(c, ButtonBits.ButtonX) || pressed(c, ButtonBits.ButtonY)) placePanel = true
+        if (pressed(c, ButtonBits.ButtonX)) placePanel = true
+        if (pressed(c, ButtonBits.ButtonY)) placeCube = true
+      }
+      if (stopAtNs != 0L && now >= stopAtNs) {
+        stopAtNs = 0L
+        stopTalking(stopPointer)
       }
       if (pendingReload) {
         pendingReload = false
@@ -269,11 +301,13 @@ class TalkActivity : AppSystemActivity() {
       }
 
       val e = cubeEntity ?: return
-      if (cube.at == null && head != null) {
-        // first appearance: a metre in front of you, at chest height
+      if ((cube.at == null || placeCube) && head != null) {
+        // first appearance, and Y: a metre in front of you, at chest height
+        placeCube = false
         val t = inView(head, 1.0f, 0f).t
         cube = cube.copy(at = Vector3(t.x, maxOf(t.y - 0.4f, 0.5f), t.z))
         cubeChanged = true
+        log("cube: in front of you at ${fmt(cube.at!!)}")
       }
       val at = cube.at ?: return
       if (cube.spin) angle = (angle + 45f * dt) % 360f
@@ -283,7 +317,7 @@ class TalkActivity : AppSystemActivity() {
       if (cubeChanged) {
         cubeChanged = false
         e.setComponent(Scale(Vector3(cube.size)))
-        e.setComponent(Material().apply { baseColor = color4(cube.color) })
+        e.setComponent(cubeMaterial(cube.color))
       }
     }
 

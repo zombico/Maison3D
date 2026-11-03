@@ -61,6 +61,6 @@ const server = http.createServer(async (req, res) => {
 server.keepAliveTimeout = 65000;
 
 server.listen(PORT, '127.0.0.1', () => {
-  console.log(`talk server on http://localhost:${PORT}  model ${config.model}  key ${config.hasKey ? 'found' : 'MISSING (.env META_API_KEY=…)'}  speech-to-text ${sttStatus()}  voice ${voiceStatus()}`);
+  console.log(`talk server on http://localhost:${PORT}  model ${config.model} (reasoning ${config.effort})  key ${config.hasKey ? 'found' : 'MISSING (.env META_API_KEY=…)'}  speech-to-text ${sttStatus()}  voice ${voiceStatus()}`);
   console.log(`headset: adb reverse tcp:${PORT} tcp:${PORT}, then open Maison3D Talk`);
 });

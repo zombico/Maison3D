@@ -16,6 +16,8 @@ for (const p of [join(here, '.env'), join(here, '..', '.env')]) {
 export const config = {
   base: (process.env.META_API_BASE || 'https://api.meta.ai/v1').replace(/\/$/, ''),
   model: process.env.MAISON_MODEL || 'muse-spark-1.3',
+  // a spoken turn should answer in a second or two; Muse Spark reasons at its own (deep) level unless told
+  effort: process.env.MAISON_EFFORT || 'minimal',
   hasKey: !!process.env.META_API_KEY,
 };
 
@@ -24,11 +26,13 @@ can change is one cube. Each turn tells you what the person said, what their rig
 let go of the button, the cube as it is, and the room: walls, frames and furniture with an id (table1, wall2…),
 label, centre, size and top, in metres, y up, the floor at floorY.
 
-Change the cube only by calling set_cube. To put it on a piece of furniture, pass that item's id as "on". For
-"here" or "there", use at_pointing. Colours are #rrggbb. Sizes are the cube's edge in metres; "small" is about 0.1,
+Change the cube only by calling set_cube. Act on the cube whenever a request could reasonably apply to it ("make
+everything blue" means the cube); say so briefly if you left part of it undone. To put it on a piece of furniture, pass that item's id as "on". For
+"here" or "there", use at_pointing; for "in front of me" or "bring it back", use in_front. Colours are #rrggbb. Sizes are the cube's edge in metres; "small" is about 0.1,
 "big" about 0.5. If the request is unclear or impossible, change nothing and say why.
 
-Then answer in one short spoken sentence: it is read aloud in the headset. No markdown, no lists.`;
+Answer in one short spoken sentence: it is read aloud in the headset. No markdown, no lists. When you call set_cube,
+write that sentence in the same message as the call, saying what you did.`;
 
 const TOOLS = [{
   type: 'function',
@@ -42,6 +46,7 @@ const TOOLS = [{
         size: { type: 'number', description: 'edge length in metres, 0.03 to 2' },
         on: { type: 'string', description: 'id of a room item (e.g. table1): the cube rests on its top, at its centre' },
         at_pointing: { type: 'boolean', description: 'put the cube where the person pointed' },
+        in_front: { type: 'boolean', description: 'bring the cube to about a metre in front of the person' },
         at: { type: 'array', items: { type: 'number' }, minItems: 3, maxItems: 3, description: 'centre of the cube, x y z in metres' },
         spin: { type: 'boolean' },
       },
@@ -78,6 +83,11 @@ export function setCube(cube, args, room, pointing) {
     const n = pointing.normal ?? [0, 1, 0];
     // on a floor or table top it sits on the surface; on a wall it sits against it
     next.at = (n[1] > 0.7 ? [p[0], p[1] + half, p[2]] : [p[0] + n[0] * half, p[1] + n[1] * half, p[2] + n[2] * half]).map(round);
+  } else if (args.in_front) {
+    const v = room?.viewer;
+    if (!v?.position || !v?.forward) return { error: 'the headset did not say where the person is' };
+    const floor = room.floorY ?? 0;
+    next.at = [v.position[0] + v.forward[0], Math.max(v.position[1] - 0.4, floor + half), v.position[2] + v.forward[2]].map(round);
   } else if (args.at !== undefined) {
     if (!Array.isArray(args.at) || args.at.length !== 3 || !args.at.every(Number.isFinite)) return { error: 'at must be [x, y, z]' };
     next.at = args.at.map(round);
@@ -93,7 +103,7 @@ async function chat(messages) {
   const res = await fetch(`${config.base}/chat/completions`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.META_API_KEY}` },
-    body: JSON.stringify({ model: config.model, messages, tools: TOOLS, tool_choice: 'auto' }),
+    body: JSON.stringify({ model: config.model, reasoning_effort: config.effort, messages, tools: TOOLS, tool_choice: 'auto' }),
   });
   const text = await res.text();
   if (!res.ok) throw new Error(`Meta Model API said ${res.status}: ${text.slice(0, 300)}`);
@@ -104,6 +114,11 @@ async function chat(messages) {
 }
 
 const history = []; // earlier turns, as plain text, so "make it bigger" knows what "it" is
+
+function remember(said, reply) {
+  history.push({ role: 'user', content: `said: ${said}` }, { role: 'assistant', content: reply || '(no reply)' });
+  while (history.length > 20) history.shift();
+}
 
 /** One turn: returns { reply, cube, calls }. */
 export async function runTurn({ said, pointing, room, cube }) {
@@ -116,10 +131,10 @@ export async function runTurn({ said, pointing, room, cube }) {
     messages.push(msg);
     if (!msg.tool_calls?.length) {
       const reply = (typeof msg.content === 'string' ? msg.content : '').trim();
-      history.push({ role: 'user', content: `said: ${said}` }, { role: 'assistant', content: reply || '(no reply)' });
-      while (history.length > 20) history.shift();
+      remember(said, reply);
       return { reply, cube: state, calls };
     }
+    let failed = false;
     for (const call of msg.tool_calls) {
       let result;
       try {
@@ -130,7 +145,14 @@ export async function runTurn({ said, pointing, room, cube }) {
         result = { error: `bad arguments: ${e.message}` };
       }
       if (result.cube) state = result.cube;
+      else failed = true;
       messages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(result) });
+    }
+    // the reply came with the call and every call worked: no second round trip
+    const said_ = typeof msg.content === 'string' ? msg.content.trim() : '';
+    if (said_ && !failed) {
+      remember(said, said_);
+      return { reply: said_, cube: state, calls };
     }
   }
   return { reply: 'I got stuck changing the cube.', cube: state, calls };
