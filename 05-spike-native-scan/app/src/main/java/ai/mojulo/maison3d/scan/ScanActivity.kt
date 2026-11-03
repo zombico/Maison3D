@@ -28,6 +28,8 @@ import com.meta.spatial.toolkit.AvatarBody
 import com.meta.spatial.toolkit.Controller
 import com.meta.spatial.toolkit.Grabbable
 import com.meta.spatial.toolkit.Material
+import com.meta.spatial.toolkit.Mesh
+import com.meta.spatial.toolkit.MeshCollision
 import com.meta.spatial.toolkit.Panel
 import com.meta.spatial.toolkit.PanelRegistration
 import com.meta.spatial.toolkit.Transform
@@ -219,6 +221,8 @@ class ScanActivity : AppSystemActivity(), MRUKSceneEventListener {
         if (pressed(c, ButtonBits.ButtonY) || pressed(c, ButtonBits.ButtonX)) placePanel = true
       }
 
+      clearTintHits()
+
       // once the head is tracked, and again whenever asked: the panel in front of you
       val p = panel
       if (placePanel && p != null && head != null && head != Pose()) {
@@ -242,6 +246,23 @@ class ScanActivity : AppSystemActivity(), MRUKSceneEventListener {
       val mrukJson = runCatching { mruk.saveSceneToJsonString() }.getOrNull()
       render()
       delivery.deliver(scan, mrukJson, ::log)
+    }
+
+    /**
+     * The tint MRUK spawns over walls and furniture is hittable by default, so it caught the controller's ray before
+     * the panel whenever a table or a wall stood in between. Nothing but the panel needs the ray.
+     */
+    private fun clearTintHits() {
+      var cleared = 0
+      for (e in Query.where { has(Mesh.id) }.eval()) {
+        if (e.hasComponent<Panel>()) continue
+        val mesh = e.getComponent<Mesh>()
+        if (mesh.hittable == MeshCollision.NoCollision) continue
+        mesh.hittable = MeshCollision.NoCollision
+        e.setComponent(mesh)
+        cleared++
+      }
+      if (cleared > 0) Log.i(TAG, "tint: $cleared mesh(es) no longer catch the pointer")
     }
 
     private fun localBody(): AvatarBody? =
