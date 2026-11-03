@@ -9,7 +9,9 @@ const PORT = Number(process.env.PORT) || 8091;
 const MAX_BODY = 16 * 1024 * 1024;
 
 function send(res, status, body) {
-  res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
+  // close after every answer: the headset's HTTP stack keeps idle connections for reuse, Node drops them after 5 s,
+  // and a turn sent down a dropped one fails as "unexpected end of stream"
+  res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', connection: 'close' });
   res.end(JSON.stringify(body));
 }
 
@@ -53,6 +55,8 @@ const server = http.createServer(async (req, res) => {
     send(res, 500, { error: e.message });
   }
 });
+
+server.keepAliveTimeout = 65000;
 
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`talk server on http://localhost:${PORT}  model ${config.model}  key ${config.hasKey ? 'found' : 'MISSING (.env META_API_KEY=…)'}  speech-to-text ${sttStatus()}`);

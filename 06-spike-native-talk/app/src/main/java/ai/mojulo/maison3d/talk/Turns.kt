@@ -36,7 +36,16 @@ class Turns(private val base: String) {
     io.execute { done(runCatching { get("/api/health") }) }
   }
 
-  private fun post(path: String, body: JSONObject): JSONObject {
+  /** Retried once on a dropped connection: a fresh one is opened for the second try. */
+  private fun post(path: String, body: JSONObject): JSONObject =
+      try {
+        postOnce(path, body)
+      } catch (e: java.io.IOException) {
+        Log.w("Maison3DTalk", "turn failed (${e.message}), retrying on a new connection")
+        postOnce(path, body)
+      }
+
+  private fun postOnce(path: String, body: JSONObject): JSONObject {
     val conn = open(path)
     conn.requestMethod = "POST"
     conn.doOutput = true
@@ -51,6 +60,8 @@ class Turns(private val base: String) {
       (URL(base.trimEnd('/') + path).openConnection() as HttpURLConnection).apply {
         connectTimeout = 3000
         readTimeout = 60000
+        // no pooled connections: the laptop server closes idle ones, and a turn sent on one fails
+        setRequestProperty("connection", "close")
       }
 
   private fun read(conn: HttpURLConnection): JSONObject {
