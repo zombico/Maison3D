@@ -7,7 +7,8 @@ import { entry, home } from './server.mjs';
 
 export async function connect({ log = () => {} } = {}) {
   if (!existsSync(entry)) throw new Error('mojulo is not installed for this project yet: run `npm run mojulo:setup`');
-  const p = spawn(process.execPath, [entry], { env: { ...process.env, MOJULO_HOME: home, MOJULO_DISTRIBUTION: 'source' }, stdio: ['pipe', 'pipe', 'pipe'] });
+  // flat tool list: our code calls mojulo's tools by name (create_sketch, design_interior…), not through its packs
+  const p = spawn(process.execPath, [entry], { env: { ...process.env, MOJULO_HOME: home, MOJULO_DISTRIBUTION: 'source', MOJULO_TOOL_PACKS: 'off' }, stdio: ['pipe', 'pipe', 'pipe'] });
   let buf = '', id = 0;
   const waiting = new Map();
   p.stdout.on('data', (d) => {

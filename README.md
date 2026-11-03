@@ -196,5 +196,11 @@ npm run mojulo:setup
 ```
 
 Then `node 08-spike-mojulo-furnish/furnish.mjs L` (or `--empty`, or another room glyph) furnishes the sample room on
-it. In Claude Code the same mojulo is offered as the `mojulo-rc` server (`.mcp.json`); it keeps its data in
-`.mojulo/home`, apart from the plugin's `~/.mojulo`.
+it. It keeps its data in `.mojulo/home`, apart from the plugin's `~/.mojulo`.
+
+In Claude Code this repo offers mojulo scoped to furniture, as the `maison-furniture` server (`.mcp.json`,
+`mojulo/furniture-mcp.mjs`): six tools in front of the pinned mojulo instead of its whole studio, so an agent here is
+not steered toward games, worlds or characters. `design_room` (mojulo's `design_interior`: a room fitted for its jobs
+at true size, in a style, with clearances kept and refusals explained), `make_piece` (workbench furniture builds
+only), `edit_piece`, `export_piece`, `measure_piece` and `design_rules`. Turn the mojulo plugin off for this project
+(`/plugin`) to see only these. Muse never sees mojulo's tools at all: the laptop server gives it its own four.

@@ -1,8 +1,8 @@
 {
   "mcpServers": {
-    "mojulo-rc": {
+    "maison-furniture": {
       "command": "node",
-      "args": ["mojulo/server.mjs"]
+      "args": ["mojulo/furniture-mcp.mjs"]
     }
   }
 }
