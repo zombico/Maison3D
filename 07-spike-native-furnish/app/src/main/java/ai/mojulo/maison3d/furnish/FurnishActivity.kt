@@ -124,7 +124,7 @@ class FurnishActivity : AppSystemActivity() {
     )
     panel = Entity.create(listOf(Panel(R.layout.furnish_panel), Transform(), Visible(false), Grabbable()))
     // what the server already holds, if it was furnishing before this launch
-    turns.scene { r -> r.onSuccess { incoming.set(parseScene(it)) } }
+    turns.scene { r -> r.onSuccess { runCatching { incoming.set(parseScene(it)) } } }
   }
 
   override fun onSpatialShutdown() {
@@ -207,7 +207,12 @@ class FurnishActivity : AppSystemActivity() {
         val voice = answer.optString("voice")
         if (voice.isNotEmpty()) speaker.play(android.util.Base64.decode(voice, android.util.Base64.DEFAULT))
         else if (text.isNotEmpty()) speaker.say(text)
-        answer.optJSONArray("scene")?.let { incoming.set(parseScene(JSONObject().put("scene", it))) }
+        try {
+          answer.optJSONArray("scene")?.let { incoming.set(parseScene(JSONObject().put("scene", it))) }
+        } catch (e: Exception) {
+          Log.e(TAG, "the scene did not parse", e)
+          log("the scene did not parse: ${e.message}")
+        }
         answer.optString("note").takeIf { it.isNotEmpty() }?.let(::log)
       }
       r.onFailure {
@@ -232,6 +237,7 @@ class FurnishActivity : AppSystemActivity() {
     val ids = scene.map { it.id }.toSet()
     for (id in shown.keys.toList().filter { it !in ids }) shown.remove(id)?.second?.destroy()
     for (p in scene) {
+      Log.i(TAG, "piece ${p.id}: ${p.item} at ${p.at} facing ${p.facing}")
       val pose = Pose(p.at, Quaternion.lookRotation(p.facing))
       val have = shown[p.id]
       if (have != null && have.first == p.item) {
@@ -239,10 +245,12 @@ class FurnishActivity : AppSystemActivity() {
         continue
       }
       have?.second?.destroy()
+      val url = "${server.trimEnd('/')}/catalog/${p.item}.glb"
+      Log.i(TAG, "loading $url")
       val e =
           Entity.create(
               listOf(
-                  Mesh(Uri.parse("${server.trimEnd('/')}/catalog/${p.item}.glb")).apply { hittable = MeshCollision.NoCollision },
+                  Mesh(Uri.parse(url)).apply { hittable = MeshCollision.NoCollision },
                   Transform(pose),
               ),
           )
@@ -262,7 +270,14 @@ class FurnishActivity : AppSystemActivity() {
   private inner class FurnishSystem : SystemBase() {
     override fun execute() {
       val now = System.nanoTime()
-      incoming.getAndSet(null)?.let(::applyScene)
+      incoming.getAndSet(null)?.let { scene ->
+        try {
+          applyScene(scene)
+        } catch (e: Exception) {
+          Log.e(TAG, "showing the scene failed", e)
+          log("showing the scene failed: ${e.javaClass.simpleName}: ${e.message}")
+        }
+      }
 
       clearTintHits()
       val body = localBody() ?: return
