@@ -149,10 +149,32 @@ class FurnishActivity : AppSystemActivity() {
               saidView = root.findViewById(R.id.said)
               replyView = root.findViewById(R.id.reply)
               statusView = root.findViewById(R.id.status)
+              root.findViewById<android.widget.Button>(R.id.rescan).setOnClickListener { rescan() }
+              root.findViewById<android.widget.Button>(R.id.reload).setOnClickListener { pendingReload = true }
+              root.findViewById<android.widget.Button>(R.id.clear).setOnClickListener { clearScene() }
               render()
             }
           },
       )
+
+  /**
+   * Space Setup from inside the app: the headset rescans the room you are in (walls, furniture, the mesh), then the
+   * app reads it again. The same as Settings > Physical space > Space Setup, without leaving.
+   */
+  private fun rescan() {
+    log("rescanning the room: follow the headset's Space Setup")
+    mruk.requestSceneCapture().whenComplete { _, error ->
+      if (error != null) log("Space Setup did not run: ${error.message}")
+      pendingReload = true
+    }
+  }
+
+  private fun clearScene() {
+    turns.clear { r ->
+      r.onSuccess { incoming.set(parseScene(it)) }
+      r.onFailure { log("clearing failed: ${it.message}") }
+    }
+  }
 
   private fun loadRoom() {
     if (checkSelfPermission(PERMISSION_USE_SCENE) != PackageManager.PERMISSION_GRANTED) {
@@ -214,6 +236,9 @@ class FurnishActivity : AppSystemActivity() {
           log("the scene did not parse: ${e.message}")
         }
         answer.optString("note").takeIf { it.isNotEmpty() }?.let(::log)
+        // things the model asked the headset itself to do
+        val actions = answer.optJSONArray("actions")
+        for (i in 0 until (actions?.length() ?: 0)) if (actions?.optString(i) == "rescan") runOnUiThread { rescan() }
       }
       r.onFailure {
         setSaid("")

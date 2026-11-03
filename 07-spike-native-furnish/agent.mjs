@@ -56,6 +56,7 @@ const TOOLS = [
   { type: 'function', function: { name: 'place', description: 'Add a catalogue piece to the room.', parameters: { type: 'object', properties: { item: { type: 'string', enum: catalogList.map((c) => c.id) }, ...WHERE }, required: ['item'], additionalProperties: false } } },
   { type: 'function', function: { name: 'move', description: 'Move or turn a placed piece. Give only `face` or `turn` to turn it where it stands.', parameters: { type: 'object', properties: { id: { type: 'string' }, ...WHERE }, required: ['id'], additionalProperties: false } } },
   { type: 'function', function: { name: 'swap', description: 'Replace a placed piece with another catalogue item, keeping its place and facing.', parameters: { type: 'object', properties: { id: { type: 'string' }, item: { type: 'string', enum: catalogList.map((c) => c.id) } }, required: ['id', 'item'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'rescan_room', description: "Have the headset rescan the room (Meta's Space Setup), when the person asks or the room looks wrong: walls missing, furniture not found.", parameters: { type: 'object', properties: {}, additionalProperties: false } } },
   { type: 'function', function: { name: 'remove', description: 'Take a placed piece away, or every piece with id "all".', parameters: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'], additionalProperties: false } } },
 ];
 
@@ -73,6 +74,10 @@ const describe = (p) => ({ id: p.id, item: p.item, at: p.at, facing: p.facing, s
 /** Runs one tool call against the scene; returns what the model reads back. */
 export function apply(name, args, ctx) {
   const env = { ...ctx, scene, catalog };
+  if (name === 'rescan_room') {
+    ctx.actions?.push('rescan');
+    return { ok: true, note: 'the headset is starting Space Setup; the person walks the room and the scan reloads after' };
+  }
   if (name === 'remove') {
     if (args.id === 'all') { const n = scene.length; scene.length = 0; return { ok: true, removed: n }; }
     const i = scene.findIndex((p) => p.id === args.id);
@@ -141,17 +146,18 @@ export async function runTurn({ said, pointing, room }) {
   };
   const messages = [{ role: 'system', content: SYSTEM }, ...history, { role: 'user', content: JSON.stringify(context) }];
   const calls = [];
+  const actions = []; // things for the headset itself to do, such as rescanning
   for (let round = 0; round < 4; round++) {
     const msg = await chat(messages);
     messages.push(msg);
     const text = typeof msg.content === 'string' ? msg.content.trim() : '';
-    if (!msg.tool_calls?.length) { remember(said, text); return { reply: text, calls }; }
+    if (!msg.tool_calls?.length) { remember(said, text); return { reply: text, calls, actions }; }
     let needsLook = false;
     for (const call of msg.tool_calls) {
       let result;
       try {
         const args = JSON.parse(call.function?.arguments || '{}');
-        result = apply(call.function?.name, args, { room, pointing });
+        result = apply(call.function?.name, args, { room, pointing, actions });
         calls.push({ name: call.function?.name, args, result });
       } catch (e) {
         result = { error: `bad arguments: ${e.message}` };
@@ -160,7 +166,7 @@ export async function runTurn({ said, pointing, room }) {
       messages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(result) });
     }
     // the reply came with the calls and they all landed cleanly: no second round trip
-    if (text && !needsLook) { remember(said, text); return { reply: text, calls }; }
+    if (text && !needsLook) { remember(said, text); return { reply: text, calls, actions }; }
   }
-  return { reply: 'I got stuck arranging that.', calls };
+  return { reply: 'I got stuck arranging that.', calls, actions };
 }

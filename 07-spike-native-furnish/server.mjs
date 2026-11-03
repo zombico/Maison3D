@@ -45,12 +45,12 @@ async function turn(req, res) {
   const said = typeof body.text === 'string' && body.text.trim() ? body.text.trim() : await transcribe(Buffer.from(body.audio ?? '', 'base64'), keywords);
   const heardMs = Date.now() - t0;
   if (!said) return send(res, 200, { said: '', reply: '', scene: sceneJson(), note: 'heard nothing' });
-  const { reply, calls } = await runTurn({ said, pointing: body.pointing, room: body.room });
+  const { reply, calls, actions } = await runTurn({ said, pointing: body.pointing, room: body.room });
   console.log(`\n> ${said}${body.pointing ? `   (pointing at ${body.pointing.id ?? body.pointing.target})` : ''}`);
   for (const c of calls) console.log(`  ${c.name} ${JSON.stringify(c.args)} -> ${c.result.error ?? (c.result.piece ? `${c.result.piece.id} at ${c.result.piece.at}` : 'ok')}${c.result.issues?.length ? `  [${c.result.issues.join('; ')}]` : ''}`);
   console.log(`< ${reply}   [${heardMs} ms to hear, ${Date.now() - t0 - heardMs} ms to answer]`);
   const voice = body.voice ? await speak(reply) : null;
-  send(res, 200, { said, reply, scene: sceneJson(), ...(voice ? { voice: voice.toString('base64') } : {}) });
+  send(res, 200, { said, reply, scene: sceneJson(), actions, ...(voice ? { voice: voice.toString('base64') } : {}) });
 }
 
 const server = http.createServer(async (req, res) => {
@@ -58,6 +58,7 @@ const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, 'http://localhost');
     if (req.method === 'GET' && url.pathname === '/api/health') return send(res, 200, { ok: true, model: config.model, key: config.hasKey, stt: sttStatus(), voice: voiceStatus(), catalog: catalogList.map((c) => c.id) });
     if (req.method === 'GET' && url.pathname === '/api/scene') return send(res, 200, { scene: sceneJson() });
+    if (req.method === 'POST' && url.pathname === '/api/clear') { scene.length = 0; console.log('\n(cleared from the headset)'); return send(res, 200, { scene: [] }); }
     if (req.method === 'GET' && url.pathname.startsWith('/catalog/')) {
       const id = decodeURIComponent(url.pathname.slice('/catalog/'.length)).replace(/\.glb$/, '');
       if (!catalog[id]) return send(res, 404, { error: `no catalogue item ${id}` });

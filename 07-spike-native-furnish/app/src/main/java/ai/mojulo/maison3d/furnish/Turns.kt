@@ -37,6 +37,11 @@ class Turns(private val base: String) {
     io.execute { done(runCatching { get("/api/scene") }) }
   }
 
+  /** Takes every piece away; answers with the (empty) scene. */
+  fun clear(done: (Result<JSONObject>) -> Unit) {
+    io.execute { done(runCatching { post("/api/clear", JSONObject()) }) }
+  }
+
   fun health(done: (Result<JSONObject>) -> Unit) {
     io.execute { done(runCatching { get("/api/health") }) }
   }

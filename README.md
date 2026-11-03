@@ -173,4 +173,10 @@ adb reverse tcp:8091 tcp:8091
 ```
 
 Hold **A** and say what you want; point while you let go for "there" or "this". **B** reads the room again, **X**
-or **Y** brings the panel back.
+or **Y** brings the panel back. The panel's **Rescan room** runs the headset's Space Setup without leaving the app
+(so does saying "rescan the room"), **Clear furniture** takes every piece away.
+
+Pieces never change size: each model is true size in metres, and the headset only ever gives a piece a position and a
+facing, never a scale; the fit checks read the same sizes from `catalog.json`. Fitting a room is done by choosing,
+the way mojulo's floor-share sizing picks a loveseat for a small lounge: size variants of a piece belong in the
+catalogue as their own models, and the designer picks among them.
