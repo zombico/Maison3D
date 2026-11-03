@@ -10,6 +10,8 @@
   "scripts": {
     "spike:scan": "node 00-spike-room-scan/server.mjs",
     "spike:loop": "node 01-spike-muse-loop/cli.mjs serve",
-    "spike:loop:https": "node 01-spike-muse-loop/cli.mjs serve --https"
+    "spike:loop:https": "node 01-spike-muse-loop/cli.mjs serve --https",
+    "spike:talk": "node 06-spike-native-talk/server.mjs",
+    "spike:talk:try": "node 06-spike-native-talk/try.mjs"
   }
 }

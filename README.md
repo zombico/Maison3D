@@ -85,3 +85,39 @@ What the app is doing, from the laptop:
 ```bash
 adb logcat -s Maison3DScan
 ```
+
+## 06: talking to the room, natively
+
+Spike 01 again, as a native app with no agent in the middle: hold **A**, speak, let go. The headset sends the audio,
+what the right controller pointed at, the room you are in (from MRUK, with ids like `table2`) and the cube to a small
+server on the laptop. The server turns the audio into words, asks Muse (Meta Model API, chat completions with a
+`set_cube` tool) what to do, and answers with a reply and the cube's new state. The headset moves the cube and reads
+the reply aloud without leaving passthrough. The API key stays on the laptop.
+
+Once, on the laptop: put the key in `.env` at the repository root (ignored by git):
+
+```
+META_API_KEY=…
+```
+
+`MAISON_MODEL` picks another model (default `muse-spark-1.3`); `META_API_BASE` another endpoint.
+
+Try the model part without the headset, against the room in spike 05's sample:
+
+```bash
+npm run spike:talk:try -- "put the cube on the biggest table and make it red"
+```
+
+With the headset (Maison3D Talk from the `native` workflow's Artifacts, installed like spike 05):
+
+```bash
+npm run spike:talk
+```
+
+```bash
+adb reverse tcp:8091 tcp:8091
+```
+
+Not done yet: speech to text. The server's Muse Voice backend (`stt.mjs`) comes next, so a spoken turn currently
+answers with that error on the panel. Each turn is printed on the laptop: what was heard, the tool calls, the reply
+and how long hearing and answering took.

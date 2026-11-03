@@ -1,11 +1,12 @@
-# Builds the native Quest app (Meta Spatial SDK) into an APK on every push that touches it.
-# Download it from the run's Artifacts and install it with: adb install -r maison3d-native-scan.apk
+# Builds the native Quest apps (Meta Spatial SDK) into APKs on every push that touches them.
+# Download one from the run's Artifacts and install it with: adb install -r <name>.apk
 name: native
 
 on:
   push:
     paths:
       - '05-spike-native-scan/**'
+      - '06-spike-native-talk/**'
       - '.github/workflows/native.yml'
   workflow_dispatch:
 
@@ -19,9 +20,17 @@ concurrency:
 jobs:
   apk:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dir: 05-spike-native-scan
+            apk: maison3d-native-scan
+          - dir: 06-spike-native-talk
+            apk: maison3d-native-talk
     defaults:
       run:
-        working-directory: 05-spike-native-scan
+        working-directory: ${{ matrix.dir }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -33,9 +42,9 @@ jobs:
       - name: Build
         run: ./gradlew --no-daemon assembleDebug
       - name: Name the APK
-        run: cp app/build/outputs/apk/debug/app-debug.apk maison3d-native-scan.apk
+        run: cp app/build/outputs/apk/debug/app-debug.apk ${{ matrix.apk }}.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: maison3d-native-scan
-          path: 05-spike-native-scan/maison3d-native-scan.apk
+          name: ${{ matrix.apk }}
+          path: ${{ matrix.dir }}/${{ matrix.apk }}.apk
           if-no-files-found: error
