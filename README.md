@@ -118,6 +118,17 @@ npm run spike:talk
 adb reverse tcp:8091 tcp:8091
 ```
 
-Not done yet: speech to text. The server's Muse Voice backend (`stt.mjs`) comes next, so a spoken turn currently
-answers with that error on the panel. Each turn is printed on the laptop: what was heard, the tool calls, the reply
-and how long hearing and answering took.
+Speech to text is Muse Voice Transcribe (`muse-voice-transcribe-1.0`, one `POST /v1/asr/transcribe` per turn in
+`PUSH_TO_TALK` mode), biased toward the room's own words (table, storage, couch…). Try it without the headset with a
+WAV from macOS's `say`:
+
+```bash
+say -o turn.wav --data-format=LEI16@16000 "put the cube on the biggest table and make it blue"
+```
+
+```bash
+npm run spike:talk:try -- --wav turn.wav
+```
+
+Each turn is printed on the laptop: what was heard, the tool calls, the reply and how long hearing and answering
+took.

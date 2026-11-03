@@ -31,7 +31,8 @@ async function turn(req, res) {
   const body = await readJson(req);
   const t0 = Date.now();
   // typed text (for trying it without speaking) skips transcription
-  const said = typeof body.text === 'string' && body.text.trim() ? body.text.trim() : await transcribe(Buffer.from(body.audio ?? '', 'base64'));
+  const keywords = ['cube', ...new Set((body.room?.items ?? []).map((i) => i.label))];
+  const said = typeof body.text === 'string' && body.text.trim() ? body.text.trim() : await transcribe(Buffer.from(body.audio ?? '', 'base64'), keywords);
   const heardMs = Date.now() - t0;
   if (!said) return send(res, 200, { said: '', reply: '', cube: body.cube, note: 'heard nothing' });
   const { reply, cube, calls } = await runTurn({ said, pointing: body.pointing, room: body.room, cube: body.cube });
