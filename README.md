@@ -74,6 +74,12 @@ when the laptop server from spike 00 is running (`npm run spike:scan` and `adb r
 adb pull /sdcard/Android/data/ai.mojulo.maison3d.scan/files/scans/
 ```
 
+What it found (`05-spike-native-scan/samples/`, a Quest 3S): every room the headset knows loads at once, each
+with labelled walls, floor, ceiling, door and window frames, and furniture as boxes standing on the floor whose tops
+match the table, storage and couch surfaces. Anchors hold to the millimetre between scans in one session; the origin
+moves with each launch, so positions are only comparable within a session. The floor sat 6 cm below the app's
+y = 0, so heights should be taken from the floor anchor, not from zero.
+
 What the app is doing, from the laptop:
 
 ```bash
