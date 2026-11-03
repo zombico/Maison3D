@@ -1,0 +1,24 @@
+{
+  "kind": "workbench",
+  "frames": [
+    {
+      "id": "side-table",
+      "unit": "mm",
+      "build": {
+        "type": "table",
+        "w": 450,
+        "d": 450,
+        "h": 550,
+        "species": "oak",
+        "finish": "oil"
+      }
+    }
+  ],
+  "units": "mm",
+  "title": "Side table",
+  "ledger": {
+    "recipe_bytes": 177,
+    "faces": 5676,
+    "closed": true
+  }
+}

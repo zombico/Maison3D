@@ -1,0 +1,86 @@
+[
+ {
+  "id": "armchair",
+  "name": "armchair",
+  "kind": "chair",
+  "size": [
+   0.966,
+   0.824,
+   0.828
+  ],
+  "sits": "floor",
+  "file": "armchair.glb",
+  "recipe": "recipes/armchair.json",
+  "note": "oak frame, boucle, rolled arms"
+ },
+ {
+  "id": "bookshelf",
+  "name": "bookshelf",
+  "kind": "storage",
+  "size": [
+   0.8,
+   1.8,
+   0.3
+  ],
+  "sits": "floor",
+  "file": "bookshelf.glb",
+  "recipe": "recipes/bookshelf.json",
+  "note": "plywood, 80 x 180 cm, four shelves"
+ },
+ {
+  "id": "floor-lamp",
+  "name": "floor lamp",
+  "kind": "lamp",
+  "size": [
+   0.44,
+   1.6,
+   0.44
+  ],
+  "sits": "floor",
+  "file": "floor-lamp.glb",
+  "recipe": "recipes/floor-lamp.json",
+  "note": "black steel, cream shade, 1.6 m"
+ },
+ {
+  "id": "rug",
+  "name": "rug",
+  "kind": "rug",
+  "size": [
+   2,
+   0.01,
+   1.4
+  ],
+  "sits": "floor",
+  "file": "rug.glb",
+  "recipe": "recipes/rug.json",
+  "note": "terracotta, 2 x 1.4 m"
+ },
+ {
+  "id": "side-table",
+  "name": "side table",
+  "kind": "table",
+  "size": [
+   0.45,
+   0.55,
+   0.45
+  ],
+  "sits": "floor",
+  "file": "side-table.glb",
+  "recipe": "recipes/side-table.json",
+  "note": "oak, 45 cm square, 55 cm high"
+ },
+ {
+  "id": "sofa",
+  "name": "three-seat sofa",
+  "kind": "sofa",
+  "size": [
+   2.103,
+   0.824,
+   0.871
+  ],
+  "sits": "floor",
+  "file": "sofa.glb",
+  "recipe": "recipes/sofa.json",
+  "note": "walnut frame, grey twill, loose cushions, track arms"
+ }
+]

@@ -1,0 +1,26 @@
+{
+  "kind": "workbench",
+  "frames": [
+    {
+      "id": "armchair",
+      "unit": "mm",
+      "build": {
+        "type": "sofa",
+        "seats": 1,
+        "arms": "rolled",
+        "back": "tight",
+        "cushions": "loose",
+        "legH": 140
+      },
+      "fabric": "boucle",
+      "species": "oak"
+    }
+  ],
+  "units": "mm",
+  "title": "Armchair",
+  "ledger": {
+    "recipe_bytes": 222,
+    "faces": 14224,
+    "closed": true
+  }
+}

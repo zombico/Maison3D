@@ -1,0 +1,33 @@
+{
+  "kind": "workbench",
+  "extrudes": [
+    {
+      "profile": {
+        "rect": {
+          "w": 200,
+          "h": 140,
+          "r": 4
+        }
+      },
+      "axisFrom": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "axisTo": {
+        "x": 0,
+        "y": 0,
+        "z": 1
+      },
+      "tint": "#b4553a",
+      "material": "matte"
+    }
+  ],
+  "units": "cm",
+  "title": "Rug",
+  "ledger": {
+    "recipe_bytes": 201,
+    "faces": 72,
+    "closed": true
+  }
+}

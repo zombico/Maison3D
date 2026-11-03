@@ -12,6 +12,8 @@
     "spike:loop": "node 01-spike-muse-loop/cli.mjs serve",
     "spike:loop:https": "node 01-spike-muse-loop/cli.mjs serve --https",
     "spike:talk": "node 06-spike-native-talk/server.mjs",
-    "spike:talk:try": "node 06-spike-native-talk/try.mjs"
+    "spike:talk:try": "node 06-spike-native-talk/try.mjs",
+    "spike:furnish": "node 07-spike-native-furnish/server.mjs",
+    "spike:furnish:try": "node 07-spike-native-furnish/try.mjs"
   }
 }

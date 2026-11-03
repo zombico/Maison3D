@@ -1,0 +1,8 @@
+{
+ "sofa": { "name": "three-seat sofa", "kind": "sofa", "note": "walnut frame, grey twill, loose cushions, track arms" },
+ "armchair": { "name": "armchair", "kind": "chair", "note": "oak frame, boucle, rolled arms" },
+ "side-table": { "name": "side table", "kind": "table", "note": "oak, 45 cm square, 55 cm high" },
+ "bookshelf": { "name": "bookshelf", "kind": "storage", "note": "plywood, 80 x 180 cm, four shelves" },
+ "floor-lamp": { "name": "floor lamp", "kind": "lamp", "note": "black steel, cream shade, 1.6 m" },
+ "rug": { "name": "rug", "kind": "rug", "note": "terracotta, 2 x 1.4 m" }
+}

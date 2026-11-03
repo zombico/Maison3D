@@ -139,3 +139,38 @@ npm run spike:talk:try -- --wav turn.wav
 
 Each turn is printed on the laptop: what was heard, the tool calls, the reply and how long hearing and answering
 took.
+
+## 07: furnishing by voice, from a mojulo catalogue
+
+Spike 06's loop with real furniture instead of the cube. Six pieces were made with mojulo at true size (sofa,
+armchair, side table, bookshelf, floor lamp, rug: `07-spike-native-furnish/catalog/`, recipes in `recipes/`, a
+preview in `preview.png`) and exported as GLB; `catalog/build.mjs` readies mojulo's exports for the headset (drops
+the studio floor and cameras, stands each piece on y = 0 centred on its footprint, front to +z) and writes
+`catalog.json`. This is the fixed-catalogue step: nothing calls mojulo while you talk. Making or editing pieces
+mid-conversation needs mojulo on the laptop and comes later; the headset side does not change for it.
+
+Muse gets four tools: `place` (a catalogue item), `move` (or turn), `swap` (for another item, same spot) and `remove`.
+It says where in the room's words (on `table1`, against `wall3`, next to `sofa1` on the left as you see it, where you
+pointed, in front of you) and `place.mjs` works out the position and facing and checks the fit against the real
+room: furniture it would stand in is reported back to the model, a wall it would poke through pushes it back in, and
+a piece placed without a facing sits square to the walls. The laptop holds the scene and serves the models; the
+headset loads each piece from it (`/catalog/<id>.glb`, cached) and stands it where the scene says.
+
+Try it without the headset, against spike 05's sample room (several turns in a row, then a plan in `plan.svg`):
+
+```bash
+npm run spike:furnish:try -- "an armchair against the wall on my left" "a floor lamp next to it on the left" "a rug in front of it"
+```
+
+With the headset (Maison3D Furnish, from the `native` workflow's Artifacts):
+
+```bash
+npm run spike:furnish
+```
+
+```bash
+adb reverse tcp:8091 tcp:8091
+```
+
+Hold **A** and say what you want; point while you let go for "there" or "this". **B** reads the room again, **X**
+or **Y** brings the panel back.

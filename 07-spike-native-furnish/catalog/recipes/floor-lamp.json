@@ -1,0 +1,88 @@
+{
+  "kind": "workbench",
+  "lathes": [
+    {
+      "axisFrom": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "axisTo": {
+        "x": 0,
+        "y": 0,
+        "z": 3
+      },
+      "profile": [
+        {
+          "t": 0,
+          "radius": 14
+        },
+        {
+          "t": 0.7,
+          "radius": 14
+        },
+        {
+          "t": 1,
+          "radius": 12
+        }
+      ],
+      "tint": "#2b2b2b",
+      "material": "steel"
+    },
+    {
+      "axisFrom": {
+        "x": 0,
+        "y": 0,
+        "z": 3
+      },
+      "axisTo": {
+        "x": 0,
+        "y": 0,
+        "z": 138
+      },
+      "profile": [
+        {
+          "t": 0,
+          "radius": 1.2
+        },
+        {
+          "t": 1,
+          "radius": 1.2
+        }
+      ],
+      "tint": "#2b2b2b",
+      "material": "steel"
+    },
+    {
+      "axisFrom": {
+        "x": 0,
+        "y": 0,
+        "z": 130
+      },
+      "axisTo": {
+        "x": 0,
+        "y": 0,
+        "z": 160
+      },
+      "profile": [
+        {
+          "t": 0,
+          "radius": 22
+        },
+        {
+          "t": 1,
+          "radius": 15
+        }
+      ],
+      "tint": "#efe6d2",
+      "material": "matte"
+    }
+  ],
+  "units": "cm",
+  "title": "Floor lamp",
+  "ledger": {
+    "recipe_bytes": 545,
+    "faces": 2808,
+    "closed": true
+  }
+}

@@ -7,6 +7,7 @@ on:
     paths:
       - '05-spike-native-scan/**'
       - '06-spike-native-talk/**'
+      - '07-spike-native-furnish/**'
       - '.github/workflows/native.yml'
   workflow_dispatch:
 
@@ -28,6 +29,8 @@ jobs:
             apk: maison3d-native-scan
           - dir: 06-spike-native-talk
             apk: maison3d-native-talk
+          - dir: 07-spike-native-furnish
+            apk: maison3d-native-furnish
     defaults:
       run:
         working-directory: ${{ matrix.dir }}

@@ -1,0 +1,30 @@
+{
+  "kind": "workbench",
+  "frames": [
+    {
+      "id": "sofa",
+      "unit": "mm",
+      "build": {
+        "type": "sofa",
+        "seats": 3,
+        "arms": "track",
+        "back": "loose",
+        "cushions": "loose",
+        "legH": 120
+      },
+      "fabric": {
+        "weave": "twill-2/1",
+        "warp": "grey",
+        "weft": "charcoal"
+      },
+      "species": "walnut"
+    }
+  ],
+  "units": "mm",
+  "title": "Sofa (3-seat)",
+  "ledger": {
+    "recipe_bytes": 270,
+    "faces": 28808,
+    "closed": true
+  }
+}

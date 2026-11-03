@@ -1,0 +1,26 @@
+{
+  "kind": "workbench",
+  "frames": [
+    {
+      "id": "bookshelf",
+      "unit": "mm",
+      "build": {
+        "type": "carcass",
+        "w": 800,
+        "h": 1800,
+        "d": 300,
+        "material": "plywood",
+        "shelves": 4,
+        "back": "groove",
+        "plinth": 60
+      }
+    }
+  ],
+  "units": "mm",
+  "title": "Bookshelf",
+  "ledger": {
+    "recipe_bytes": 208,
+    "faces": 13760,
+    "closed": true
+  }
+}
