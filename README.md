@@ -39,3 +39,41 @@ reads the answer aloud without leaving AR. The scene is one cube. The agent's si
   **Hold to talk**. The Quest browser has no speech recognition of its own, so the headset records and transcribes
   in the page with a small Whisper model; only the words reach the server. Typing in the page sends the same thing.
 - Where AR is not offered, the button enters VR with the cube over a grid.
+
+## 05: the room, natively
+
+Spike 00 again, as a native Quest app: Meta Spatial SDK with MR Utility Kit (MRUK) instead of the browser. It loads
+the room Space Setup saved (walls, floor, ceiling, door and window frames, furniture volumes, the room and global
+meshes), tints it over passthrough, and saves a scan in spike 00's format so `view.html` draws both and they can be
+compared. MRUK's own serialisation of the scene rides along under `mruk`.
+
+Getting it onto the headset, once:
+
+1. Make a free developer organisation at developer.meta.com, then turn on Developer Mode in the Meta Horizon phone
+   app (Devices > your headset > Headset settings > Developer Mode).
+2. Install Android's `adb` (platform-tools) or Meta Quest Developer Hub on the laptop, plug the headset in over USB-C
+   and allow USB debugging inside the headset.
+
+Each build: every push that touches `05-spike-native-scan/` builds an APK in GitHub Actions (the `native` workflow).
+Download `maison3d-native-scan` from the run's Artifacts, unzip it, and
+
+```bash
+adb install -r maison3d-native-scan.apk
+```
+
+It shows up in the headset's Library under Unknown Sources as **Maison3D Scan**.
+
+In the headset: allow spatial data when asked. A scan is saved once the room loads; **A** (or the panel's button)
+saves another, **B** reads the room again, **Space Setup** asks the headset to rescan. Scans land on the headset and,
+when the laptop server from spike 00 is running (`npm run spike:scan` and `adb reverse tcp:8080 tcp:8080`), in
+`00-spike-room-scan/scans/` too. Without the server, pull them:
+
+```bash
+adb pull /sdcard/Android/data/ai.mojulo.maison3d.scan/files/scans/
+```
+
+What the app is doing, from the laptop:
+
+```bash
+adb logcat -s Maison3DScan
+```

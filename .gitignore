@@ -3,3 +3,7 @@ node_modules/
 */scans/
 .DS_Store
 .state/
+.gradle/
+build/
+local.properties
+*.apk
