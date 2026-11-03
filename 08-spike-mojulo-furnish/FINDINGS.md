@@ -50,3 +50,21 @@ with its own data, `mojulo/client.mjs` calls it from our code, and `.mcp.json` o
   console, which is mojulo's own layout, not the mapping.
 - `rc-empty-vs-with-your-furniture.png` renders both from above (upholstery shows black in that preview renderer, a
   texture it does not read; the headset is the real test).
+
+## Your real room, empty, by design_interior
+
+`design.mjs` gives mojulo's interior designer the real room without its furniture: the walls and both doors from the
+scan, as a house of its own (the room and the hall its doors open onto; describing it as a `section` let mojulo draft
+a house that put a door to an invented bedroom in the north wall). Cells are grown by the 255 mm of wall mojulo takes
+off, so the room comes out at its measured 3075 x 2950 mm.
+
+The japandi design (`design.json`, `design-in-your-room.png`): a media console and TV on the north wall, a reading
+corner (lounge chair, floor lamp, side table) and a bookcase along the east wall, the south wall with both doors kept
+clear. No sofa, and mojulo says why: the room is 2.95 m deep, too shallow for a sofa, a coffee table and a step in
+front of it, and a loveseat would stand in the approach to a door. It also notes two light sources where three, in a
+triangle, would light the room in layers.
+
+`pieces.mjs` splits the design's GLB into one GLB per piece (`pieces/`, each standing on y = 0, centred, front to +z
+like spike 07's catalogue; decor rides the piece it sits on, the TV its console) and writes `layout.json` in the
+room's own terms. Spike 07's server takes it as `MAISON_LAYOUT` and stands it in whatever room the headset describes
+first, rebuilding the room's frame from its walls, so the design lands in the same place in any session.

@@ -62,7 +62,7 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET' && url.pathname.startsWith('/catalog/')) {
       const id = decodeURIComponent(url.pathname.slice('/catalog/'.length)).replace(/\.glb$/, '');
       if (!catalog[id]) return send(res, 404, { error: `no catalogue item ${id}` });
-      const glb = await readFile(join(CATALOG, catalog[id].file));
+      const glb = await readFile(join(catalog[id].dir ?? CATALOG, catalog[id].file));
       res.writeHead(200, { 'content-type': 'model/gltf-binary', 'content-length': glb.length, 'cache-control': 'max-age=3600', connection: 'close' });
       return res.end(glb);
     }

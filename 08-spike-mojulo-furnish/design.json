@@ -1,0 +1,198 @@
+{
+ "mojulo": "design_interior",
+ "ref": "sk_32q7r85wz8",
+ "style": "japandi",
+ "room": {
+  "tag": "101",
+  "name": "lounge",
+  "size": [
+   3075,
+   2950
+  ],
+  "doors": [
+   {
+    "tag": "101A",
+    "wall": "S",
+    "to": "102 hallway"
+   },
+   {
+    "tag": "101B",
+    "wall": "S",
+    "to": "102 hallway"
+   }
+  ],
+  "windows": 0
+ },
+ "focal": {
+  "wall": "N",
+  "why": "the media wall: its longest solid stretch, 3075 mm"
+ },
+ "section": {
+  "house": "sk_maison_house_mw189m7n",
+  "room": "101",
+  "doors": [
+   {
+    "wall": "S",
+    "to": "hall",
+    "at": 0.16,
+    "width": "737mm"
+   },
+   {
+    "wall": "S",
+    "to": "hall",
+    "at": 0.52,
+    "width": "1398mm"
+   }
+  ]
+ },
+ "pieces": [
+  {
+   "id": "media.console",
+   "piece": "media-console",
+   "like": "media-console",
+   "facingLetter": "S",
+   "plan": [
+    1.538,
+    0.225
+   ],
+   "at": [
+    0.182,
+    -0.063,
+    -1.499
+   ],
+   "facing": [
+    -0.831,
+    0,
+    0.556
+   ],
+   "size": [
+    1.8,
+    0.45,
+    0.52
+   ]
+  },
+  {
+   "id": "reading.chair",
+   "piece": "lounge-chair",
+   "like": "armchair",
+   "facingLetter": "W",
+   "plan": [
+    2.495,
+    0.92
+   ],
+   "at": [
+    0.137,
+    -0.063,
+    -0.317
+   ],
+   "facing": [
+    -0.556,
+    0,
+    -0.831
+   ],
+   "size": [
+    0.84,
+    0.86,
+    0.78
+   ]
+  },
+  {
+   "id": "reading.lamp",
+   "piece": "floor-lamp",
+   "facingLetter": "W",
+   "plan": [
+    2.675,
+    0.19
+   ],
+   "at": [
+    0.844,
+    -0.063,
+    -0.573
+   ],
+   "facing": [
+    -0.556,
+    0,
+    -0.831
+   ],
+   "size": [
+    0.38,
+    0.38,
+    1.6
+   ]
+  },
+  {
+   "id": "reading.side-table",
+   "piece": "side-table",
+   "like": "coffee-table",
+   "facingLetter": "W",
+   "plan": [
+    2.495,
+    1.67
+   ],
+   "at": [
+    -0.487,
+    -0.063,
+    0.1
+   ],
+   "facing": [
+    -0.556,
+    0,
+    -0.831
+   ],
+   "size": [
+    0.5,
+    0.5,
+    0.56
+   ]
+  },
+  {
+   "id": "display.bookcase-1",
+   "piece": "bookcase",
+   "like": "bookcase",
+   "facingLetter": "W",
+   "plan": [
+    2.91,
+    1.825
+   ],
+   "at": [
+    -0.385,
+    -0.063,
+    0.531
+   ],
+   "facing": [
+    -0.556,
+    0,
+    -0.831
+   ],
+   "size": [
+    0.9,
+    0.33,
+    1.83
+   ]
+  }
+ ],
+ "gaps": [
+  {
+   "fn": "converse",
+   "why": "sofa-and-pair: needs a m or l room (this one is s, 9.1 m²); sofa-facing-pair: needs a m or l room (this one is s, 9.1 m²); sofa-and-chair: the room is 2950 mm off the N wall: too shallow for the sofa, a coffee table and a step facing it; loveseat-and-sides: conversation.sofa: it stands in the approach to door 101A"
+  }
+ ],
+ "refused": [
+  {
+   "fn": "display",
+   "won": "bookcase",
+   "refused": [
+    {
+     "id": "bookcase-pair",
+     "why": "needs a l room (this one is s, 9.1 m²)"
+    }
+   ]
+  }
+ ],
+ "review": [
+  "2 light sources (the ceiling's and 1 lamp); three, in a triangle, light a room in layers"
+ ],
+ "notes": [
+  "focal point: the media wall: its longest solid stretch, 3075 mm (N wall)"
+ ]
+}

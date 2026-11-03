@@ -5,6 +5,8 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { resolve, check, pointedPiece, walls } from './place.mjs';
+import { resolve as resolvePath } from 'node:path';
+import { frameOf, toWorld, dirToWorld, FT } from '../08-spike-mojulo-furnish/toMojulo.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -21,6 +23,20 @@ export const config = {
 
 export const catalogList = JSON.parse(readFileSync(join(here, 'catalog', 'catalog.json'), 'utf8'));
 export const catalog = Object.fromEntries(catalogList.map((c) => [c.id, c]));
+
+// A designed layout (spike 08: mojulo's design_interior, split into pieces): its pieces join the catalogue, and its
+// scene waits, in the room's own terms, until a turn brings the room's walls to place it by.
+let pendingLayout = null;
+if (process.env.MAISON_LAYOUT) {
+  const path = resolvePath(process.env.MAISON_LAYOUT);
+  const layout = JSON.parse(readFileSync(path, 'utf8'));
+  for (const c of layout.catalog) {
+    const entry = { ...c, dir: dirname(path) };
+    catalog[c.id] = entry;
+    catalogList.push(entry);
+  }
+  pendingLayout = layout;
+}
 
 const SYSTEM = `You furnish a real room, seen through a Quest headset in passthrough, with pieces from a catalogue.
 Each turn tells you what the person said, what their right controller pointed at when they let go of the button
@@ -134,8 +150,27 @@ function remember(said, reply) {
   while (history.length > 20) history.shift();
 }
 
+/** Stands a pending layout in the room the headset just described; returns what it placed, or null. */
+export function placeLayout(room) {
+  if (!pendingLayout || walls(room).length < 4) return null;
+  const f = frameOf(room);
+  const FACE = { N: [0, -1], S: [0, 1], E: [1, 0], W: [-1, 0] };
+  const placed = [];
+  for (const p of pendingLayout.scene) {
+    const c = toWorld(f, [p.plan[0] / FT, p.plan[1] / FT]);
+    const d = dirToWorld(f, FACE[p.facing] ?? [0, 1]);
+    const piece = { id: p.id, item: p.item, at: [c[0], f.floorY, c[1]].map((v) => Math.round(v * 1000) / 1000), facing: [d[0], 0, d[1]].map((v) => Math.round(v * 1000) / 1000) };
+    scene.push(piece);
+    placed.push(piece.id);
+  }
+  pendingLayout = null;
+  return placed;
+}
+
 /** One turn: returns { reply, calls }; the scene is changed in place. */
 export async function runTurn({ said, pointing, room }) {
+  const laid = placeLayout(room);
+  if (laid) console.log(`  (the designed layout stands in the room: ${laid.join(', ')})`);
   const pointed = pointedPiece(pointing, scene, catalog);
   const context = {
     said,

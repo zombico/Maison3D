@@ -204,3 +204,16 @@ not steered toward games, worlds or characters. `design_room` (mojulo's `design_
 at true size, in a style, with clearances kept and refusals explained), `make_piece` (workbench furniture builds
 only), `edit_piece`, `export_piece`, `measure_piece` and `design_rules`. Turn the mojulo plugin off for this project
 (`/plugin`) to see only these. Muse never sees mojulo's tools at all: the laptop server gives it its own four.
+
+### mojulo's design in the headset
+
+`node 08-spike-mojulo-furnish/design.mjs japandi` has mojulo's `design_interior` design the real room, empty (walls
+and doors from the scan, no furniture), and `node 08-spike-mojulo-furnish/pieces.mjs` turns the design into headset
+pieces and `layout.json`. Both are committed, so on the laptop only this is needed, with the same Maison3D Furnish app:
+
+```bash
+MAISON_LAYOUT=08-spike-mojulo-furnish/layout.json npm run spike:furnish
+```
+
+The design stands in the room on the first turn (say "show me the design"), and the pieces then move, swap and go like
+any other.
