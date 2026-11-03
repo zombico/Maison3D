@@ -15,7 +15,7 @@ import org.json.JSONObject
 class Turns(private val base: String) {
   private val io = Executors.newSingleThreadExecutor()
 
-  fun send(wav: ByteArray, pointing: JSONObject?, room: JSONObject, cube: JSONObject, done: (Result<JSONObject>) -> Unit) {
+  fun send(wav: ByteArray, pointing: JSONObject?, room: JSONObject, cube: JSONObject, voice: Boolean, done: (Result<JSONObject>) -> Unit) {
     io.execute {
       done(
           runCatching {
@@ -26,6 +26,7 @@ class Turns(private val base: String) {
                     .put("pointing", pointing ?: JSONObject.NULL)
                     .put("room", room)
                     .put("cube", cube)
+                    .put("voice", voice) // the reply as audio too, when the headset cannot speak it
             post("/api/turn", body)
           },
       )

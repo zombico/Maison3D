@@ -4,6 +4,7 @@
 import http from 'node:http';
 import { config, runTurn } from './agent.mjs';
 import { transcribe, sttStatus } from './stt.mjs';
+import { speak, voiceStatus } from './voice.mjs';
 
 const PORT = Number(process.env.PORT) || 8091;
 const MAX_BODY = 16 * 1024 * 1024;
@@ -41,13 +42,14 @@ async function turn(req, res) {
   console.log(`\n> ${said}${body.pointing ? `   (pointing at ${body.pointing.id ?? body.pointing.target})` : ''}`);
   for (const c of calls) console.log(`  ${c.name} ${JSON.stringify(c.args)} -> ${c.result.error ?? 'ok'}`);
   console.log(`< ${reply}   [${heardMs} ms to hear, ${Date.now() - t0 - heardMs} ms to answer]`);
-  send(res, 200, { said, reply, cube });
+  const voice = body.voice ? await speak(reply) : null;
+  send(res, 200, { said, reply, cube, ...(voice ? { voice: voice.toString('base64') } : {}) });
 }
 
 const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://localhost');
-    if (req.method === 'GET' && url.pathname === '/api/health') return send(res, 200, { ok: true, model: config.model, key: config.hasKey, stt: sttStatus() });
+    if (req.method === 'GET' && url.pathname === '/api/health') return send(res, 200, { ok: true, model: config.model, key: config.hasKey, stt: sttStatus(), voice: voiceStatus() });
     if (req.method === 'POST' && url.pathname === '/api/turn') return await turn(req, res);
     send(res, 404, { error: 'not found' });
   } catch (e) {
@@ -59,6 +61,6 @@ const server = http.createServer(async (req, res) => {
 server.keepAliveTimeout = 65000;
 
 server.listen(PORT, '127.0.0.1', () => {
-  console.log(`talk server on http://localhost:${PORT}  model ${config.model}  key ${config.hasKey ? 'found' : 'MISSING (.env META_API_KEY=…)'}  speech-to-text ${sttStatus()}`);
+  console.log(`talk server on http://localhost:${PORT}  model ${config.model}  key ${config.hasKey ? 'found' : 'MISSING (.env META_API_KEY=…)'}  speech-to-text ${sttStatus()}  voice ${voiceStatus()}`);
   console.log(`headset: adb reverse tcp:${PORT} tcp:${PORT}, then open Maison3D Talk`);
 });

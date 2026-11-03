@@ -200,13 +200,15 @@ class TalkActivity : AppSystemActivity() {
     val pointing = controller?.let { room.pointAt(it.t, it.q.times(Vector3(0f, 0f, 1f)).normalize()) }
     busy = true
     setSaid("…")
-    turns.send(wav, pointing, room.describe(), cubeJson()) { r ->
+    turns.send(wav, pointing, room.describe(), cubeJson(), speaker.needsServerVoice) { r ->
       busy = false
       r.onSuccess { answer ->
         setSaid(answer.optString("said", "").ifEmpty { "(nothing heard)" })
         val text = answer.optString("reply", "")
         setReply(text)
-        if (text.isNotEmpty()) speaker.say(text)
+        val voice = answer.optString("voice")
+        if (voice.isNotEmpty()) speaker.play(android.util.Base64.decode(voice, android.util.Base64.DEFAULT))
+        else if (text.isNotEmpty()) speaker.say(text)
         answer.optJSONObject("cube")?.let(::applyCube)
         answer.optString("note").takeIf { it.isNotEmpty() }?.let(::log)
       }

@@ -86,31 +86,75 @@ class Recorder {
   }
 }
 
-/** Reads answers aloud with the headset's text-to-speech engine, when it has one; otherwise they stay on the panel. */
-class Speaker(context: Context, private val report: (String) -> Unit) {
+/**
+ * Reads answers aloud. First choice is the headset's own text-to-speech with any English voice it has (spike 06 found
+ * a Quest whose engine refused US English); otherwise `needsServerVoice` asks the laptop for the reply as audio,
+ * which `play` then plays; failing both, answers stay on the panel.
+ */
+class Speaker(private val context: Context, private val report: (String) -> Unit) {
   @Volatile private var ready = false
+  @Volatile var needsServerVoice = false
+    private set
   private lateinit var tts: TextToSpeech
+  private var player: android.media.MediaPlayer? = null
 
   init {
     tts =
         TextToSpeech(context) { status ->
-          if (status == TextToSpeech.SUCCESS) {
-            val lang = tts.setLanguage(Locale.US)
-            ready = lang != TextToSpeech.LANG_MISSING_DATA && lang != TextToSpeech.LANG_NOT_SUPPORTED
-            report(if (ready) "speech out: ${tts.defaultEngine ?: "default engine"}" else "speech out: engine has no English voice")
+          if (status != TextToSpeech.SUCCESS) {
+            needsServerVoice = true
+            report("speech out: no text-to-speech engine here; asking the laptop to speak")
           } else {
-            report("speech out: no text-to-speech engine on this headset; answers show on the panel")
+            ready = pickEnglish()
+            needsServerVoice = !ready
+            report(
+                if (ready) "speech out: ${tts.defaultEngine ?: "engine"}, ${runCatching { tts.voice?.name }.getOrNull() ?: "English"}"
+                else "speech out: ${tts.defaultEngine ?: "engine"} has no English voice " +
+                    "(${runCatching { tts.voices?.size }.getOrNull() ?: 0} voices); asking the laptop to speak",
+            )
           }
         }
+  }
+
+  private fun pickEnglish(): Boolean {
+    for (locale in listOf(Locale.US, Locale.UK, Locale.ENGLISH, Locale.getDefault())) {
+      val r = runCatching { tts.setLanguage(locale) }.getOrDefault(TextToSpeech.LANG_NOT_SUPPORTED)
+      if (r != TextToSpeech.LANG_MISSING_DATA && r != TextToSpeech.LANG_NOT_SUPPORTED) return true
+    }
+    val voice = runCatching { tts.voices }.getOrNull()?.firstOrNull { it.locale.language == "en" && !it.isNetworkConnectionRequired }
+    return voice != null && tts.setVoice(voice) == TextToSpeech.SUCCESS
   }
 
   fun say(text: String) {
     if (ready) tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "reply")
   }
 
+  /** Plays a WAV the laptop rendered for the reply. */
+  fun play(wav: ByteArray) {
+    try {
+      val file = java.io.File(context.cacheDir, "reply.wav").apply { writeBytes(wav) }
+      player?.release()
+      player =
+          android.media.MediaPlayer().apply {
+            setDataSource(file.absolutePath)
+            setOnCompletionListener { it.release(); if (player === it) player = null }
+            prepare()
+            start()
+          }
+    } catch (e: Exception) {
+      Log.w(TAG, "could not play the reply", e)
+      report("speech out: could not play the laptop's voice (${e.message})")
+    }
+  }
+
   fun stop() {
     tts.stop()
     tts.shutdown()
+    player?.release()
+  }
+
+  companion object {
+    private const val TAG = "Maison3DTalk"
   }
 }
 
