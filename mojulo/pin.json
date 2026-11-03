@@ -1,0 +1,6 @@
+{
+  "repo": "https://github.com/zombico/mojulo",
+  "branch": "1026-consolidated",
+  "commit": "ba1234a188596fdc18589792cb9869bd4409a1f7",
+  "note": "mojulo from source at an exact commit: the release candidate is not on npm, so the Claude plugin (which installs published versions only) cannot carry it yet"
+}

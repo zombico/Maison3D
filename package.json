@@ -14,6 +14,7 @@
     "spike:talk": "node 06-spike-native-talk/server.mjs",
     "spike:talk:try": "node 06-spike-native-talk/try.mjs",
     "spike:furnish": "node 07-spike-native-furnish/server.mjs",
-    "spike:furnish:try": "node 07-spike-native-furnish/try.mjs"
+    "spike:furnish:try": "node 07-spike-native-furnish/try.mjs",
+    "mojulo:setup": "node mojulo/setup.mjs"
   }
 }

@@ -186,3 +186,15 @@ catalogue as their own models, and the designer picks among them.
 Can mojulo, rather than our own rules, furnish the real room? Step 1 maps the scanned room into a mojulo floor plan
 (`08-spike-mojulo-furnish/toMojulo.mjs`) and asks it to furnish. Results and what they mean:
 [`08-spike-mojulo-furnish/FINDINGS.md`](08-spike-mojulo-furnish/FINDINGS.md).
+
+This spike runs a newer mojulo than the Claude plugin's: the `1026-consolidated` release candidate, pinned to a
+commit in `mojulo/pin.json` and run from source (it is not on npm, and the plugin installs published versions only).
+Once:
+
+```bash
+npm run mojulo:setup
+```
+
+Then `node 08-spike-mojulo-furnish/furnish.mjs L` (or `--empty`, or another room glyph) furnishes the sample room on
+it. In Claude Code the same mojulo is offered as the `mojulo-rc` server (`.mcp.json`); it keeps its data in
+`.mojulo/home`, apart from the plugin's `~/.mojulo`.

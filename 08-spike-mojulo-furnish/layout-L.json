@@ -1,0 +1,59 @@
+{
+ "mojulo": "3.1.1",
+ "ref": "sk_maison_l_real_mw17re6h",
+ "glb": "/home/user/Maison3D/.mojulo/home/data/outcomes/sk_maison_l_real_mw17re6h/model.glb",
+ "pieces": [
+  {
+   "id": "bordered-rug",
+   "at": [
+    -0.982,
+    -0.063,
+    -0.991
+   ],
+   "size": [
+    2.13,
+    0.02,
+    1.52
+   ]
+  },
+  {
+   "id": "constructed-armchair",
+   "at": [
+    0.443,
+    -0.063,
+    -0.626
+   ],
+   "size": [
+    0.73,
+    0.79,
+    0.73
+   ]
+  },
+  {
+   "id": "vase",
+   "at": [
+    -1.131,
+    0.284,
+    -1.387
+   ],
+   "size": [
+    1.03,
+    0.6,
+    1.13
+   ]
+  },
+  {
+   "id": "mail-stack",
+   "at": [
+    -1.12,
+    0.284,
+    -1.507
+   ],
+   "size": [
+    1.11,
+    0.23,
+    1.11
+   ]
+  }
+ ]
+}

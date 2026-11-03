@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "mojulo-rc": {
+      "command": "node",
+      "args": ["mojulo/server.mjs"]
+    }
+  }
+}
