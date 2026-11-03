@@ -28,10 +28,10 @@ import com.meta.spatial.toolkit.AvatarBody
 import com.meta.spatial.toolkit.Controller
 import com.meta.spatial.toolkit.Grabbable
 import com.meta.spatial.toolkit.Material
+import com.meta.spatial.toolkit.Panel
 import com.meta.spatial.toolkit.PanelRegistration
 import com.meta.spatial.toolkit.Transform
 import com.meta.spatial.toolkit.Visible
-import com.meta.spatial.toolkit.createPanelEntity
 import com.meta.spatial.vr.LocomotionSystem
 import com.meta.spatial.vr.VRFeature
 
@@ -39,11 +39,14 @@ import com.meta.spatial.vr.VRFeature
  * Spike 05: the room as a native Quest app sees it. Passthrough on, Space Setup's room loaded through MR Utility
  * Kit and tinted over the real one, and a scan saved in spike 00's format: automatically once the room loads, then
  * with A or the panel's button. B or "Reload room" reads the room again; "Space Setup" asks the headset to rescan.
+ * X, Y or a click of the right thumbstick brings the panel back in front of you.
  */
 class ScanActivity : AppSystemActivity(), MRUKSceneEventListener {
   private lateinit var mruk: MRUKFeature
   private lateinit var delivery: Delivery
   private var tint: AnchorProceduralMesh? = null
+  @Volatile private var panel: Entity? = null
+  @Volatile private var placePanel = true
 
   private var statusView: TextView? = null
   private val status = ArrayDeque<String>()
@@ -99,7 +102,9 @@ class ScanActivity : AppSystemActivity(), MRUKSceneEventListener {
         sunDirection = -Vector3(1f, 3f, -2f),
         environmentIntensity = 0.3f,
     )
-    Entity.createPanelEntity(PANEL_ID, R.layout.scan_panel, Transform(), Visible(false), Grabbable())
+    // a fresh entity, not a fixed id: MRUK's room and anchors are created first and could already hold any id
+    panel = Entity.create(listOf(Panel(R.layout.scan_panel), Transform(), Visible(false), Grabbable()))
+    placePanel = true
   }
 
   override fun onSpatialShutdown() {
@@ -201,19 +206,24 @@ class ScanActivity : AppSystemActivity(), MRUKSceneEventListener {
   // --- each frame: place the panel, read the buttons, take pending scans -------------------------------------
 
   private inner class ScanSystem : SystemBase() {
-    private var panelPlaced = false
-
     override fun execute() {
       val body = localBody() ?: return
       val head = body.head.tryGetComponent<Transform>()?.transform
-      if (!panelPlaced && head != null && head != Pose()) {
-        panelPlaced = true
-        placeInView(head, Entity(PANEL_ID))
-      }
 
       body.rightHand.tryGetComponent<Controller>()?.let { c ->
         if (pressed(c, ButtonBits.ButtonA)) pendingSave = "button"
         if (pressed(c, ButtonBits.ButtonB)) pendingReload = true
+        if (pressed(c, ButtonBits.ButtonThumbRClick)) placePanel = true
+      }
+      body.leftHand.tryGetComponent<Controller>()?.let { c ->
+        if (pressed(c, ButtonBits.ButtonY) || pressed(c, ButtonBits.ButtonX)) placePanel = true
+      }
+
+      // once the head is tracked, and again whenever asked: the panel in front of you
+      val p = panel
+      if (placePanel && p != null && head != null && head != Pose()) {
+        placePanel = false
+        placeInView(head, p)
       }
 
       if (pendingReload) {
@@ -251,6 +261,7 @@ class ScanActivity : AppSystemActivity(), MRUKSceneEventListener {
     q = q.times(Quaternion(20f, 0f, 0f))
     val t = head.t.plus(q.times(Vector3(0f, 0f, 0.8f)))
     element.setComponents(listOf(Transform(Pose(t, q)), Visible(true)))
+    Log.i(TAG, "panel placed at $t (head at ${head.t})")
   }
 
   // --- the panel's text --------------------------------------------------------------------------------------
@@ -273,7 +284,6 @@ class ScanActivity : AppSystemActivity(), MRUKSceneEventListener {
     private const val TAG = "Maison3DScan"
     private const val PERMISSION_USE_SCENE = "com.oculus.permission.USE_SCENE"
     private const val REQUEST_USE_SCENE = 1
-    private const val PANEL_ID = 2
     private const val DEFAULT_SEND = "http://localhost:8080"
   }
 }

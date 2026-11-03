@@ -64,7 +64,8 @@ adb install -r maison3d-native-scan.apk
 It shows up in the headset's Library under Unknown Sources as **Maison3D Scan**.
 
 In the headset: allow spatial data when asked. A scan is saved once the room loads; **A** (or the panel's button)
-saves another, **B** reads the room again, **Space Setup** asks the headset to rescan. Scans land on the headset and,
+saves another, **B** reads the room again, **Space Setup** asks the headset to rescan. **X**, **Y** or a click of
+the right thumbstick brings the panel back in front of you. Scans land on the headset and,
 when the laptop server from spike 00 is running (`npm run spike:scan` and `adb reverse tcp:8080 tcp:8080`), in
 `00-spike-room-scan/scans/` too. Without the server, pull them:
 
