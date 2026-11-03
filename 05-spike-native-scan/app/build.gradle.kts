@@ -19,6 +19,17 @@ android {
     versionName = "0.1"
   }
 
+  // One committed debug key, so every CI build is signed alike and installs over the last one. It signs
+  // sideloaded test builds only; store builds get a real key kept out of the repository.
+  signingConfigs {
+    getByName("debug") {
+      storeFile = file("debug.keystore")
+      storePassword = "android"
+      keyAlias = "androiddebugkey"
+      keyPassword = "android"
+    }
+  }
+
   buildTypes {
     release {
       isMinifyEnabled = false
