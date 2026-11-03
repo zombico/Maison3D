@@ -180,3 +180,9 @@ Pieces never change size: each model is true size in metres, and the headset onl
 facing, never a scale; the fit checks read the same sizes from `catalog.json`. Fitting a room is done by choosing,
 the way mojulo's floor-share sizing picks a loveseat for a small lounge: size variants of a piece belong in the
 catalogue as their own models, and the designer picks among them.
+
+## 08: mojulo in the loop
+
+Can mojulo, rather than our own rules, furnish the real room? Step 1 maps the scanned room into a mojulo floor plan
+(`08-spike-mojulo-furnish/toMojulo.mjs`) and asks it to furnish. Results and what they mean:
+[`08-spike-mojulo-furnish/FINDINGS.md`](08-spike-mojulo-furnish/FINDINGS.md).
