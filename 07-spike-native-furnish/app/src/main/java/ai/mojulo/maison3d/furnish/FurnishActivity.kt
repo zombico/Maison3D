@@ -89,7 +89,7 @@ class FurnishActivity : AppSystemActivity() {
     server = intent?.getStringExtra("server") ?: DEFAULT_SERVER
     turns = Turns(server)
     // the furniture's models come from the laptop server and are cached on the headset
-    com.meta.spatial.runtime.NetworkedAssetLoader.init(java.io.File(applicationContext.cacheDir.canonicalPath), com.meta.spatial.okhttp3.OkHttpAssetFetcher())
+    com.meta.spatial.runtime.NetworkedAssetLoader.init(java.io.File(applicationContext.cacheDir.canonicalPath), HttpAssetFetcher())
     speaker = Speaker(applicationContext, ::log)
     log("server: $server")
     log(recognizerReport(applicationContext))
