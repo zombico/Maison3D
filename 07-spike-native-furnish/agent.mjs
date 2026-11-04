@@ -14,6 +14,7 @@ import { GLAZES } from './vases.mjs';
 import { SURFACES, SURFACE_KINDS } from './surfaces.mjs';
 import { PIECES as INVENTORY_PIECES, COLLECTIONS } from '../70-inventory/catalogue.mjs';
 import * as rooms from './rooms.mjs';
+import { slot } from './designs.mjs';
 import { resolve as resolvePath } from 'node:path';
 import { linearOf } from '../70-inventory/colour.mjs';
 import { MATERIALS, PATTERNED, materialsOf } from '../70-inventory/recipes.mjs';
@@ -243,14 +244,14 @@ const TOOLS = [
  * The furnished scene: [{ id, item, at, facing, colours?, materials? }]; `colours` are the parts recoloured
  * ({ fabric: '#5f7a5a' }), `materials` the parts made of something else ({ fabric: 'velvet' }).
  */
-export const scene = [];
+export const scene = slot(() => []); // the visitor's own (designs.mjs)
 
 /** The room's colours: { wall (every wall), walls: { wallId }, floor, ceiling }, over shell.mjs's FINISH. */
-export const finish = { walls: {} };
+export const finish = slot(() => ({ walls: {} }));
 /** A surface's finish for the scene: 'paint', or its kind and colours. */
 const madeOf = (s) => (s && s !== 'none' ? { finish: s.kind, ...(s.colour2 ? { colour2: s.colour2 } : {}), ...(s.size ? { size: s.size } : {}) } : 'paint');
 /** How the design is shown: the real furniture's outlines on or off. */
-export const settings = { outlines: true };
+export const settings = slot(() => ({ outlines: true }));
 
 function newId(item) {
   let n = 1;
@@ -721,11 +722,20 @@ async function chat(messages) {
   return msg;
 }
 
-const history = [];
+const history = slot(() => []);
 function remember(said, reply) {
   history.push({ role: 'user', content: `said: ${said}` }, { role: 'assistant', content: reply || '(no reply)' });
   while (history.length > 20) history.shift();
 }
+
+// The public demo: a browser (or VR from a browser), no real room behind it, no mojulo to rebuild a piece in another
+// material.
+const WEB_NOTE = process.env.MAISON_PUBLIC === '1' ? `
+
+This is the public web demo: the person is in a browser, or in VR from a browser. They point by clicking (or with a
+controller's laser). There is no real room behind the design here: do not offer rescan_room, use_room scan or view
+real. Making a part in another material is not available in the demo (say so, and offer a colour instead); colours,
+finishes, sizes, swaps and everything else work.` : '';
 
 /** One turn: returns { reply, calls }; the scene is changed in place. */
 export async function runTurn({ said, pointing, room }) {
@@ -741,7 +751,7 @@ export async function runTurn({ said, pointing, room }) {
     openings: openingsAround(room),
     pieces: scene.map(describe),
   };
-  const messages = [{ role: 'system', content: SYSTEM }, ...history, { role: 'user', content: JSON.stringify(context) }];
+  const messages = [{ role: 'system', content: SYSTEM + WEB_NOTE }, ...history, { role: 'user', content: JSON.stringify(context) }];
   const calls = [];
   const actions = []; // things for the headset itself to do, such as rescanning
   for (let round = 0; round < 4; round++) {

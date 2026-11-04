@@ -1,0 +1,34 @@
+# Fly.io config for the public demo: fly launch --copy-config --no-deploy, fly secrets set META_API_KEY=…, fly deploy.
+# Keep it to one machine: each visitor's room and the day's turn counts live in the server's memory.
+app = "maison3d"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  MAISON_PUBLIC = "1"
+  PORT = "8080"
+  MAISON_TURNS_PER_VISITOR = "30"
+  MAISON_TURNS_PER_ADDRESS = "60"
+  MAISON_TURNS_PER_DAY = "1500"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  max_machines_running = 1
+
+  [[http_service.checks]]
+    grace_period = "20s"
+    interval = "30s"
+    method = "GET"
+    path = "/api/limit"
+    timeout = "5s"
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1

@@ -1,0 +1,19 @@
+.git
+.github
+.env
+**/.env
+node_modules
+.mojulo
+docs
+**/*.md
+70-inventory/models/variants
+# the Quest app's Android project: the server does not need it
+07-spike-native-furnish/app
+07-spike-native-furnish/gradle
+07-spike-native-furnish/gradlew
+07-spike-native-furnish/gradlew.bat
+07-spike-native-furnish/*.kts
+07-spike-native-furnish/gradle.properties
+07-spike-native-furnish/build
+07-spike-native-furnish/.gradle
+07-spike-native-furnish/plan.svg

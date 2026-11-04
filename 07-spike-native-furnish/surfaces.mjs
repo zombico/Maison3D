@@ -198,6 +198,7 @@ export function surfaceTexture(surface, { kind, colour2, size }, colour) {
   if (!made.has(key)) {
     const t = S.paint(rgb(colour ?? S.colour), rgb(colour2 ?? S.colour2), size ?? S.size, { grout: rgb(S.grout ?? '#9a968e') });
     made.set(key, { ...t, id: key });
+    if (made.size > 120) made.delete(made.keys().next().value);
   }
   return made.get(key);
 }

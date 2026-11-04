@@ -1,0 +1,21 @@
+# Render Blueprint for the public demo: New > Blueprint, pick this repo, paste META_API_KEY when asked.
+# One instance only: each visitor's room and the day's turn counts live in the server's memory.
+services:
+  - type: web
+    name: maison3d
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/limit
+    autoDeploy: false
+    envVars:
+      - key: META_API_KEY
+        sync: false
+      - key: MAISON_PUBLIC
+        value: "1"
+      - key: MAISON_TURNS_PER_VISITOR
+        value: "30"
+      - key: MAISON_TURNS_PER_ADDRESS
+        value: "60"
+      - key: MAISON_TURNS_PER_DAY
+        value: "1500"

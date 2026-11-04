@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Maison3D</title>
+  <meta name="description" content="Furnish a room by talking to it, in your browser or in VR.">
+  <link rel="icon" href="/favicon.svg">
+  <link rel="stylesheet" href="/style.css">
+  <script type="importmap">
+    { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    } }
+  </script>
+</head>
+<body>
+  <canvas id="view" aria-label="The room, in 3D"></canvas>
+
+  <header>
+    <div class="brand"><img src="/favicon.svg" alt=""> Maison3D</div>
+    <div class="actions">
+      <span id="limit" class="pill" hidden></span>
+      <button id="help" class="ghost" type="button" title="What can I say?">?</button>
+      <button id="voice" class="ghost" type="button" aria-pressed="true" title="Read replies aloud">Voice on</button>
+      <button id="restart" class="ghost" type="button" title="An empty room again">Start over</button>
+      <span id="vr"></span>
+    </div>
+  </header>
+
+  <section id="intro">
+    <button id="close" class="x" type="button" aria-label="Close">×</button>
+    <h1>Furnish a room by talking to it</h1>
+    <p>You're standing in an empty 20 by 15 ft room. Say or type what you want; click the floor, a wall or a piece first
+      to say "here" or "this". Drag to look around, scroll to move in.</p>
+    <div class="chips" id="examples"></div>
+    <p class="small">On a Quest, open this page in the browser and press <b>Enter VR</b>: hold the grip to talk, pull
+      the trigger to point, push the thumbstick forward to step to where you point, left or right to turn.</p>
+  </section>
+
+  <aside id="log" aria-live="polite"></aside>
+
+  <div id="pointing" class="pill" hidden></div>
+
+  <form id="say" autocomplete="off">
+    <button id="mic" type="button" title="Hold to talk (or hold the space bar)" aria-label="Hold to talk">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-2.08A7 7 0 0 0 19 12h-2Z"/></svg>
+    </button>
+    <input id="text" placeholder="Try “a sage velvet sofa against the left wall”" aria-label="What you want">
+    <button id="send" type="submit">Send</button>
+  </form>
+  <div id="status" role="status"></div>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

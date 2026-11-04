@@ -13,9 +13,12 @@ const WALL_SIDES = ['front', 'right', 'back', 'left'];
  */
 export const WINDOW_STYLE = { sill_depth: 0.05, recess: 0.1, trim: 0.065, panes: 'two', frame: 'white' };
 export const PANES = ['single', 'two', 'sash', 'grid'], FRAMES = ['white', 'black', 'wood'];
+import { slot } from './designs.mjs';
+
 const round = (v) => Math.round(v * 1000) / 1000;
 
-export const state = {
+// the design's room: each visitor's own (designs.mjs), the local one for the headset on the laptop
+const FRESH_ROOM = {
   source: 'dictated',
   spec: {
     // 20 by 15 feet, 10 feet high: a door behind you on the right, a wide window ahead, one on the left
@@ -31,6 +34,7 @@ export const state = {
   session: null,
   scanned: null, // the headset's last description of the real room
 };
+export const state = slot(() => structuredClone(FRESH_ROOM));
 
 const rightOf = (f) => [-f[1], f[0]];
 /** A point in the room's own frame (x to the right, z forward, from its centre) in the world. */

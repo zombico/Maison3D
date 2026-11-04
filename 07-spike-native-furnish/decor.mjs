@@ -412,6 +412,7 @@ export function decorModel(entry, fit = null, { draft = false } = {}) {
     // a wall or window piece was built with its back at -d/2 of its own depth: centre its depth too
     if (entry.mount === 'wall' || entry.mount === 'window') { const { lo, hi } = bounds(m), dz = (lo[2] + hi[2]) / 2; for (const g of m.mats.values()) for (let i = 2; i < g.pos.length; i += 3) g.pos[i] -= dz; }
     built.set(key, { glb: m.glb(entry.name), size, triangles: m.triangles });
+    if (built.size > 1500) built.delete(built.keys().next().value); // the oldest goes: visitors' fits would grow it forever
   }
   return built.get(key);
 }

@@ -14,6 +14,48 @@ The repo holds the product only:
 
 How this becomes a submitted app: [`docs/packaging-proposal.md`](docs/packaging-proposal.md).
 
+## The public demo
+
+The same server serves a web client (`07-spike-native-furnish/web/`): the room in 3D in any browser, typed or spoken
+requests, a click to point, and **Enter VR** in a Quest's browser (WebXR: grip to talk, trigger to point, thumbstick to
+step and turn). Nothing to install.
+
+With `MAISON_PUBLIC=1` the server is a public demo:
+
+- it listens beyond the machine;
+- each visitor's browser keeps its own room (a design per visitor, in memory, kept six hours idle);
+- turns are limited per visitor (30 a day), per address (60) and for the whole day (1,500, the real guard on cost);
+- replies are spoken by the browser.
+
+Making a part in another material needs mojulo on the server and is off in the demo; colours work.
+
+**Render:** New > Blueprint, pick this repo (`render.yaml`), paste the Meta API key as `META_API_KEY`. The `starter`
+plan doesn't sleep.
+
+**Fly.io:**
+
+```bash
+fly launch --copy-config --no-deploy
+```
+
+```bash
+fly secrets set META_API_KEY=your-key
+```
+
+```bash
+fly deploy
+```
+
+Keep it to one machine: the rooms and the day's counts live in the server's memory. The image (`Dockerfile`) has no
+build step and no npm dependencies; try it locally with:
+
+```bash
+docker build -t maison3d . && docker run --rm -p 8080:8080 -e META_API_KEY=your-key maison3d
+```
+
+then open http://localhost:8080.
+
+
 Quick start: `npm start` on the laptop (the API key in `.env` at the root), the Maison3D Furnish APK from the
 `native` workflow on the headset, `adb reverse tcp:8091 tcp:8091`.
 
