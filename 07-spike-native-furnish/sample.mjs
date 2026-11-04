@@ -21,6 +21,8 @@ export function roomFromScan(scan, floorBelow = 1.5) {
     const max = [0, 1, 2].map((i) => Math.max(...p.world.map((w) => w[i])));
     const m = p.pose.matrix;
     add(p.label, min, max, [m[8], m[9], m[10]]); // the pose's z column: the plane's normal
+    // the floor's and ceiling's own outline, as the headset sends it: [x, z] round the plane
+    if (p.label === 'floor' || p.label === 'ceiling') items.at(-1).outline = p.world.map((w) => [round(w[0]), round(w[2])]);
   }
   for (const m of scan.meshes) {
     if (m.label === 'global mesh' || m.worldBox.min[1] >= floorBelow) continue;

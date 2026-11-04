@@ -263,15 +263,25 @@ Sizes are related: each piece knows its other sizes in its collection, smallest 
 smallest, then 2-, 3- and 4-seat; double, queen, king), and Muse's `resize` tool takes "smaller", "larger" or a size
 by name. The resized piece keeps its back where it was and keeps its colours and materials.
 
-The room's real walls can be painted: "paint this wall sage", "paint the wall behind the sofa navy", "paint the room
-white", "take the paint off". Muse's `paint` tool colours a wall by id (or all of them), and
-`07-spike-native-furnish/paint.mjs` cuts each painted wall into panels against the room the headset last described:
-the scanned wall less its doors, windows and wall art, and less the real furniture standing within 60 cm of it, up to
-that furniture's height. The headset stands the panels just in front of the wall, lit like the furniture. The headset
-draws them over passthrough, so a real thing the scan does not know (a lamp, a plant) or furniture further into the
-room shows painted over where it is in front of a painted wall; the headset's depth sensing would fix that, later.
-`paintSvg` draws each painted wall's panels for a check without the headset. Paint needs this Maison3D Furnish build
-or newer.
+### Designing in VR, the room empty
+
+Maison3D Furnish now designs in VR: the room you scanned stands around you empty, 1:1 over the real one, so you can
+walk it, and you furnish it from scratch. `07-spike-native-furnish/shell.mjs` builds it on the laptop as one model
+from the room the headset reads (`POST /api/room`, as soon as the room loads): the walls with their doors and
+windows open, the floor and ceiling from the scan's own outline (a room need not be a rectangle), skirting, trim
+round each opening, a short hall behind each door and bright glass in each window. The real furniture is left out of
+the room, out of what Muse sees and out of the fit checks; it shows as blue outlines instead, so nobody walks into a
+real sofa they cannot see (the Quest's own boundary stays on too). A point at real furniture goes on through it to the
+wall or floor behind. Pieces are kept out of each door's opening and the 80 cm in front of it.
+
+Say "paint this wall sage", "paint the room white", "a light oak floor" or "a white ceiling" (Muse's `paint`), "show
+me the real room" and "back to the design" (`view`, or the panel's Real room button: passthrough, the design over
+the real room), "hide the outlines" (`outlines`). A change of colour is a new room model, built in a few
+milliseconds. The panel now comes up in front of you at eye height once the headset is tracking; X, Y or a
+right-thumbstick click brings it back in front of you, and pointing at it and holding the grip moves it.
+
+Check the room without the headset: `shellGlb`, `ghostsGlb` and `shellSvg` (a plan from above) in `shell.mjs` take
+the room as `sample.mjs` makes it from spike 05's scan.
 
 Two things mojulo's lit export gets wrong are fixed in `ready.mjs` and `recipes.mjs`: sheet goods (plywood and MDF
 casework) come out white, so their board colour is put back from mojulo's own sheet table; and mojulo's furniture

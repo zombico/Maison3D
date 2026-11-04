@@ -37,6 +37,11 @@ class Turns(private val base: String) {
     io.execute { done(runCatching { get("/api/scene") }) }
   }
 
+  /** The room the headset just read; answers with the scene and the empty room to stand in VR. */
+  fun room(room: JSONObject, done: (Result<JSONObject>) -> Unit) {
+    io.execute { done(runCatching { post("/api/room", JSONObject().put("room", room)) }) }
+  }
+
   /** Takes every piece away; answers with the (empty) scene. */
   fun clear(done: (Result<JSONObject>) -> Unit) {
     io.execute { done(runCatching { post("/api/clear", JSONObject()) }) }

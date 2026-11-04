@@ -208,6 +208,11 @@ export function check(piece, size, { room, scene, catalog }) {
     const o = overlap(box, b);
     if (o > 0.02 && vertical(box, b)) issues.push(`overlaps the real ${item.label} ${item.id} by ${round(o)} m`);
   }
+  // a door's opening and the 80 cm in front of it stay clear (a rug may lie there)
+  for (const zone of doorZones(room)) {
+    const o = overlap(box, zone);
+    if (o > 0.02) issues.push(`blocks the door ${zone.id} by ${round(o)} m (keep 80 cm in front of a door clear)`);
+  }
   for (const other of scene) {
     if (other.id === piece.id || catalog[other.item].kind === 'rug') continue;
     const b = pieceBox(other, catalog[other.item].size);
@@ -215,6 +220,24 @@ export function check(piece, size, { room, scene, catalog }) {
     if (o > 0.02 && vertical(box, b)) issues.push(`overlaps ${other.id} by ${round(o)} m`);
   }
   return issues;
+}
+
+/** The floor in front of each door, inside the room: its opening's width, 0.8 m deep, as boxes like a footprint's. */
+const DOOR_CLEAR = 0.8;
+function doorZones(room) {
+  const ws = walls(room);
+  const out = [];
+  for (const d of room?.items ?? []) {
+    if (d.label !== 'door frame') continue;
+    // the wall it is in: the nearest wall plane, whose normal points into the room
+    const wall = ws.map((w) => ({ w, off: Math.abs(dot([d.center[0] - w.center[0], d.center[2] - w.center[2]], w.n)) })).sort((a, b) => a.off - b.off)[0]?.w;
+    if (!wall) continue;
+    const along = [-wall.n[1], wall.n[0]];
+    const width = Math.min(d.size[0] / Math.max(Math.abs(along[0]), 0.2), d.size[2] / Math.max(Math.abs(along[1]), 0.2), Math.hypot(d.size[0], d.size[2]));
+    const c = [d.center[0] + wall.n[0] * DOOR_CLEAR / 2, d.center[2] + wall.n[1] * DOOR_CLEAR / 2];
+    out.push({ id: d.id, c, u: along, v: wall.n, hu: width / 2, hv: DOOR_CLEAR / 2, y0: floorOf(room), y1: floorOf(room) + 2 });
+  }
+  return out;
 }
 
 /** Which placed piece the pointer ray hits first, if it hits one before the room. */

@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
-import com.meta.spatial.core.Color4
 import com.meta.spatial.core.Entity
 import com.meta.spatial.core.Pose
 import com.meta.spatial.core.Quaternion
@@ -14,20 +13,16 @@ import com.meta.spatial.core.Query
 import com.meta.spatial.core.SpatialFeature
 import com.meta.spatial.core.SystemBase
 import com.meta.spatial.core.Vector3
-import com.meta.spatial.mruk.AnchorProceduralMesh
-import com.meta.spatial.mruk.AnchorProceduralMeshConfig
 import com.meta.spatial.mruk.MRUKFeature
-import com.meta.spatial.mruk.MRUKLabel
 import com.meta.spatial.mruk.MRUKLoadDeviceResult
 import com.meta.spatial.runtime.ButtonBits
 import com.meta.spatial.runtime.LayerConfig
 import com.meta.spatial.runtime.ReferenceSpace
 import com.meta.spatial.toolkit.AppSystemActivity
 import com.meta.spatial.toolkit.AvatarBody
-import com.meta.spatial.toolkit.Box
 import com.meta.spatial.toolkit.Controller
 import com.meta.spatial.toolkit.Grabbable
-import com.meta.spatial.toolkit.Material
+import com.meta.spatial.toolkit.GrabbableType
 import com.meta.spatial.toolkit.Mesh
 import com.meta.spatial.toolkit.MeshCollision
 import com.meta.spatial.toolkit.Panel
@@ -39,11 +34,14 @@ import com.meta.spatial.vr.VRFeature
 import org.json.JSONObject
 
 /**
- * Spike 07: furnish the room by voice. Hold A and speak, let go: the words (as audio), what the right controller
- * pointed at, where you stand and the room go to the laptop server, which transcribes them, asks Muse to place,
- * move, turn or remove pieces from a mojulo catalogue, and answers with a reply and the whole furnished scene. The
- * headset loads each piece's model from the server, stands it where the scene says, and reads the reply aloud
- * without leaving passthrough. B reads the room again; X or a right-thumbstick click brings the panel back.
+ * Spike 07: design your room by voice, in VR. The room you scanned stands around you empty, 1:1 over the real one
+ * (its walls, doors, windows, floor and ceiling, built by the laptop server as one model), with your real furniture
+ * as outlines so you do not walk into it. Hold A and speak, let go: the words (as audio), what the right controller
+ * pointed at, where you stand and the room go to the server, which transcribes them, asks Muse to place, move, turn,
+ * recolour or remove pieces from a mojulo catalogue or paint the room, and answers with a reply, the furnished scene
+ * and the room. The panel's Real room button (or "show me the real room") turns passthrough back on, the design over
+ * the real room. B reads the room again; X, Y or a right-thumbstick click brings the panel in front of you, and the
+ * grip moves it.
  */
 class FurnishActivity : AppSystemActivity() {
   private lateinit var mruk: MRUKFeature
@@ -51,7 +49,6 @@ class FurnishActivity : AppSystemActivity() {
   private lateinit var turns: Turns
   private lateinit var speaker: Speaker
   private val recorder = Recorder()
-  private var tint: AnchorProceduralMesh? = null
 
   @Volatile private var panel: Entity? = null
   @Volatile private var placePanel = true
@@ -67,11 +64,17 @@ class FurnishActivity : AppSystemActivity() {
   // A new scene arrives on a network thread and is applied on the frame loop.
   private lateinit var server: String
   private val incoming = java.util.concurrent.atomic.AtomicReference<List<Piece>?>(null)
-  // the painted walls, as the server cut them to the room: [{ wall, colour, facing, panels: [{ at, size }] }]
-  private val incomingPaint = java.util.concurrent.atomic.AtomicReference<org.json.JSONArray?>(null)
-  private val paintShown = mutableListOf<Entity>()
-  private var paintKey = ""
   private val shown = mutableMapOf<String, Pair<String, Entity>>() // piece id -> (model path, entity)
+  // the empty room and the real furniture's outlines, as the server built them: { shell, ghosts } model paths
+  private val incomingRoom = java.util.concurrent.atomic.AtomicReference<JSONObject?>(null)
+  private var shellShown: Pair<String, Entity>? = null
+  private var ghostsShown: Pair<String, Entity>? = null
+  // VR (the design) or passthrough (the real room, the design over it)
+  @Volatile private var realView = false
+  @Volatile private var pendingView: Boolean? = null
+  @Volatile private var viewButton: android.widget.Button? = null
+  // the panel waits for the head to be tracked for a moment, so it lands in front of you, not where the headset lay
+  private var trackedFrames = 0
 
   private var saidView: TextView? = null
   private var replyView: TextView? = null
@@ -102,8 +105,7 @@ class FurnishActivity : AppSystemActivity() {
 
     systemManager.findSystem<LocomotionSystem>().enableLocomotion(false)
     systemManager.registerSystem(FurnishSystem())
-    scene.enablePassthrough(true)
-    tint = AnchorProceduralMesh(mruk, tintConfig())
+    scene.enablePassthrough(false) // the design starts in VR: the room drawn empty
 
     val missing = listOf(PERMISSION_USE_SCENE, Manifest.permission.RECORD_AUDIO).filter { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
     if (missing.isEmpty()) loadRoom() else requestPermissions(missing.toTypedArray(), REQUEST_PERMISSIONS)
@@ -128,13 +130,13 @@ class FurnishActivity : AppSystemActivity() {
         sunDirection = -Vector3(1f, 3f, -2f),
         environmentIntensity = 0.3f,
     )
-    panel = Entity.create(listOf(Panel(R.layout.furnish_panel), Transform(), Visible(false), Grabbable()))
+    // grabbed with the grip (pointing at it), it stays upright and turns to face you
+    panel = Entity.create(listOf(Panel(R.layout.furnish_panel), Transform(), Visible(false), Grabbable(true, GrabbableType.PIVOT_Y)))
     // what the server already holds, if it was furnishing before this launch
-    turns.scene { r -> r.onSuccess { runCatching { incoming.set(parseScene(it)); it.optJSONArray("paint")?.let { a -> incomingPaint.set(a) } } } }
+    turns.scene { r -> r.onSuccess { runCatching { incoming.set(parseScene(it)); it.optJSONObject("room")?.let(incomingRoom::set) } } }
   }
 
   override fun onSpatialShutdown() {
-    tint?.destroy()
     speaker.stop()
     super.onSpatialShutdown()
   }
@@ -157,6 +159,7 @@ class FurnishActivity : AppSystemActivity() {
               statusView = root.findViewById(R.id.status)
               root.findViewById<android.widget.Button>(R.id.rescan).setOnClickListener { rescan() }
               root.findViewById<android.widget.Button>(R.id.reload).setOnClickListener { pendingReload = true }
+              viewButton = root.findViewById<android.widget.Button>(R.id.view).also { it.setOnClickListener { pendingView = !realView } }
               root.findViewById<android.widget.Button>(R.id.clear).setOnClickListener { clearScene() }
               render()
             }
@@ -177,7 +180,7 @@ class FurnishActivity : AppSystemActivity() {
 
   private fun clearScene() {
     turns.clear { r ->
-      r.onSuccess { incoming.set(parseScene(it)); it.optJSONArray("paint")?.let { a -> incomingPaint.set(a) } }
+      r.onSuccess { incoming.set(parseScene(it)); it.optJSONObject("room")?.let(incomingRoom::set) }
       r.onFailure { log("clearing failed: ${it.message}") }
     }
   }
@@ -193,6 +196,11 @@ class FurnishActivity : AppSystemActivity() {
         result == MRUKLoadDeviceResult.SUCCESS -> {
           val d = room.describe()
           log("room: ${d.optJSONArray("items")?.length() ?: 0} things, floor at ${d.opt("floorY")}")
+          // the server builds the empty room from it, to stand around you before anyone says anything
+          turns.room(d) { r ->
+            r.onSuccess { incoming.set(parseScene(it)); it.optJSONObject("room")?.let(incomingRoom::set) }
+            r.onFailure { log("the server did not take the room: ${it.message}") }
+          }
         }
         else -> log("loading the room: $result (run Space Setup in Settings > Physical space)")
       }
@@ -201,7 +209,7 @@ class FurnishActivity : AppSystemActivity() {
 
   private fun checkServer() {
     turns.health { r ->
-      r.onSuccess { log("server ok: model ${it.optString("model")}, catalogue ${it.optJSONArray("catalog")?.join(", ")?.replace("\"", "")}") }
+      r.onSuccess { log("server ok: model ${it.optString("model")}, ${it.optJSONArray("catalog")?.length() ?: 0} pieces in the catalogue") }
       r.onFailure { log("server not reachable: run npm run spike:furnish and adb reverse tcp:$PORT tcp:$PORT") }
     }
   }
@@ -237,7 +245,7 @@ class FurnishActivity : AppSystemActivity() {
         else if (text.isNotEmpty()) speaker.say(text)
         try {
           answer.optJSONArray("scene")?.let { incoming.set(parseScene(JSONObject().put("scene", it))) }
-          answer.optJSONArray("paint")?.let { incomingPaint.set(it) }
+          answer.optJSONObject("room")?.let(incomingRoom::set)
         } catch (e: Exception) {
           Log.e(TAG, "the scene did not parse", e)
           log("the scene did not parse: ${e.message}")
@@ -245,7 +253,13 @@ class FurnishActivity : AppSystemActivity() {
         answer.optString("note").takeIf { it.isNotEmpty() }?.let(::log)
         // things the model asked the headset itself to do
         val actions = answer.optJSONArray("actions")
-        for (i in 0 until (actions?.length() ?: 0)) if (actions?.optString(i) == "rescan") runOnUiThread { rescan() }
+        for (i in 0 until (actions?.length() ?: 0)) {
+          when (actions?.optString(i)) {
+            "rescan" -> runOnUiThread { rescan() }
+            "real" -> pendingView = true
+            "design" -> pendingView = false
+          }
+        }
       }
       r.onFailure {
         setSaid("")
@@ -292,37 +306,38 @@ class FurnishActivity : AppSystemActivity() {
     log("scene: " + scene.joinToString(", ") { it.id }.ifEmpty { "empty" })
   }
 
-  /**
-   * Shows the painted walls: each a few thin lit panels standing just in front of the scanned wall, with its doors,
-   * windows and the real furniture against it left out (the server cuts them). Redone only when the paint changes.
-   */
-  private fun applyPaint(paint: org.json.JSONArray) {
-    val key = paint.toString()
-    if (key == paintKey) return
-    paintKey = key
-    paintShown.forEach { it.destroy() }
-    paintShown.clear()
-    for (i in 0 until paint.length()) {
-      val wall = paint.getJSONObject(i)
-      val c = android.graphics.Color.parseColor(wall.getString("colour"))
-      val colour = Color4(android.graphics.Color.red(c) / 255f, android.graphics.Color.green(c) / 255f, android.graphics.Color.blue(c) / 255f, 1f)
-      val facing = vec3(wall.getJSONArray("facing"))
-      val panels = wall.getJSONArray("panels")
-      for (k in 0 until panels.length()) {
-        val p = panels.getJSONObject(k)
-        val size = vec3(p.getJSONArray("size"))
-        paintShown +=
-            Entity.create(
-                listOf(
-                    Mesh(Uri.parse("mesh://box")).apply { hittable = MeshCollision.NoCollision },
-                    Box(Vector3(-size.x / 2, -size.y / 2, -size.z / 2), Vector3(size.x / 2, size.y / 2, size.z / 2)),
-                    Material().apply { baseColor = colour },
-                    Transform(Pose(vec3(p.getJSONArray("at")), Quaternion.lookRotation(facing))),
-                ),
-            )
-      }
-    }
-    log("paint: " + (0 until paint.length()).joinToString(", ") { paint.getJSONObject(it).getString("wall") }.ifEmpty { "none" })
+  /** Shows the empty room and the real furniture's outlines the server built; a new path is a new model. */
+  private fun applyRoom(j: JSONObject) {
+    val shell = if (j.isNull("shell")) null else j.optString("shell")
+    val ghosts = if (j.isNull("ghosts")) null else j.optString("ghosts")
+    if (shellShown?.first != shell) log(if (shell == null) "no room to show: rescan it" else "room: $shell")
+    shellShown = showModel(shellShown, shell)
+    ghostsShown = showModel(ghostsShown, ghosts)
+  }
+
+  private fun showModel(current: Pair<String, Entity>?, path: String?): Pair<String, Entity>? {
+    if (current?.first == path) return current
+    current?.second?.destroy()
+    if (path == null) return null
+    // in the world's own coordinates, like the room it was built from: it stands at the origin
+    val e =
+        Entity.create(
+            listOf(
+                Mesh(Uri.parse(server.trimEnd('/') + path)).apply { hittable = MeshCollision.NoCollision },
+                Transform(Pose()),
+                Visible(!realView),
+            ),
+        )
+    return path to e
+  }
+
+  /** The real room (passthrough, the design over it) or the design in VR. */
+  private fun setView(real: Boolean) {
+    realView = real
+    scene.enablePassthrough(real)
+    for (e in listOfNotNull(shellShown?.second, ghostsShown?.second)) e.setComponent(Visible(!real))
+    runOnUiThread { viewButton?.text = if (real) "Design" else "Real room" }
+    log(if (real) "showing the real room, with the design over it" else "showing the design")
   }
 
   /** Where you are and which way you face, so "in front of me" has an answer. */
@@ -336,13 +351,17 @@ class FurnishActivity : AppSystemActivity() {
   private inner class FurnishSystem : SystemBase() {
     override fun execute() {
       val now = System.nanoTime()
-      incomingPaint.getAndSet(null)?.let { paint ->
+      incomingRoom.getAndSet(null)?.let { r ->
         try {
-          applyPaint(paint)
+          applyRoom(r)
         } catch (e: Exception) {
-          Log.e(TAG, "painting failed", e)
-          log("painting failed: ${e.javaClass.simpleName}: ${e.message}")
+          Log.e(TAG, "showing the room failed", e)
+          log("showing the room failed: ${e.javaClass.simpleName}: ${e.message}")
         }
+      }
+      pendingView?.let { real ->
+        pendingView = null
+        setView(real)
       }
       incoming.getAndSet(null)?.let { scene ->
         try {
@@ -380,10 +399,12 @@ class FurnishActivity : AppSystemActivity() {
         loadRoom()
       }
 
+      // in front of you at eye height, a little below the line of sight, once the head has been tracked a moment
       val p = panel
-      if (placePanel && p != null && head != null) {
+      if (head != null) trackedFrames++ else trackedFrames = 0
+      if (placePanel && p != null && head != null && trackedFrames > 45) {
         placePanel = false
-        p.setComponents(listOf(Transform(inView(head, 0.8f, -20f)), Visible(true)))
+        p.setComponents(listOf(Transform(inView(head, 0.9f, -8f)), Visible(true)))
       }
 
     }
@@ -398,7 +419,7 @@ class FurnishActivity : AppSystemActivity() {
 
     private fun released(c: Controller, button: Int) = (c.buttonState and button) == 0 && (c.changedButtons and button) != 0
 
-    /** MRUK's tint is hittable by default and would catch the pointer before the panel (spike 05). */
+    /** A mesh is hittable by default and would catch the pointer before the panel (spike 05). */
     private fun clearTintHits() {
       for (ent in Query.where { has(Mesh.id) }.eval()) {
         if (ent.hasComponent<Panel>()) continue
@@ -416,29 +437,6 @@ class FurnishActivity : AppSystemActivity() {
     forward.y = 0f
     val q = Quaternion.lookRotation(forward).times(Quaternion(-pitch, 0f, 0f))
     return Pose(head.t.plus(q.times(Vector3(0f, 0f, distance))), q)
-  }
-
-  private fun tintConfig(): Map<MRUKLabel, AnchorProceduralMeshConfig> {
-    fun tint(r: Float, g: Float, b: Float, a: Float) =
-        AnchorProceduralMeshConfig(
-            Material().apply {
-              baseColor = Color4(r, g, b, a)
-              alphaMode = 1 // translucent
-              unlit = true
-            },
-            false,
-        )
-    val furniture = tint(0.88f, 0.36f, 0.82f, 0.2f)
-    return mapOf(
-        MRUKLabel.TABLE to furniture,
-        MRUKLabel.COUCH to furniture,
-        MRUKLabel.BED to furniture,
-        MRUKLabel.STORAGE to furniture,
-        MRUKLabel.SCREEN to furniture,
-        MRUKLabel.LAMP to furniture,
-        MRUKLabel.PLANT to furniture,
-        MRUKLabel.OTHER to furniture,
-    )
   }
 
   // --- the panel ---------------------------------------------------------------------------------------------

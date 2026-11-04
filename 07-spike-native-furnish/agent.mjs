@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { resolve, check, pointedPiece, walls } from './place.mjs';
+import { emptyRoom, shellHit, SHELL } from './shell.mjs';
 import { resolve as resolvePath } from 'node:path';
 import { frameOf, toWorld, dirToWorld, FT } from '../08-spike-mojulo-furnish/toMojulo.mjs';
 import { linearOf } from '../70-inventory/colour.mjs';
@@ -67,11 +68,12 @@ if (process.env.MAISON_LAYOUT) {
   pendingLayout = layout;
 }
 
-const SYSTEM = `You furnish a real room, seen through a Quest headset in passthrough, with pieces from a catalogue.
-Each turn tells you what the person said, what their right controller pointed at when they let go of the button
-(a room surface, and the placed piece it hit if any), where they stand, the room (walls, frames and real furniture
-with ids such as table1 or wall2, label, centre, size, top; walls carry the way they face) and the pieces already
-placed (ids such as sofa1).
+const SYSTEM = `You design a person's real room with them, in VR in a Quest headset: they stand in their own room,
+scanned and shown empty at true size (its walls, doors, windows, floor and ceiling; their real furniture taken out),
+and furnish it with pieces from a catalogue. Each turn tells you what the person said, what their right controller
+pointed at when they let go of the button (a wall or the floor, and the placed piece it hit if any), where they stand,
+the room (walls, door and window frames and the floor, with ids such as wall2 or doorframe1, label, centre, size, top;
+walls carry the way they face and their colour) and the pieces already placed (ids such as sofa1).
 
 Catalogue (width x height x depth in metres; fronts face the way they are turned):
 ${catalogList.map((c) => `- ${c.id}: ${c.name}, ${c.size.join(' x ')}${c.note ? ` (${c.note})` : ''}${c.parts && Object.keys(c.parts).length ? `; parts ${Object.entries(c.parts).map(([k, v]) => `${k}${c.made?.[k] ? ` ${c.made[k]}` : ''} ${v}`).join(', ')}` : ''}`).join('\n')}
@@ -81,15 +83,16 @@ Materials a part can be made of: ${Object.entries(MATERIALS).map(([k, v]) => `${
 Change the scene only with the tools. Say where a piece goes the way the person would: on an item, against a wall,
 next to something (left, right, front, behind as the person sees it), where they pointed, in front of them, or as
 x, z coordinates when nothing else fits. "This" or "that" usually means the pointed piece. A tool's result says
-where the piece ended up and anything it runs into; if it overlaps real furniture, move it or say so. Pieces only
+where the piece ended up and anything it runs into; if it runs into a wall, a door or another piece, move it or say so. Pieces only
 come from the catalogue; if asked for something it does not have, say what is closest. A piece's listed parts can be
 recoloured (the sofa's fabric, a table's wood, a dresser's body): pick the colour as a hex the person would recognise
 for what they said ("sage green", "darker wood", "white"), and say it in words, never as a hex. A part can also be
 made of another material (linen to velvet, oak to walnut); that rebuilds the piece and takes a few seconds to appear.
 A smaller or larger one is the same piece in its next size (resize), keeping its colours and materials.
-The room's real walls can be painted (paint), one by id or all of them; "this wall" is usually the pointed one, and
-"the wall behind the sofa" the wall it stands against. Doors, windows and the real furniture against a wall stay
-unpainted.
+The room can be painted (paint): a wall by id, every wall ("all"), the floor or the ceiling; "this wall" is usually
+the pointed one, and "the wall behind the sofa" the wall it stands against. The person can look at their real room
+again and come back to the design (view), and show or hide the outlines of their real furniture (outlines), which stay
+in the room so nobody walks into them.
 
 Answer in one short spoken sentence: it is read aloud in the headset. No markdown, no lists. When you call tools,
 write that sentence in the same message as the calls, saying what you did.`;
@@ -113,7 +116,9 @@ const TOOLS = [
   { type: 'function', function: { name: 'recolour', description: "Change the colour of one part of a placed piece (its catalogue entry lists its parts and their colours now). Without `part`, the piece's first part (the sofa's fabric, the dresser's body).", parameters: { type: 'object', properties: { id: { type: 'string' }, part: { type: 'string', description: 'fabric, wood, body, seat, handles, throw, pillows or mattress, as the piece lists' }, colour: { type: 'string', description: '#rrggbb, or "original" to go back to the catalogue colour' } }, required: ['id', 'colour'], additionalProperties: false } } },
   { type: 'function', function: { name: 'material', description: "Make one part of a placed piece in another material (velvet instead of linen, walnut instead of oak). Without `part`, the piece's first part. A cloth of one colour keeps the part's colour; a patterned one (tartan, gingham, houndstooth, ticking) brings its own.", parameters: { type: 'object', properties: { id: { type: 'string' }, part: { type: 'string', enum: Object.keys(MATERIALS) }, material: { type: 'string', enum: [...new Set([...Object.values(MATERIALS).flat(), 'original'])], description: '"original" goes back to the catalogue material' } }, required: ['id', 'material'], additionalProperties: false } } },
   { type: 'function', function: { name: 'resize', description: 'Make a placed piece the same piece in another size (a smaller sofa, a king bed), back where its back was, keeping its colours and materials.', parameters: { type: 'object', properties: { id: { type: 'string' }, size: { type: 'string', description: '"smaller", "larger", "smallest", "largest", or a size by name (queen, 2-seat, tall)' } }, required: ['id', 'size'], additionalProperties: false } } },
-  { type: 'function', function: { name: 'paint', description: 'Paint a wall of the real room, or every wall with "all". Colour "none" takes the paint off.', parameters: { type: 'object', properties: { wall: { type: 'string', description: 'a wall id (wall2), or "all"' }, colour: { type: 'string', description: '#rrggbb, or "none"' } }, required: ['wall', 'colour'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'paint', description: 'Paint a wall of the room, every wall ("all"), the floor or the ceiling. Colour "none" goes back to how it started.', parameters: { type: 'object', properties: { wall: { type: 'string', description: 'a wall id (wall2), "all", "floor" or "ceiling"' }, colour: { type: 'string', description: '#rrggbb, or "none"' } }, required: ['wall', 'colour'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'view', description: 'Show the real room (the headset camera, the design over it) or go back to the design in VR.', parameters: { type: 'object', properties: { real: { type: 'boolean', description: 'true: the real room; false: the design' } }, required: ['real'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'outlines', description: "Show or hide the outlines of the person's real furniture in the design.", parameters: { type: 'object', properties: { show: { type: 'boolean' } }, required: ['show'], additionalProperties: false } } },
   { type: 'function', function: { name: 'rescan_room', description: "Have the headset rescan the room (Meta's Space Setup), when the person asks or the room looks wrong: walls missing, furniture not found.", parameters: { type: 'object', properties: {}, additionalProperties: false } } },
   { type: 'function', function: { name: 'remove', description: 'Take a placed piece away, or every piece with id "all".', parameters: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'], additionalProperties: false } } },
 ];
@@ -124,8 +129,10 @@ const TOOLS = [
  */
 export const scene = [];
 
-/** The painted walls: { wallId: '#rrggbb' } (paint.mjs turns them into panels for the headset). */
-export const paint = {};
+/** The room's colours: { wall (every wall), walls: { wallId }, floor, ceiling }, over shell.mjs's FINISH. */
+export const finish = { walls: {} };
+/** How the design is shown: the real furniture's outlines on or off. */
+export const settings = { outlines: true };
 
 function newId(item) {
   let n = 1;
@@ -191,14 +198,25 @@ export function apply(name, args, ctx) {
     return { ok: true, piece: describe(p) };
   }
   if (name === 'paint') {
-    const ws = walls(ctx.room).map((w) => w.id);
+    const ws = walls(ctx.room).map((w) => w.id), what = args.wall;
     if (!ws.length) return { error: 'the room has no walls yet: rescan it' };
-    const which = args.wall === 'all' ? ws : [args.wall];
-    if (!ws.includes(which[0])) return { error: `no wall ${args.wall}; the walls are ${ws.join(', ')}` };
-    if (args.colour === 'none') { for (const w of which) delete paint[w]; return { ok: true, unpainted: which }; }
-    if (!linearOf(args.colour)) return { error: `${args.colour} is not a colour: give #rrggbb` };
-    for (const w of which) paint[w] = args.colour.toLowerCase().replace(/^#?/, '#');
-    return { ok: true, painted: which, colour: paint[which[0]], note: 'doors, windows and the real furniture against it stay unpainted' };
+    if (!['all', 'floor', 'ceiling', ...ws].includes(what)) return { error: `no wall ${what}; the walls are ${ws.join(', ')}, or all, floor, ceiling` };
+    const none = args.colour === 'none';
+    if (!none && !linearOf(args.colour)) return { error: `${args.colour} is not a colour: give #rrggbb` };
+    const c = none ? undefined : args.colour.toLowerCase().replace(/^#?/, '#');
+    if (what === 'all') { finish.wall = c; finish.walls = {}; }
+    else if (what === 'floor' || what === 'ceiling') finish[what] = c;
+    else if (none) delete finish.walls[what];
+    else finish.walls[what] = c;
+    return { ok: true, [none ? 'reset' : 'painted']: what, ...(c ? { colour: c } : {}) };
+  }
+  if (name === 'view') {
+    ctx.actions?.push(args.real ? 'real' : 'design');
+    return { ok: true, showing: args.real ? 'the real room, with the design over it' : 'the design' };
+  }
+  if (name === 'outlines') {
+    settings.outlines = !!args.show;
+    return { ok: true, outlines: settings.outlines };
   }
   if (name === 'material') {
     const p = scene.find((x) => x.id === args.id);
@@ -283,6 +301,14 @@ function remember(said, reply) {
   while (history.length > 20) history.shift();
 }
 
+/** `pointing` as if the real furniture were not there: a hit on it goes on along the ray to the room behind. */
+function throughFurniture(pointing, scanned) {
+  if (!pointing?.id || !pointing.ray) return pointing;
+  const hit = (scanned?.items ?? []).find((i) => i.id === pointing.id);
+  if (!hit || SHELL.has(hit.label)) return pointing;
+  return { ...pointing, ...(shellHit(pointing.ray, emptyRoom(scanned)) ?? { target: 'nothing', id: null }) };
+}
+
 /** Stands a pending layout in the room the headset just described; returns what it placed, or null. */
 export function placeLayout(room) {
   if (!pendingLayout || walls(room).length < 4) return null;
@@ -301,7 +327,11 @@ export function placeLayout(room) {
 }
 
 /** One turn: returns { reply, calls }; the scene is changed in place. */
-export async function runTurn({ said, pointing, room }) {
+export async function runTurn({ said, pointing: pointed0, room: scanned }) {
+  // the design starts from the room empty: its real furniture is left out of what Muse sees and what pieces are
+  // checked against, and a point that landed on real furniture goes on through it to the wall or floor behind
+  const room = emptyRoom(scanned);
+  const pointing = throughFurniture(pointed0, scanned);
   const laid = placeLayout(room);
   if (laid) console.log(`  (the designed layout stands in the room: ${laid.join(', ')})`);
   const pointed = pointedPiece(pointing, scene, catalog);
@@ -309,7 +339,7 @@ export async function runTurn({ said, pointing, room }) {
     said,
     pointing: pointing ? { ...pointing, ray: undefined, piece: pointed } : null,
     viewer: room?.viewer ?? null,
-    room: { floorY: room?.floorY, items: (room?.items ?? []).filter((i) => i.label !== 'global mesh'), walls: walls(room).map((w) => ({ id: w.id, faces: w.n.map((v) => Math.round(v * 100) / 100), ...(paint[w.id] ? { painted: paint[w.id] } : {}) })) },
+    room: { floorY: room?.floorY, items: (room?.items ?? []).map(({ outline, ...i }) => i), walls: walls(room).map((w) => ({ id: w.id, faces: w.n.map((v) => Math.round(v * 100) / 100), colour: finish.walls[w.id] ?? finish.wall ?? 'as it started' })), floor: finish.floor ?? 'as it started', ceiling: finish.ceiling ?? 'as it started' },
     pieces: scene.map(describe),
   };
   const messages = [{ role: 'system', content: SYSTEM }, ...history, { role: 'user', content: JSON.stringify(context) }];
@@ -330,7 +360,7 @@ export async function runTurn({ said, pointing, room }) {
       } catch (e) {
         result = { error: `bad arguments: ${e.message}` };
       }
-      if (result.error || result.issues?.some((i) => i.startsWith('overlaps'))) needsLook = true;
+      if (result.error || result.issues?.some((i) => i.startsWith('overlaps') || i.startsWith('blocks'))) needsLook = true;
       messages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(result) });
     }
     // the reply came with the calls and they all landed cleanly: no second round trip

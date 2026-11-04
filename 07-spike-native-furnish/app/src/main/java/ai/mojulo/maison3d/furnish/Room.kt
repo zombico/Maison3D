@@ -9,6 +9,7 @@ import com.meta.spatial.mruk.MRUKPlane
 import com.meta.spatial.mruk.MRUKRoom
 import com.meta.spatial.mruk.MRUKVolume
 import com.meta.spatial.mruk.SurfaceType
+import com.meta.spatial.mruk.getBoundaryAsList
 import com.meta.spatial.mruk.getLabelsAsList
 import com.meta.spatial.toolkit.Transform
 import kotlin.math.round
@@ -37,6 +38,8 @@ class Room(private val mruk: MRUKFeature) {
       a.normal?.let { item.put("normal", vec(it)) }
       // real furniture: its own footprint, turned the way it stands (the room's axes need not match the world's)
       a.footprint?.let { item.put("footprint", it) }
+      // the floor's and ceiling's own outline, [x, z] round the plane (a room need not be a rectangle)
+      a.outline?.let { item.put("outline", it) }
       items.put(item)
     }
     return JSONObject().put("loaded", true).put("floorY", floorY?.let { r(it) } ?: JSONObject.NULL).put("items", items)
@@ -65,6 +68,7 @@ class Room(private val mruk: MRUKFeature) {
       val top: Float,
       val normal: Vector3?,
       val footprint: JSONObject?,
+      val outline: JSONArray? = null,
   )
 
   private fun anchors(room: MRUKRoom): List<Anchor> {
@@ -111,7 +115,11 @@ class Room(private val mruk: MRUKFeature) {
                 .put("v", JSONArray(listOf(r(ay.x), r(ay.z))))
                 .put("half", JSONArray(listOf(r((v.max.x - v.min.x) / 2), r((v.max.y - v.min.y) / 2))))
           }
-      out.add(Anchor(info.uuid.toString(), "$key$n", label, min.plus(max).times(0.5f), max.minus(min), max.y, normal, footprint))
+      val outline =
+          if (plane != null && (label == "floor" || label == "ceiling"))
+              JSONArray(plane.getBoundaryAsList().map { b -> world.times(Vector3(b.x, b.y, 0f)).let { JSONArray(listOf(r(it.x), r(it.z))) } })
+          else null
+      out.add(Anchor(info.uuid.toString(), "$key$n", label, min.plus(max).times(0.5f), max.minus(min), max.y, normal, footprint, outline))
     }
     return out
   }

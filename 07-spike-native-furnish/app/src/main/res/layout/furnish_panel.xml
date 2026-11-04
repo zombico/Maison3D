@@ -10,7 +10,7 @@
   <TextView
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:text="Maison3D: hold A and talk"
+    android:text="Maison3D: hold A and talk · grip to move this"
     android:textColor="#ECE6DA"
     android:textSize="22sp"
     android:textStyle="bold"
@@ -57,6 +57,16 @@
       android:layout_weight="1"
       android:backgroundTint="#E4B363"
       android:text="Rescan room"
+      android:textColor="#15130F"
+    />
+    <Button
+      android:id="@+id/view"
+      android:layout_width="0dp"
+      android:layout_height="48dp"
+      android:layout_margin="4dp"
+      android:layout_weight="1"
+      android:backgroundTint="#9FC5D9"
+      android:text="Real room"
       android:textColor="#15130F"
     />
     <Button
