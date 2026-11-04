@@ -7,7 +7,7 @@ import { readFile } from 'node:fs/promises';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { config, runTurn, scene, catalog, catalogList, modelPath, parseModel, finish, settings, placeLayout, manualMove } from './agent.mjs';
+import { config, runTurn, scene, catalog, catalogList, modelPath, parseModel, finish, settings, manualMove } from './agent.mjs';
 import { decorModel } from './decor.mjs';
 import { walls, sizeOf, mountOf, ceilingOf } from './place.mjs';
 import { frame } from './shell.mjs';
@@ -141,8 +141,7 @@ const server = http.createServer(async (req, res) => {
       const body = await readJson(req);
       if (body.room?.items?.length) rooms.scanned = body.room;
       const fresh = newSession(body.session, scene);
-      const laid = placeLayout(designRoom());
-      console.log(`\n(headset ${fresh ? 'started' : 'reloaded its room'}: ${body.room?.items?.length ?? 0} things scanned; designing in the ${rooms.source} room${laid ? `; the designed layout stands in it: ${laid.join(', ')}` : ''})`);
+      console.log(`\n(headset ${fresh ? 'started' : 'reloaded its room'}: ${body.room?.items?.length ?? 0} things scanned; designing in the ${rooms.source} room)`);
       return send(res, 200, { scene: sceneJson(), room: roomJson() });
     }
     // the first half of a turn: only the words, back as soon as they are heard, so the headset can show them while
@@ -180,6 +179,6 @@ server.keepAliveTimeout = 65000;
 
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`furnish server on http://localhost:${PORT}  model ${config.model} (reasoning ${config.effort})  key ${config.hasKey ? 'found' : 'MISSING (.env META_API_KEY=…)'}  speech-to-text ${sttStatus()}  voice ${voiceStatus()}`);
-  console.log(`catalogue: ${catalogList.map((c) => c.id).join(', ')}`);
+  { const kinds = {}; for (const c of catalogList) kinds[c.kind ?? 'piece'] = (kinds[c.kind ?? 'piece'] ?? 0) + 1; console.log(`catalogue: ${catalogList.length} pieces (${Object.entries(kinds).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${n} ${k}`).join(', ')})`); }
   console.log(`headset: adb reverse tcp:${PORT} tcp:${PORT}, then open Maison3D Furnish`);
 });

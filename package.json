@@ -2,17 +2,13 @@
   "name": "maison3d",
   "version": "0.0.0",
   "private": true,
-  "description": "Furnish a real room by voice in a Quest headset, with Meta's models driving mojulo.",
+  "description": "Furnish a room by voice in a Quest headset: Meta's models design it, with furniture made by mojulo.",
   "type": "module",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
-    "spike:scan": "node 00-spike-room-scan/server.mjs",
-    "spike:loop": "node 01-spike-muse-loop/cli.mjs serve",
-    "spike:loop:https": "node 01-spike-muse-loop/cli.mjs serve --https",
-    "spike:talk": "node 06-spike-native-talk/server.mjs",
-    "spike:talk:try": "node 06-spike-native-talk/try.mjs",
+    "start": "node 07-spike-native-furnish/server.mjs",
     "spike:furnish": "node 07-spike-native-furnish/server.mjs",
     "spike:furnish:try": "node 07-spike-native-furnish/try.mjs",
     "mojulo:setup": "node mojulo/setup.mjs",

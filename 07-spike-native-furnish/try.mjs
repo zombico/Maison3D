@@ -8,7 +8,7 @@ import { config, runTurn, scene, catalog } from './agent.mjs';
 import { roomFromScan, planSvg } from './sample.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const scan = JSON.parse(readFileSync(join(here, '..', '05-spike-native-scan', 'samples', 'two-rooms-quest3s.json'), 'utf8'));
+const scan = JSON.parse(readFileSync(join(here, 'samples', 'two-rooms-quest3s.json'), 'utf8'));
 const room = roomFromScan(scan);
 console.log(`model ${config.model} (reasoning ${config.effort}); room: ${room.items.map((i) => i.id).join(', ')}`);
 for (const said of process.argv.slice(2)) {

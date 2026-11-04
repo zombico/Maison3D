@@ -1,12 +1,10 @@
-# Builds the native Quest apps (Meta Spatial SDK) into APKs on every push that touches them.
+# Builds the Quest app (Meta Spatial SDK) into an APK on every push that touches them.
 # Download one from the run's Artifacts and install it with: adb install -r <name>.apk
 name: native
 
 on:
   push:
     paths:
-      - '05-spike-native-scan/**'
-      - '06-spike-native-talk/**'
       - '07-spike-native-furnish/**'
       - '.github/workflows/native.yml'
   workflow_dispatch:
@@ -25,10 +23,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - dir: 05-spike-native-scan
-            apk: maison3d-native-scan
-          - dir: 06-spike-native-talk
-            apk: maison3d-native-talk
           - dir: 07-spike-native-furnish
             apk: maison3d-native-furnish
     defaults:
