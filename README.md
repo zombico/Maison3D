@@ -288,6 +288,23 @@ fields, Bauhaus, line drawing, hills, arches, a pencil grid, waves, leaves, a su
 (pinch-pleat, ripple-fold, grommet, sheer, velvet) and blinds (roman, roller) made to fit the window they hang at. Their
 parts recolour like any piece's (a planter's pot, a frame, the curtain fabric).
 
+Pictures can be made to any size: "a frame here that's 80 by 120", "a canvas over the bed, 1.5 by 1". `ART-FRAME` (a
+framed print) and `ART-CANVAS` (a stretched canvas) are built to the width and height asked for, with an abstract painted
+to fit in the picture's own proportions (`art.mjs`: blobs, blocks, gradient, strokes, terrazzo, rings, cut-outs, horizon,
+dots, arcs; palettes warm, earth, ocean, sage, bold, mono, blush, forest). Muse's `picture` tool changes one already up:
+another picture, a style, a palette, a frame, its size. A wall piece's hanging height is `centre_height`.
+
+Appliances and fixtures, the things that take up space in a room, at their US sizes (`appliances.mjs`): fridges
+(24, 30, 33, 36 in, and a side-by-side), ranges (24, 30, 36 in), dishwashers (18, 24 in), range hoods (30, 36 in, on the
+wall at range height), a washer, a dryer and the two stacked, a toilet, vanities (24 to 60 in), bathtubs (60, 66,
+72 in), showers, radiators, a wall air conditioner, a ceiling fan, a tower fan and a fireplace with its mantel. Each size
+is its own piece ("a bigger fridge" is the next one up); a finish (stainless, white, black, or `panel-<collection>` to
+match that collection's cabinets) is set with Muse's `material` and kept through a resize.
+
+Windows and doors where you point: point the laser at a wall and say "this should be a window" (or "a door", or "move
+this door here"); Muse's `opening` takes `at_pointing` and centres it on the point (a window 4 ft wide, 1.4 m high,
+unless sized).
+
 Every piece has a mount: floor, rug, wall (pictures hang centred about 1.45 m up, or 22 cm over what they are above:
 "the sunset print above the sofa"), window (curtains: a rod 15 cm over the window running 25 cm past each side, to the
 floor, or "high and wide" near the ceiling, or to the sill; "close the curtains"), ceiling, and surface (a small plant

@@ -9,7 +9,7 @@ import { readGlb, writeGlb } from './ready.mjs';
 /** The parts a person can name, in the order a piece is usually meant by them ("the sofa" is its fabric). */
 export const ROLES = ['fabric', 'body', 'throw', 'pillows', 'mattress', 'wood', 'seat', 'handles', 'pot', 'leaves', 'frame', 'mat', 'rod', 'shade', 'base'];
 // Maison3D's own pieces name their parts' roles outright: `<part>:<role>`
-const NAMED_ROLES = new Set(['pot', 'leaves', 'frame', 'mat', 'rod', 'shade', 'base', 'fabric', 'wood']);
+const NAMED_ROLES = new Set(['pot', 'leaves', 'frame', 'mat', 'rod', 'shade', 'base', 'fabric', 'wood', 'body']);
 
 /** The role a material plays, from its name (`<part>:<kind>:...`, as mojulo names them), or null. */
 export function roleOf(name = '') {

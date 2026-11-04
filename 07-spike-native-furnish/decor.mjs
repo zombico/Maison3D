@@ -3,8 +3,9 @@
 // recipe, readied like a catalogue piece: centred on its footprint, its base at y = 0, its front to +z. A wall piece's
 // back is at -z; a window piece is built to its window (`fit`), the one kind of piece sized when placed.
 import { Mesh, dice, norm, v3, bounds, settle } from './mesh.mjs';
-import { paint } from './art.mjs';
+import { paint, ABSTRACT_STYLES, PALETTES } from './art.mjs';
 import { partsOf } from '../70-inventory/colour.mjs';
+import { applianceEntries } from './appliances.mjs';
 
 const R = (v) => Math.round(v * 1000) / 1000;
 
@@ -147,7 +148,7 @@ const ARTWORKS = [
 ];
 const ART_SIZES = { small: [0.4, 0.5], medium: [0.6, 0.8], large: [0.9, 1.2] };
 
-function picture(m, { art, seed, frame, w, h, draft = false }) {
+function picture(m, { art, seed, frame, w, h, palette, draft = false }) {
   const F = FRAMES[frame], D = F.d, z0 = -D / 2, z1 = D / 2;
   const fw = F.w;
   if (fw > 0) {
@@ -158,8 +159,10 @@ function picture(m, { art, seed, frame, w, h, draft = false }) {
   const inner = [w / 2 - fw, h - fw], mat = F.mat, zf = fw > 0 ? z1 - 0.008 : z1;
   if (mat > 0) m.quad({ name: 'mat:mat', colour: '#f6f3ec', roughness: 0.95 }, [[-inner[0], fw, zf - 0.001], [inner[0], fw, zf - 0.001], [inner[0], h - fw, zf - 0.001], [-inner[0], h - fw, zf - 0.001]]);
   const ax = inner[0] - mat, y0 = fw + mat, y1 = h - fw - mat;
-  const px = 384, py = Math.round((px * (y1 - y0)) / (2 * ax));
-  m.quad({ name: 'art:art', colour: '#ffffff', roughness: 0.9, texture: draft ? paint('grid', 1, 8, 8) : paint(art, seed, px, Math.max(64, Math.min(768, py))) }, [[-ax, y0, zf], [ax, y0, zf], [ax, y1, zf], [-ax, y1, zf]]);
+  // the picture's pixels in its own proportions, the long side 512 (384 for the catalogue's fixed prints)
+  const long = palette ? 512 : 384, aspect = (2 * ax) / (y1 - y0);
+  const [px, py] = aspect >= 1 ? [long, Math.max(48, Math.round(long / aspect))] : [Math.max(48, Math.round(long * aspect)), long];
+  m.quad({ name: 'art:art', colour: '#ffffff', roughness: 0.9, texture: draft ? paint('grid', 1, 8, 8) : paint(art, seed, px, Math.min(768, py), { palette }) }, [[-ax, y0, zf], [ax, y0, zf], [ax, y1, zf], [-ax, y1, zf]]);
 }
 
 const MIRRORS = {
@@ -285,13 +288,27 @@ ARTWORKS.forEach(([art, label, frame, shape, seed]) => {
     entries.push({ id: `ART-${code(label)}-${size}`, name: `${label} print, ${size}`, kind: 'art', mount: 'wall', hang: 1.45, sizeName: size, piece: `ART-${code(label)}`, words: [label.toLowerCase(), 'picture', 'frame', 'art'], note: `${frame === 'canvas' ? 'a stretched canvas' : `in a ${frame} frame`}, ${Math.round(w * 100)} x ${Math.round(h * 100)} cm`, build: (fit, { draft } = {}) => { const m = new Mesh(); picture(m, { art, seed, frame, w, h, draft }); return m; } });
   }
 });
+// pictures made to any size: a framed print or a stretched canvas, its picture an abstract painted to fit
+export const CUSTOM_ART = { styles: ABSTRACT_STYLES, palettes: Object.keys(PALETTES), frames: Object.keys(FRAMES).filter((f) => f !== 'canvas') };
+export const customFit = ({ w = 0.6, h = 0.8, style, palette = 'warm', frame = 'oak', seed = 1 } = {}, canvas = false) => ({
+  w: Math.round(Math.max(0.15, Math.min(3, w)) * 1000) / 1000, h: Math.round(Math.max(0.15, Math.min(3, h)) * 1000) / 1000,
+  style: ABSTRACT_STYLES.includes(style) ? style : ABSTRACT_STYLES[(seed - 1) % ABSTRACT_STYLES.length],
+  palette: PALETTES[palette] ? palette : 'warm', frame: canvas ? 'canvas' : FRAMES[frame] && frame !== 'canvas' ? frame : 'oak', seed: Math.max(1, Math.round(seed)),
+});
+for (const [id, label, canvas] of [['ART-FRAME', 'Framed print, any size', false], ['ART-CANVAS', 'Stretched canvas, any size', true]]) {
+  entries.push({ id, name: label, kind: 'art', mount: 'wall', hang: 1.45, piece: id, custom: true, words: [canvas ? 'canvas' : 'frame', 'picture', 'art', 'abstract'], note: `made to the size asked for (width x height), an abstract painted to fit: styles ${ABSTRACT_STYLES.join(', ')}; palettes ${Object.keys(PALETTES).join(', ')}${canvas ? '' : `; frames ${Object.keys(FRAMES).filter((f) => f !== 'canvas').join(', ')}`}`,
+    build: (fit, { draft } = {}) => { const f = customFit(fit ?? {}, canvas), m = new Mesh(); picture(m, { art: f.style, seed: f.seed, frame: f.frame, w: f.w, h: f.h, palette: f.palette, draft }); return m; } });
+}
 for (const [kind, M] of Object.entries(MIRRORS)) entries.push({ id: `MIR-${code(kind)}`, name: `${M.label[0].toUpperCase()}${M.label.slice(1)}`, kind: 'mirror', mount: M.mount ?? 'wall', hang: 1.5, piece: `MIR-${code(kind)}`, words: [M.label, 'mirror'], note: `${Math.round(M.size[0] * 100)} x ${Math.round(M.size[1] * 100)} cm`, build: () => { const m = new Mesh(); mirror(m, kind, M.size); return m; } });
 for (const [id, C] of Object.entries(CURTAINS)) entries.push({ id, name: `${C.label[0].toUpperCase()}${C.label.slice(1)}`, kind: 'curtain', mount: 'window', piece: id, words: [C.label, C.blind ? 'blind' : 'curtains'], note: `${C.note}; made to fit the window it hangs at`, fitted: true, build: (fit) => { const m = new Mesh(); curtain(m, id, fit ?? { w: 1.7, top: 2.45, bottom: 0.012, open: 1 }); return m; } });
+
+// appliances and fixtures (appliances.mjs): built the same way, a finish their fit
+entries.push(...applianceEntries);
 
 const built = new Map();
 /** A decor entry's model: { glb, size [w, h, d], triangles }; a window piece's for its fit. Built once each. */
 export function decorModel(entry, fit = null, { draft = false } = {}) {
-  const key = `${entry.id}${fit ? `~${fit.w}~${fit.top}~${fit.bottom}~${fit.open}` : ''}${draft ? '~draft' : ''}`;
+  const key = `${entry.id}${fit ? `~${JSON.stringify(Object.entries(fit).sort())}` : ''}${draft ? '~draft' : ''}`;
   if (!built.has(key)) {
     const m = entry.build(fit, { draft });
     const size = settle(m, { keepZ: entry.mount === 'wall' || entry.mount === 'window' });

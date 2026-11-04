@@ -5,7 +5,8 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { resolve, check, pointedPiece, walls, sizeOf, mountOf, ceilingOf, floorOf } from './place.mjs';
-import { decorCatalog, decorModel, fitTo } from './decor.mjs';
+import { decorCatalog, decorModel, fitTo, customFit, CUSTOM_ART } from './decor.mjs';
+import { FINISHES } from './appliances.mjs';
 import { PIECES as INVENTORY_PIECES, COLLECTIONS } from '../70-inventory/catalogue.mjs';
 import * as rooms from './rooms.mjs';
 import { resolve as resolvePath } from 'node:path';
@@ -107,9 +108,18 @@ for what they said ("sage green", "darker wood", "white"), and say it in words, 
 made of another material (linen to velvet, oak to walnut); that rebuilds the piece and takes a few seconds to appear.
 A smaller or larger one is the same piece in its next size (resize), keeping its colours and materials.
 Curtains open and close (open: 1 drawn back, 0 closed); hung "high and wide" they start near the ceiling.
+Appliances and fixtures (fridges, ranges, dishwashers, hoods, washers and dryers, toilets, vanities, tubs, showers,
+radiators, fans, a fireplace) come in their US sizes; an appliance's finish changes with material (stainless, white,
+black, or panel-<collection> to match that collection's cabinets).
+A picture of a size the person names ("a frame here that's 80 by 120", "a big canvas over the bed, 1.5 by 1") is
+ART-FRAME (a framed print) or ART-CANVAS (a stretched canvas), placed with width and height in metres (the first number
+is the width; convert centimetres and inches), and if they say so a style (${CUSTOM_ART.styles.join(', ')}), a palette
+(${CUSTOM_ART.palettes.join(', ')}) and a frame (${CUSTOM_ART.frames.join(', ')}). picture changes one already up: another
+picture, a style, a palette, a frame, its size.
 The room can be painted (paint): a wall by id, every wall ("all"), the floor or the ceiling; "this wall" is usually
 the pointed one, and "the wall behind the sofa" the wall it stands against. Change the room itself with room_size and
-opening; pieces stay where they are, so after shrinking the room check what now runs into a wall. go_to takes the
+opening ("this should be a window" while pointing at a wall: opening add, kind window, at_pointing; "move this door
+here": opening move at_pointing); pieces stay where they are, so after shrinking the room check what now runs into a wall. go_to takes the
 person to stand somewhere ("take me to the window"). They can look at their real room again and come back to the
 design (view), and in a scanned room show or hide the outlines of their real furniture (outlines).
 
@@ -166,26 +176,32 @@ const WHERE = {
   at: { type: 'array', items: { type: 'number' }, minItems: 2, maxItems: 3, description: '[x, z] on the floor, or [x, y, z]' },
   face: { type: 'string', description: '"me", "away", or an id to face; default: as the placement implies, else the person' },
   turn: { type: 'number', description: 'then turn it by this many degrees, anticlockwise seen from above (90 = a quarter turn left)' },
-  height: { type: 'number', description: "a wall piece's centre above the floor, metres (pictures hang about 1.45)" },
+  centre_height: { type: 'number', description: "a wall piece's centre above the floor, metres (pictures hang about 1.45)" },
   above: { type: 'string', description: 'a wall piece: hang it over this piece (art above the sofa), on the wall behind it' },
   window: { type: 'string', description: 'a window piece (curtains, blinds): the window id it hangs at' },
   high: { type: 'boolean', description: 'curtains hung high and wide, near the ceiling' },
   drop: { type: 'string', enum: ['floor', 'sill'], description: 'curtains to the floor (default) or to the sill' },
   open: { type: 'number', description: 'curtains: 1 drawn back (default), 0 closed; blinds: 1 raised, 0 down' },
+  width: { type: 'number', description: 'ART-FRAME or ART-CANVAS: its width in metres' },
+  height: { type: 'number', description: 'ART-FRAME or ART-CANVAS: its height in metres' },
+  style: { type: 'string', enum: CUSTOM_ART.styles, description: "ART-FRAME or ART-CANVAS: the abstract's style" },
+  palette: { type: 'string', enum: CUSTOM_ART.palettes, description: "ART-FRAME or ART-CANVAS: the abstract's colours" },
+  frame: { type: 'string', enum: CUSTOM_ART.frames, description: 'ART-FRAME: the frame' },
 };
 
 const TOOLS = [
   { type: 'function', function: { name: 'find', description: 'Search the catalogue by words (a kind, a style, a colour, a size, a collection): the best matches with their ids, sizes and how they sit.', parameters: { type: 'object', properties: { query: { type: 'string' }, mount: { type: 'string', enum: ['floor', 'rug', 'wall', 'window', 'ceiling', 'surface'] }, max: { type: 'number' } }, required: ['query'], additionalProperties: false } } },
   { type: 'function', function: { name: 'place', description: 'Add a catalogue piece to the room, by its id.', parameters: { type: 'object', properties: { item: { type: 'string' }, ...WHERE }, required: ['item'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'picture', description: 'Change a placed ART-FRAME or ART-CANVAS: another picture (another: true), its style, palette or frame, or its size (it keeps its centre).', parameters: { type: 'object', properties: { id: { type: 'string' }, another: { type: 'boolean' }, style: { type: 'string', enum: CUSTOM_ART.styles }, palette: { type: 'string', enum: CUSTOM_ART.palettes }, frame: { type: 'string', enum: CUSTOM_ART.frames }, width: { type: 'number' }, height: { type: 'number' } }, required: ['id'], additionalProperties: false } } },
   { type: 'function', function: { name: 'open', description: 'Open or close placed curtains or blinds: 1 drawn back or raised, 0 closed or down, or in between.', parameters: { type: 'object', properties: { id: { type: 'string', description: 'a curtain or blind id, or "all"' }, amount: { type: 'number' } }, required: ['id', 'amount'], additionalProperties: false } } },
   { type: 'function', function: { name: 'move', description: 'Move or turn a placed piece. Give only `face` or `turn` to turn it where it stands.', parameters: { type: 'object', properties: { id: { type: 'string' }, ...WHERE }, required: ['id'], additionalProperties: false } } },
   { type: 'function', function: { name: 'swap', description: 'Replace a placed piece with another catalogue item, keeping its place and facing.', parameters: { type: 'object', properties: { id: { type: 'string' }, item: { type: 'string' } }, required: ['id', 'item'], additionalProperties: false } } },
   { type: 'function', function: { name: 'recolour', description: "Change the colour of one part of a placed piece (its catalogue entry lists its parts and their colours now). Without `part`, the piece's first part (the sofa's fabric, the dresser's body).", parameters: { type: 'object', properties: { id: { type: 'string' }, part: { type: 'string', description: 'fabric, wood, body, seat, handles, throw, pillows or mattress, as the piece lists' }, colour: { type: 'string', description: '#rrggbb, or "original" to go back to the catalogue colour' } }, required: ['id', 'colour'], additionalProperties: false } } },
-  { type: 'function', function: { name: 'material', description: "Make one part of a placed piece in another material (velvet instead of linen, walnut instead of oak). Without `part`, the piece's first part. A cloth of one colour keeps the part's colour; a patterned one (tartan, gingham, houndstooth, ticking) brings its own.", parameters: { type: 'object', properties: { id: { type: 'string' }, part: { type: 'string', enum: Object.keys(MATERIALS) }, material: { type: 'string', enum: [...new Set([...Object.values(MATERIALS).flat(), 'original'])], description: '"original" goes back to the catalogue material' } }, required: ['id', 'material'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'material', description: "Make one part of a placed piece in another material (velvet instead of linen, walnut instead of oak). Without `part`, the piece's first part. A cloth of one colour keeps the part's colour; a patterned one (tartan, gingham, houndstooth, ticking) brings its own.", parameters: { type: 'object', properties: { id: { type: 'string' }, part: { type: 'string', enum: Object.keys(MATERIALS) }, material: { type: 'string', enum: [...new Set([...Object.values(MATERIALS).flat(), ...Object.keys(FINISHES), 'original'])], description: 'an appliance takes a finish (stainless, white, black, panel-<collection> to match its cabinets); "original" goes back to the catalogue material' } }, required: ['id', 'material'], additionalProperties: false } } },
   { type: 'function', function: { name: 'resize', description: 'Make a placed piece the same piece in another size (a smaller sofa, a king bed), back where its back was, keeping its colours and materials.', parameters: { type: 'object', properties: { id: { type: 'string' }, size: { type: 'string', description: '"smaller", "larger", "smallest", "largest", or a size by name (queen, 2-seat, tall)' } }, required: ['id', 'size'], additionalProperties: false } } },
   { type: 'function', function: { name: 'paint', description: 'Paint a wall of the room, every wall ("all"), the floor or the ceiling. Colour "none" goes back to how it started.', parameters: { type: 'object', properties: { wall: { type: 'string', description: 'a wall id (wall2), "all", "floor" or "ceiling"' }, colour: { type: 'string', description: '#rrggbb, or "none"' } }, required: ['wall', 'colour'], additionalProperties: false } } },
   { type: 'function', function: { name: 'room_size', description: 'Set the dictated room\'s size in metres: width (wall-left to wall-right), depth (wall-front to wall-back), height. Give only what changes.', parameters: { type: 'object', properties: { width: { type: 'number' }, depth: { type: 'number' }, height: { type: 'number' } }, additionalProperties: false } } },
-  { type: 'function', function: { name: 'opening', description: 'Add, move (to another wall or along its own) or remove a door or window of the dictated room.', parameters: { type: 'object', properties: { action: { type: 'string', enum: ['add', 'move', 'remove'] }, id: { type: 'string', description: 'with move or remove: door1, window2…' }, kind: { type: 'string', enum: ['door', 'window'], description: 'with add' }, wall: { type: 'string', enum: ['wall-front', 'wall-right', 'wall-back', 'wall-left'] }, at: { type: 'string', description: '"centre", "left" or "right" as seen facing that wall from inside, or metres right of its centre ("0.8", "-1.2")' }, width: { type: 'number' }, height: { type: 'number' }, sill: { type: 'number', description: 'a window\'s height off the floor' } }, required: ['action'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'opening', description: 'Add, move (to another wall or along its own) or remove a door or window of the dictated room.', parameters: { type: 'object', properties: { action: { type: 'string', enum: ['add', 'move', 'remove'] }, id: { type: 'string', description: 'with move or remove: door1, window2…' }, kind: { type: 'string', enum: ['door', 'window'], description: 'with add' }, wall: { type: 'string', enum: ['wall-front', 'wall-right', 'wall-back', 'wall-left'] }, at: { type: 'string', description: '"centre", "left" or "right" as seen facing that wall from inside, or metres right of its centre ("0.8", "-1.2")' }, width: { type: 'number' }, height: { type: 'number' }, sill: { type: 'number', description: 'a window\'s height off the floor' }, at_pointing: { type: 'boolean', description: 'add or move it where the person points on a wall ("this should be a window"), centred on the point' } }, required: ['action'], additionalProperties: false } } },
   { type: 'function', function: { name: 'use_room', description: 'Design in the dictated room, or in the headset\'s scan of the real room (emptied of its furniture).', parameters: { type: 'object', properties: { source: { type: 'string', enum: ['dictated', 'scan'] } }, required: ['source'], additionalProperties: false } } },
   { type: 'function', function: { name: 'go_to', description: 'Take the person to stand a step into the room from a wall, door, window or placed piece, facing it, or in the middle ("middle").', parameters: { type: 'object', properties: { to: { type: 'string' } }, required: ['to'], additionalProperties: false } } },
   { type: 'function', function: { name: 'view', description: 'Show the real room (the headset camera, the design over it) or go back to the design in VR.', parameters: { type: 'object', properties: { real: { type: 'boolean', description: 'true: the real room; false: the design' } }, required: ['real'], additionalProperties: false } } },
@@ -214,7 +230,7 @@ function newId(item) {
 const describe = (p) => {
   const c = catalog[p.item];
   const parts = c.parts && Object.fromEntries(Object.keys(c.parts).map((k) => [k, [p.materials?.[k] ?? c.made?.[k], p.colours?.[k] ?? (p.materials?.[k] ? (PATTERNED.has(p.materials[k]) ? 'in its pattern' : null) : c.parts[k])].filter(Boolean).join(' ')]));
-  return { id: p.id, item: p.item, at: p.at, facing: p.facing, size: sizeOf(p, catalog), mount: mountOf(c), ...(p.window ? { window: p.window, open: p.fit.open } : {}), ...(parts ? { parts } : {}), ...(c.sizeName ? { sizes: sizesOf(p.item).map((o) => o.sizeName + (o.piece !== c.piece ? ` (${o.name})` : '')) } : {}) };
+  return { id: p.id, item: p.item, at: p.at, facing: p.facing, size: sizeOf(p, catalog), mount: mountOf(c), ...(p.window ? { window: p.window, open: p.fit.open } : {}), ...(c.custom ? { picture: { style: p.fit.style, palette: p.fit.palette, frame: p.fit.frame } } : {}), ...(c.finishes ? { finish: p.fit?.finish ?? 'as built' } : {}), ...(parts ? { parts } : {}), ...(c.sizeName ? { sizes: sizesOf(p.item).map((o) => o.sizeName + (o.piece !== c.piece ? ` (${o.name})` : '')) } : {}) };
 };
 
 /**
@@ -224,7 +240,8 @@ const describe = (p) => {
  */
 export function modelPath(p) {
   const sorted = (o) => Object.entries(o ?? {}).sort(([a], [b]) => a.localeCompare(b));
-  const fit = p.fit ? `~fit@${Math.round(p.fit.w * 1000)}_${Math.round(p.fit.top * 1000)}_${Math.round(p.fit.bottom * 1000)}_${Math.round(p.fit.open * 100)}` : '';
+  // a made-to-fit piece (curtains to a window, a picture to a size): its fit, key=value, in the path
+  const fit = p.fit ? `~fit@${Object.entries(p.fit).sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => `${k}=${v}`).join(',')}` : '';
   return `/catalog/${encodeURIComponent(p.item)}${fit}${sorted(p.materials).map(([k, v]) => `~${k}@${v}`).join('')}${sorted(p.colours).map(([k, v]) => `~${k}-${v.slice(1).toLowerCase()}`).join('')}.glb`;
 }
 
@@ -234,7 +251,7 @@ export function parseModel(name) {
   const materials = {}, colours = {};
   let fit = null;
   for (const r of rest) {
-    if (r.startsWith('fit@')) { const [w, top, bottom, open] = r.slice(4).split('_').map(Number); fit = { w: w / 1000, top: top / 1000, bottom: bottom / 1000, open: open / 100 }; }
+    if (r.startsWith('fit@')) fit = Object.fromEntries(r.slice(4).split(',').map((kv) => { const [k, v] = kv.split('='); return [k, v !== '' && Number.isFinite(Number(v)) ? Number(v) : v]; }));
     else if (r.includes('@')) { const [k, v] = r.split('@'); materials[k] = v; } else { const [k, v] = r.split('-'); colours[k] = `#${v}`; }
   }
   return { item, materials, colours, fit };
@@ -305,6 +322,18 @@ export function manualMove({ id, at, facing }, room) {
 export function apply(name, args, ctx) {
   const env = { ...ctx, scene, catalog };
   if (name === 'find') return { ok: true, hits: findPieces(args) };
+  if (name === 'picture') {
+    const p = scene.find((x) => x.id === args.id);
+    if (!p) return { error: `no piece ${args.id}` };
+    if (!catalog[p.item].custom) return { error: `${p.id} is not a made-to-size picture (ART-FRAME, ART-CANVAS); swap it for one, or resize it` };
+    const was = sizeOf(p, catalog), centre = p.at[1] + was[1] / 2;
+    const w = args.width ?? (args.height ? (args.height * p.fit.w) / p.fit.h : p.fit.w), h = args.height ?? (args.width ? (args.width * p.fit.h) / p.fit.w : p.fit.h);
+    p.fit = customFit({ ...p.fit, w, h, ...(args.style ? { style: args.style } : {}), ...(args.palette ? { palette: args.palette } : {}), ...(args.frame ? { frame: args.frame } : {}), seed: args.another ? p.fit.seed + 1 : p.fit.seed }, p.item === 'ART-CANVAS');
+    if (args.another && !args.style) p.fit.style = CUSTOM_ART.styles[(p.fit.seed - 1) % CUSTOM_ART.styles.length];
+    p.size = decorModel(catalog[p.item], p.fit, { draft: true }).size;
+    p.at = [p.at[0], round3(Math.max(floorOf(ctx.room) + 0.05, Math.min(ceilingOf(ctx.room) - p.size[1] - 0.05, centre - p.size[1] / 2))), p.at[2]];
+    return { ok: true, piece: describe(p), issues: check(p, p.size, { ...ctx, scene, catalog }) };
+  }
   if (name === 'open') {
     const ps = args.id === 'all' ? scene.filter((p) => p.window) : scene.filter((p) => p.id === args.id);
     if (!ps.length) return { error: args.id === 'all' ? 'no curtains or blinds are up' : `no piece ${args.id}` };
@@ -355,7 +384,16 @@ export function apply(name, args, ctx) {
         return { ok: true, room: rooms.describeSpec(), note: 'the pieces stay where they were: check what now runs into a wall' };
       }
       if (rooms.state.source !== 'dictated') return { error: 'this is the scanned room: its size comes from the scan (use_room dictated to change size)' };
-      const out = name === 'room_size' ? { room: rooms.setSize(args) } : rooms.changeOpening(args);
+      let change = args;
+      if (name === 'opening' && args.at_pointing) {
+        // "this should be a window": on the wall the laser is on, centred where it landed
+        const p = ctx.pointing;
+        if (p?.target !== 'wall' || !p.point) return { error: 'the person is not pointing at a wall: ask them to point at where it goes' };
+        const kind = args.kind ?? (args.id ? rooms.state.spec.openings.find((o) => o.id === args.id)?.kind : undefined);
+        const here = rooms.openingAt(p.id, p.point, kind, args.height ?? (kind === 'window' && args.action === 'add' ? 1.4 : undefined));
+        change = { ...args, wall: here.wall, at: String(here.at), ...(here.sill !== undefined && args.sill === undefined ? { sill: here.sill } : {}), ...(kind === 'window' && args.action === 'add' && !args.width ? { width: 1.22 } : {}), ...(kind === 'window' && args.action === 'add' && !args.height ? { height: 1.4 } : {}) };
+      }
+      const out = name === 'room_size' ? { room: rooms.setSize(change) } : rooms.changeOpening(change);
       // every piece checked against the changed room: one a wall now runs through is pushed back inside
       const changed = rooms.designRoom(ctx.room?.viewer);
       // curtains follow their window, and go with it
@@ -399,6 +437,13 @@ export function apply(name, args, ctx) {
   if (name === 'material') {
     const p = scene.find((x) => x.id === args.id);
     if (!p) return { error: `no piece ${args.id}; pieces are ${scene.map((x) => x.id).join(', ') || 'none'}` };
+    // an appliance's finish: built here, no mojulo
+    if (catalog[p.item].finishes) {
+      if (args.material === 'original') { if (p.fit) delete p.fit.finish; if (p.fit && !Object.keys(p.fit).length) delete p.fit; return { ok: true, piece: describe(p) }; }
+      if (!catalog[p.item].finishes.includes(args.material)) return { error: `${p.id} comes in ${catalog[p.item].finishes.join(', ')}` };
+      p.fit = { ...p.fit, finish: args.material };
+      return { ok: true, piece: describe(p) };
+    }
     const made = catalog[p.item].made ?? {};
     if (!Object.keys(made).length) return { error: `${p.id} cannot be made in other materials` };
     const part = args.part ?? Object.keys(made)[0];
@@ -466,13 +511,22 @@ export function apply(name, args, ctx) {
     return { ok: true, piece: describe(piece) };
   }
   const where = { ...args };
+  let entry = current?.size ? { ...catalog[item], size: current.size } : catalog[item], fit = current?.fit;
+  if (catalog[item].custom && !current) {
+    // a picture made to the size asked for: one number given keeps a 3:4 portrait's proportion
+    const w = args.width ?? (args.height ? args.height * 0.75 : 0.6), h = args.height ?? w / 0.75;
+    fit = customFit({ w, h, style: args.style, palette: args.palette, frame: args.frame, seed: 1 + scene.filter((x) => catalog[x.item].custom).length }, item === 'ART-CANVAS');
+    entry = { ...catalog[item], size: decorModel(catalog[item], fit, { draft: true }).size };
+  }
   // only turning: stay put
   const placed = ['on', 'against', 'next_to', 'at_pointing', 'in_front', 'at'].some((k) => where[k] !== undefined && where[k] !== false);
-  const pose = placed || !current ? resolve(where, catalog[item], { ...env, current }) : resolve({ ...where, at: current.at }, catalog[item], { ...env, current });
+  const pose = placed || !current ? resolve(where, entry, { ...env, current }) : resolve({ ...where, at: current.at }, entry, { ...env, current });
   if (pose.error) return pose;
-  const piece = current ?? { id: newId(item), item };
+  const piece = current ?? { id: newId(item), item, ...(fit ? { fit, size: entry.size } : {}) };
   piece.at = pose.at;
   piece.facing = pose.facing;
+  // a tall picture is not hung through the ceiling
+  if (mountOf(entry) === 'wall') piece.at[1] = round3(Math.max(floorOf(env.room) + 0.05, Math.min(ceilingOf(env.room) - entry.size[1] - 0.05, piece.at[1])));
   if (!current) scene.push(piece);
   const issues = check(piece, sizeOf(piece, catalog), env);
   return { ok: true, piece: describe(piece), issues };

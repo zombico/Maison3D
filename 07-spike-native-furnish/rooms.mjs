@@ -136,6 +136,19 @@ export function setSize({ width, depth, height }) {
   return describeSpec();
 }
 
+/**
+ * Where a door or window goes when the person points at a wall ("this should be a window"): the wall, how far right of
+ * its centre, and for a window a sill that centres it on the point. `point` is world [x, y, z].
+ */
+export function openingAt(wallId, point, kind, height) {
+  const side = sideOf(wallId), W = wallsOf(state.spec)[side];
+  const local = fromWorld(state.anchor, [point[0], point[2]]);
+  const at = round((local[0] - W.c[0]) * W.along[0] + (local[1] - W.c[1]) * W.along[1]);
+  if (kind === 'door') return { wall: side, at };
+  const h = height ?? 1.4;
+  return { wall: side, at, sill: round(Math.max(0.3, Math.min(state.spec.height - h - 0.15, point[1] - h / 2))) };
+}
+
 /** Adds, moves (to another wall or along its own), resizes or removes a door or window. */
 export function changeOpening({ action, id, kind, wall, at, width, height, sill }) {
   const s = state.spec;

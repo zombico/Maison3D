@@ -118,7 +118,7 @@ export function resolve(where, entry, { room, scene, catalog, pointing, current 
   const onWall = mount === 'wall';
   const gap = onWall ? 0.004 : 0.02; // off the wall: a picture hangs flush, furniture stands a little clear
   // a wall piece's height: asked for (its centre), else over the thing it is above, else where it was, else its own
-  const hangAt = (y) => [floor + (where.height ?? entry.hang ?? 1.45) - h / 2, y].find((v) => v !== undefined);
+  const hangAt = (y) => [floor + (where.centre_height ?? entry.hang ?? 1.45) - h / 2, y].find((v) => v !== undefined);
   let at = current ? [...current.at] : null;
   let facing = current ? norm(xz(current.facing)) : null;
   let autoFace = null; // the facing a placement implies (against a wall: away from it)
@@ -135,7 +135,7 @@ export function resolve(where, entry, { room, scene, catalog, pointing, current 
     const s = Math.max(-half + w / 2, Math.min(half - w / 2, dot([t.box.c[0] - c[0], t.box.c[1] - c[1]], along)));
     const back = reach(own(wall.n), wall.n);
     autoFace = wall.n;
-    at = [c[0] + along[0] * s + wall.n[0] * (back + gap), where.height !== undefined ? floor + where.height - h / 2 : t.top + 0.22, c[1] + along[1] * s + wall.n[1] * (back + gap)];
+    at = [c[0] + along[0] * s + wall.n[0] * (back + gap), where.centre_height !== undefined ? floor + where.centre_height - h / 2 : t.top + 0.22, c[1] + along[1] * s + wall.n[1] * (back + gap)];
   } else if (where.on) {
     const t = find(where.on, room, scene, catalog);
     if (!t) return { error: `nothing called "${where.on}"; ids are ${ids(room, scene)}` };
@@ -154,7 +154,7 @@ export function resolve(where, entry, { room, scene, catalog, pointing, current 
     }
     autoFace = wall.n;
     const back = reach(own(wall.n), wall.n);
-    at = [p[0] + wall.n[0] * (back + gap), onWall ? hangAt(where.height === undefined && current ? current.at[1] : undefined) : floor, p[1] + wall.n[1] * (back + gap)];
+    at = [p[0] + wall.n[0] * (back + gap), onWall ? hangAt(where.centre_height === undefined && current ? current.at[1] : undefined) : floor, p[1] + wall.n[1] * (back + gap)];
   } else if (where.next_to) {
     const t = find(where.next_to, room, scene, catalog);
     if (!t) return { error: `nothing called "${where.next_to}"; ids are ${ids(room, scene)}` };
@@ -179,7 +179,7 @@ export function resolve(where, entry, { room, scene, catalog, pointing, current 
       autoFace = nn;
       const back = reach(own(nn), nn);
       // a wall piece hangs where the person pointed on the wall, unless a height is asked for
-      at = [p[0] + nn[0] * (back + gap), onWall ? (where.height !== undefined ? hangAt() : p[1] - h / 2) : floor, p[2] + nn[1] * (back + gap)];
+      at = [p[0] + nn[0] * (back + gap), onWall ? (where.centre_height !== undefined ? hangAt() : p[1] - h / 2) : floor, p[2] + nn[1] * (back + gap)];
     }
   } else if (where.in_front) {
     if (!vpos || !viewer.forward) return { error: 'the headset did not say where the person is' };
