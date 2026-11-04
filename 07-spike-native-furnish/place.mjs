@@ -93,7 +93,8 @@ function find(id, room, scene, catalog) {
   const piece = scene.find((p) => p.id.toLowerCase() === want);
   if (piece) {
     const size = sizeOf(piece, catalog);
-    return { kind: 'piece', id: piece.id, box: pieceBox(piece, size), top: piece.at[1] + size[1], piece };
+    // where things stand on it: its top, or (an entertainment centre) the base under its opening
+    return { kind: 'piece', id: piece.id, box: pieceBox(piece, size), top: piece.at[1] + (catalog[piece.item].standAt ?? size[1]), piece };
   }
   const items = room?.items ?? [];
   const item = items.find((i) => i.id.toLowerCase() === want) ?? items.find((i) => i.label.replace(/\s+/g, '') === want);
@@ -135,11 +136,36 @@ export function resolve(where, entry, { room, scene, catalog, pointing, current 
     const s = Math.max(-half + w / 2, Math.min(half - w / 2, dot([t.box.c[0] - c[0], t.box.c[1] - c[1]], along)));
     const back = reach(own(wall.n), wall.n);
     autoFace = wall.n;
-    at = [c[0] + along[0] * s + wall.n[0] * (back + gap), where.centre_height !== undefined ? floor + where.centre_height - h / 2 : t.top + 0.22, c[1] + along[1] * s + wall.n[1] * (back + gap)];
+    // a TV sits 15 cm over its console (a picture 22 cm over the sofa)
+    at = [c[0] + along[0] * s + wall.n[0] * (back + gap), where.centre_height !== undefined ? floor + where.centre_height - h / 2 : t.top + (entry.kind === 'tv' ? 0.15 : 0.22), c[1] + along[1] * s + wall.n[1] * (back + gap)];
   } else if (where.on) {
     const t = find(where.on, room, scene, catalog);
     if (!t) return { error: `nothing called "${where.on}"; ids are ${ids(room, scene)}` };
     at = [t.box.c[0], t.top, t.box.c[1]];
+    // a TV, a soundbar, a speaker on a console face the way the console does
+    if (entry.facesHost && t.kind === 'piece') autoFace = t.box.v;
+    // on a corner console, towards its front, where it is widest
+    if (t.kind === 'piece' && catalog[t.piece.item].corner) { const s = Math.max(0, t.box.hv - d / 2 - 0.03); at = [at[0] + t.box.v[0] * s, at[1], at[2] + t.box.v[1] * s]; }
+  } else if (where.corner) {
+    // in a corner, "front-left": a corner piece's back corner into it, facing out along the diagonal; anything else
+    // with its back to the first wall and its side to the second
+    // the two walls named, in the order said: by id ("wall-front") or by the id's last word ("front")
+    const said = String(where.corner).toLowerCase(), ws = walls(room);
+    const [a, b] = ws.map((x) => { const id = x.id.toLowerCase(), i = said.indexOf(id); return { x, i: i >= 0 ? i : said.search(new RegExp(`\\b${id.split(/[^a-z0-9]+/).pop()}\\b`)) }; })
+      .filter((c) => c.i >= 0).sort((p, q) => p.i - q.i).map((c) => c.x);
+    if (!a || !b || a === b) return { error: `corner names two walls that meet, like "front-left"; walls are ${ws.map((x) => x.id).join(', ')}` };
+    const det = a.n[0] * b.n[1] - a.n[1] * b.n[0];
+    if (Math.abs(det) < 0.2) return { error: `${a.id} and ${b.id} do not meet` };
+    const ca = dot(a.n, xz(a.center)), cb = dot(b.n, xz(b.center));
+    const k = [(ca * b.n[1] - cb * a.n[1]) / det, (a.n[0] * cb - b.n[0] * ca) / det]; // where the two walls meet
+    if (entry.corner) {
+      const bis = norm([a.n[0] + b.n[0], a.n[1] + b.n[1]]);
+      autoFace = bis;
+      at = [k[0] + bis[0] * (d / 2 + 0.03), floor, k[1] + bis[1] * (d / 2 + 0.03)];
+    } else {
+      autoFace = a.n;
+      at = [k[0] + a.n[0] * (d / 2 + gap) + b.n[0] * (w / 2 + gap), onWall ? hangAt() : floor, k[1] + a.n[1] * (d / 2 + gap) + b.n[1] * (w / 2 + gap)];
+    }
   } else if (where.against) {
     const wall = walls(room).find((x) => x.id.toLowerCase() === String(where.against).toLowerCase());
     if (!wall) return { error: `no wall "${where.against}"; walls are ${walls(room).map((x) => x.id).join(', ') || 'none'}` };
@@ -191,7 +217,7 @@ export function resolve(where, entry, { room, scene, catalog, pointing, current 
     if (!a.every(Number.isFinite) || (a.length !== 2 && a.length !== 3)) return { error: 'at is [x, z] or [x, y, z]' };
     at = a.length === 2 ? [a[0], floor, a[1]] : a;
   }
-  if (!at) return { error: 'say where: on, against, next_to, at_pointing, in_front or at' };
+  if (!at) return { error: 'say where: on, against, corner, next_to, at_pointing, in_front or at' };
   if (onWall && !autoFace && !current) return { error: `${entry.name} hangs on a wall: give against (a wall id), above (a piece), or at_pointing at a wall` };
   if (mount === 'ceiling') at = [at[0], ceilingOf(room) - h, at[2]];
 
@@ -217,7 +243,8 @@ export function resolve(where, entry, { room, scene, catalog, pointing, current 
 export function check(piece, size, { room, scene, catalog }) {
   const issues = [];
   let box = pieceBox(piece, size);
-  for (const wall of walls(room)) {
+  // a corner piece is a triangle in plan: its box reaches past the two walls it stands against
+  for (const wall of catalog[piece.item].corner ? [] : walls(room)) {
     // only a wall the piece is in front of (an L-shaped room's walls do not reach everywhere)
     const along = [-wall.n[1], wall.n[0]];
     const off = [box.c[0] - wall.center[0], box.c[1] - wall.center[2]];
@@ -254,10 +281,19 @@ export function check(piece, size, { room, scene, catalog }) {
   for (const other of scene) {
     if (other.id === piece.id || ['rug', 'window'].includes(mountOf(catalog[other.item]))) continue; // curtains and rugs are in nobody's way
     const b = pieceBox(other, sizeOf(other, catalog));
+    if (within(other, b, box, catalog) || within(piece, box, b, catalog)) continue; // a TV in an entertainment centre's opening
     const o = overlap(box, b);
     if (o > 0.02 && vertical(box, b)) issues.push(`overlaps ${other.id} by ${round(o)} m`);
   }
   return issues;
+}
+
+/** Whether box `g` sits inside the opening of `host` (box `hb`): an entertainment centre's, where the TV goes. */
+function within(host, hb, g, catalog) {
+  const o = catalog[host.item].opening;
+  if (!o) return false;
+  const x = dot([g.c[0] - hb.c[0], g.c[1] - hb.c[1]], hb.u), y0 = g.y0 - hb.y0, y1 = g.y1 - hb.y0;
+  return x - reach(g, hb.u) >= o.x0 - 0.02 && x + reach(g, hb.u) <= o.x1 + 0.02 && y0 >= o.y0 - 0.02 && y1 <= o.y1 + 0.02;
 }
 
 /** The floor in front of each door, inside the room: its opening's width, 0.8 m deep, as boxes like a footprint's. */

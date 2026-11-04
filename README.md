@@ -307,6 +307,27 @@ wall at range height), a washer, a dryer and the two stacked, a toilet, vanities
 is its own piece ("a bigger fridge" is the next one up); a finish (stainless, white, black, or `panel-<collection>` to
 match that collection's cabinets) is set with Muse's `material` and kept through a resize.
 
+Media and entertainment, the ways a TV stands in a room (`media.mjs`):
+- Consoles, 1.2 to 2.4 m wide:
+  - open shelves (`MCO-OPEN`);
+  - drawers on a plinth (`MCO-DRAW`);
+  - doors each end of an open middle bay (`MCO-BAY`);
+  - slatted doors (`MCO-SLAT`);
+  - floating on the wall (`MCF`);
+  - a corner console (`MCC`), a triangle in plan, placed with `corner` ("front-left").
+- Entertainment centres sized for 55 to 85 in TVs: towers, a bridge and a base round an opening that is open to the wall. `MWC` has tall cabinets; `MWL` has library shelves.
+- Televisions from 43 to 85 in:
+  - on the wall (`TV`), its middle about 1.1 m up, or 15 cm over the console it is above;
+  - on their own feet (`TVF`), on a console or on an entertainment centre's base;
+  - on an easel stand (`TVE`) or a pedestal stand (`TVP`).
+- Audio and players:
+  - soundbars, on a console or on the wall;
+  - bookshelf and floor-standing speakers, one at a time;
+  - a subwoofer, a game console and a turntable.
+- A ceiling projector, and a pull-down screen that Muse's `open` rolls up and down.
+
+Each piece matches a collection's cabinets and legs, or is oak, walnut, white or black. Muse's `material` changes it. A TV wider than its console gets a note to size one of them up; a console about 30 cm wider than the TV looks right. The old two-size inventory TV is gone, and the inventory's "media wall unit" (a closed cabinet) is now the tall media cabinet.
+
 Windows and doors where you point: point the laser at a wall and say "this should be a window" (or "a door", or "move
 this door here"); Muse's `opening` takes `at_pointing` and centres it on the point (a window 4 ft wide, 1.4 m high,
 unless sized).

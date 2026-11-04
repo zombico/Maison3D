@@ -10760,7 +10760,7 @@
   },
   {
    "id": "CAL-MDU-std",
-   "name": "Calme media wall unit",
+   "name": "Calme tall media cabinet",
    "kind": "media",
    "piece": "MDU",
    "collection": "CAL",
@@ -10770,7 +10770,7 @@
    "note": "Calme collection, quiet-luxury, living",
    "words": [
     "Calme",
-    "media wall unit"
+    "tall media cabinet"
    ],
    "size": [
     2,
@@ -19696,7 +19696,7 @@
   },
   {
    "id": "HIN-MDU-std",
-   "name": "Hinoki media wall unit",
+   "name": "Hinoki tall media cabinet",
    "kind": "media",
    "piece": "MDU",
    "collection": "HIN",
@@ -19706,7 +19706,7 @@
    "note": "Hinoki collection, japandi, living",
    "words": [
     "Hinoki",
-    "media wall unit"
+    "tall media cabinet"
    ],
    "size": [
     2,
@@ -26595,72 +26595,6 @@
    "issues": []
   },
   {
-   "id": "M3D-TV-55in",
-   "name": "Maison3D television, 55in",
-   "kind": "media",
-   "piece": "TV",
-   "collection": null,
-   "room": "any",
-   "job": "media",
-   "mount": "wall",
-   "hang": 1.25,
-   "note": "Maison3D collection, any style, any",
-   "words": [
-    "Maison3D",
-    "television"
-   ],
-   "size": [
-    1.23,
-    0.71,
-    0.06
-   ],
-   "sizeName": "55in",
-   "listed": [
-    1230,
-    60,
-    710
-   ],
-   "parts": {},
-   "triangles": 14,
-   "bytes": 2928,
-   "file": "models/M3D-TV-55in.glb",
-   "mojulo": null,
-   "issues": []
-  },
-  {
-   "id": "M3D-TV-65in",
-   "name": "Maison3D television, 65in",
-   "kind": "media",
-   "piece": "TV",
-   "collection": null,
-   "room": "any",
-   "job": "media",
-   "mount": "wall",
-   "hang": 1.25,
-   "note": "Maison3D collection, any style, any",
-   "words": [
-    "Maison3D",
-    "television"
-   ],
-   "size": [
-    1.45,
-    0.83,
-    0.06
-   ],
-   "sizeName": "65in",
-   "listed": [
-    1450,
-    60,
-    830
-   ],
-   "parts": {},
-   "triangles": 14,
-   "bytes": 2928,
-   "file": "models/M3D-TV-65in.glb",
-   "mojulo": null,
-   "issues": []
-  },
-  {
    "id": "SAB-ACC-std",
    "name": "Sable accent chair",
    "kind": "converse",
@@ -29945,7 +29879,7 @@
   },
   {
    "id": "SAB-MDU-std",
-   "name": "Sable media wall unit",
+   "name": "Sable tall media cabinet",
    "kind": "media",
    "piece": "MDU",
    "collection": "SAB",
@@ -29955,7 +29889,7 @@
    "note": "Sable collection, modern-organic, living",
    "words": [
     "Sable",
-    "media wall unit"
+    "tall media cabinet"
    ],
    "size": [
     2,

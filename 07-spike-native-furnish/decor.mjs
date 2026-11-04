@@ -6,6 +6,7 @@ import { Mesh, dice, norm, v3, bounds, settle } from './mesh.mjs';
 import { paint, ABSTRACT_STYLES, PALETTES } from './art.mjs';
 import { partsOf } from '../70-inventory/colour.mjs';
 import { applianceEntries } from './appliances.mjs';
+import { mediaEntries } from './media.mjs';
 
 const R = (v) => Math.round(v * 1000) / 1000;
 
@@ -390,6 +391,8 @@ for (const [id, C] of Object.entries(CURTAINS)) entries.push({ id, name: `${C.la
 
 // appliances and fixtures (appliances.mjs): built the same way, a finish their fit
 entries.push(...applianceEntries);
+// media and entertainment (media.mjs): consoles, entertainment centres, TVs and their stands, speakers, a projector
+entries.push(...mediaEntries);
 
 const built = new Map();
 /** A decor entry's model: { glb, size [w, h, d], triangles }; a window piece's for its fit. Built once each. */

@@ -158,11 +158,6 @@ export function objectMesh(pieceId, code, sizeName, [wm, dm, hm]) {
       for (let k = 0; k < 12; k++) { const a = (k / 12) * Math.PI * 2, x = Math.cos(a) * r * 0.82, y = cy + Math.sin(a) * r * 0.82; m.box(hand, [x - 0.004, y - 0.004, front + 0.001], [x + 0.004, y + 0.004, front + 0.003]); }
       return m;
     }
-    case 'TV': {
-      m.box({ name: 'body:body', colour: '#17181a', roughness: 0.5 }, [-w / 2, 0, -d / 2], [w / 2, h, d / 2 - 0.004]);
-      m.quad({ name: 'screen:screen', colour: '#0b0c10', roughness: 0.15, metallic: 0.1 }, [[-w / 2 + 0.008, 0.01, d / 2], [w / 2 - 0.008, 0.01, d / 2], [w / 2 - 0.008, h - 0.008, d / 2], [-w / 2 + 0.008, h - 0.008, d / 2]]);
-      return m;
-    }
     case 'RUG':
     case 'RUN': {
       // lying flat: w across, d deep (its size is w x d x h with h its pile)

@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { resolve, check, pointedPiece, walls, sizeOf, mountOf, ceilingOf, floorOf } from './place.mjs';
 import { decorCatalog, decorModel, fitTo, customFit, CUSTOM_ART } from './decor.mjs';
 import { FINISHES } from './appliances.mjs';
+import { MEDIA_FINISHES, holdsWidth } from './media.mjs';
 import { PIECES as INVENTORY_PIECES, COLLECTIONS } from '../70-inventory/catalogue.mjs';
 import * as rooms from './rooms.mjs';
 import { resolve as resolvePath } from 'node:path';
@@ -110,6 +111,14 @@ A smaller or larger one is the same piece in its next size (resize), keeping its
 Curtains open and close (open: 1 drawn back, 0 closed); hung "high and wide" they start near the ceiling. Blinds: roller,
 roman, cellular and zebra drop down; venetian, wood slat and vertical blinds raise (or draw) and tilt; plantation and
 café shutters are fixed and their louvres tilt ("tilt the slats", "close the louvres": open with tilt).
+Media: a TV hangs on the wall (TV-<size>, its middle about 1.1 m up; above a console, 15 cm over it) or stands on its
+feet (TVF-<size>) on a console or in an entertainment centre (on), or on its own floor stand (TVE easel, TVP pedestal);
+sizes 43 to 85 in. Consoles: open shelves (MCO-OPEN), drawers (MCO-DRAW), doors with an open middle bay (MCO-BAY),
+slatted doors (MCO-SLAT), floating on the wall (MCF), a corner console (MCC, placed with corner); entertainment centres
+round the TV (MWC cabinets, MWL library shelves), sized for a TV. Pick a console at least as wide as the TV, ideally
+30 cm wider. Media furniture takes a finish with material (oak, walnut, white, black, or a collection code to match
+that collection). Soundbars go on the console or the wall under the TV; speakers come one at a time (place two, either
+side); a projector hangs from the ceiling and its pull-down screen opens and closes like a blind (open: 1 up, 0 down).
 Appliances and fixtures (fridges, ranges, dishwashers, hoods, washers and dryers, toilets, vanities, tubs, showers,
 radiators, fans, a fireplace) come in their US sizes; an appliance's finish changes with material (stainless, white,
 black, or panel-<collection> to match that collection's cabinets).
@@ -176,6 +185,7 @@ const WHERE = {
   side: { type: 'string', enum: ['left', 'right', 'front', 'behind'], description: 'with next_to, as the person sees it' },
   at_pointing: { type: 'boolean', description: 'where the person pointed: on that floor or surface, or against that wall' },
   in_front: { type: 'boolean', description: 'in front of the person, on the floor' },
+  corner: { type: 'string', description: 'a corner, by the two walls that meet there ("front-left"): a corner piece fits into it; anything else stands with its back to the first wall and its side to the second' },
   at: { type: 'array', items: { type: 'number' }, minItems: 2, maxItems: 3, description: '[x, z] on the floor, or [x, y, z]' },
   face: { type: 'string', description: '"me", "away", or an id to face; default: as the placement implies, else the person' },
   turn: { type: 'number', description: 'then turn it by this many degrees, anticlockwise seen from above (90 = a quarter turn left)' },
@@ -198,11 +208,11 @@ const TOOLS = [
   { type: 'function', function: { name: 'find', description: 'Search the catalogue by words (a kind, a style, a colour, a size, a collection): the best matches with their ids, sizes and how they sit.', parameters: { type: 'object', properties: { query: { type: 'string' }, mount: { type: 'string', enum: ['floor', 'rug', 'wall', 'window', 'ceiling', 'surface'] }, max: { type: 'number' } }, required: ['query'], additionalProperties: false } } },
   { type: 'function', function: { name: 'place', description: 'Add a catalogue piece to the room, by its id.', parameters: { type: 'object', properties: { item: { type: 'string' }, ...WHERE }, required: ['item'], additionalProperties: false } } },
   { type: 'function', function: { name: 'picture', description: 'Change a placed ART-FRAME or ART-CANVAS: another picture (another: true), its style, palette or frame, or its size (it keeps its centre).', parameters: { type: 'object', properties: { id: { type: 'string' }, another: { type: 'boolean' }, style: { type: 'string', enum: CUSTOM_ART.styles }, palette: { type: 'string', enum: CUSTOM_ART.palettes }, frame: { type: 'string', enum: CUSTOM_ART.frames }, width: { type: 'number' }, height: { type: 'number' } }, required: ['id'], additionalProperties: false } } },
-  { type: 'function', function: { name: 'open', description: 'Open or close placed curtains or blinds (amount: 1 drawn back or raised, 0 closed or down), and tilt slats, vanes and louvres (tilt: 1 open, 0 closed). Shutters are fixed: they only tilt.', parameters: { type: 'object', properties: { id: { type: 'string', description: 'a curtain, blind or shutter id, or "all"' }, amount: { type: 'number' }, tilt: { type: 'number' } }, required: ['id'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'open', description: 'Open or close placed curtains or blinds (amount: 1 drawn back or raised, 0 closed or down), roll a projector screen up (1) or down (0), and tilt slats, vanes and louvres (tilt: 1 open, 0 closed). Shutters are fixed: they only tilt.', parameters: { type: 'object', properties: { id: { type: 'string', description: 'a curtain, blind or shutter id, or "all"' }, amount: { type: 'number' }, tilt: { type: 'number' } }, required: ['id'], additionalProperties: false } } },
   { type: 'function', function: { name: 'move', description: 'Move or turn a placed piece. Give only `face` or `turn` to turn it where it stands.', parameters: { type: 'object', properties: { id: { type: 'string' }, ...WHERE }, required: ['id'], additionalProperties: false } } },
   { type: 'function', function: { name: 'swap', description: 'Replace a placed piece with another catalogue item, keeping its place and facing.', parameters: { type: 'object', properties: { id: { type: 'string' }, item: { type: 'string' } }, required: ['id', 'item'], additionalProperties: false } } },
   { type: 'function', function: { name: 'recolour', description: "Change the colour of one part of a placed piece (its catalogue entry lists its parts and their colours now). Without `part`, the piece's first part (the sofa's fabric, the dresser's body).", parameters: { type: 'object', properties: { id: { type: 'string' }, part: { type: 'string', description: 'fabric, wood, body, seat, handles, throw, pillows or mattress, as the piece lists' }, colour: { type: 'string', description: '#rrggbb, or "original" to go back to the catalogue colour' } }, required: ['id', 'colour'], additionalProperties: false } } },
-  { type: 'function', function: { name: 'material', description: "Make one part of a placed piece in another material (velvet instead of linen, walnut instead of oak). Without `part`, the piece's first part. A cloth of one colour keeps the part's colour; a patterned one (tartan, gingham, houndstooth, ticking) brings its own.", parameters: { type: 'object', properties: { id: { type: 'string' }, part: { type: 'string', enum: Object.keys(MATERIALS) }, material: { type: 'string', enum: [...new Set([...Object.values(MATERIALS).flat(), ...Object.keys(FINISHES), 'original'])], description: 'an appliance takes a finish (stainless, white, black, panel-<collection> to match its cabinets); "original" goes back to the catalogue material' } }, required: ['id', 'material'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'material', description: "Make one part of a placed piece in another material (velvet instead of linen, walnut instead of oak). Without `part`, the piece's first part. A cloth of one colour keeps the part's colour; a patterned one (tartan, gingham, houndstooth, ticking) brings its own.", parameters: { type: 'object', properties: { id: { type: 'string' }, part: { type: 'string', enum: Object.keys(MATERIALS) }, material: { type: 'string', enum: [...new Set([...Object.values(MATERIALS).flat(), ...Object.keys(FINISHES), ...Object.keys(MEDIA_FINISHES), 'original'])], description: 'an appliance takes a finish (stainless, white, black, panel-<collection> to match its cabinets); media furniture and the easel TV stand take oak, walnut, white, black or a collection code (HIN, ATL…) to match it; "original" goes back to the catalogue material' } }, required: ['id', 'material'], additionalProperties: false } } },
   { type: 'function', function: { name: 'resize', description: 'Make a placed piece the same piece in another size (a smaller sofa, a king bed), back where its back was, keeping its colours and materials.', parameters: { type: 'object', properties: { id: { type: 'string' }, size: { type: 'string', description: '"smaller", "larger", "smallest", "largest", or a size by name (queen, 2-seat, tall)' } }, required: ['id', 'size'], additionalProperties: false } } },
   { type: 'function', function: { name: 'paint', description: 'Paint a wall of the room, every wall ("all"), the floor or the ceiling. Colour "none" goes back to how it started.', parameters: { type: 'object', properties: { wall: { type: 'string', description: 'a wall id (wall2), "all", "floor" or "ceiling"' }, colour: { type: 'string', description: '#rrggbb, or "none"' } }, required: ['wall', 'colour'], additionalProperties: false } } },
   { type: 'function', function: { name: 'room_size', description: 'Set the dictated room\'s size in metres: width (wall-left to wall-right), depth (wall-front to wall-back), height. Give only what changes.', parameters: { type: 'object', properties: { width: { type: 'number' }, depth: { type: 'number' }, height: { type: 'number' } }, additionalProperties: false } } },
@@ -343,7 +353,13 @@ export function apply(name, args, ctx) {
   if (name === 'open') {
     const ps = args.id === 'all' ? scene.filter((p) => p.window) : scene.filter((p) => p.id === args.id);
     if (!ps.length) return { error: args.id === 'all' ? 'no curtains or blinds are up' : `no piece ${args.id}` };
-    if (ps.some((p) => !p.window)) return { error: `${args.id} is not a curtain or blind` };
+    // a pull-down projector screen: rolled up (1) or down (0); it keeps its place on the wall
+    if (ps.length === 1 && catalog[ps[0].item].opens) {
+      if (args.amount === undefined) return { error: 'give amount: 1 rolled up, 0 down' };
+      ps[0].fit = { ...ps[0].fit, open: Math.max(0, Math.min(1, Number(args.amount))) };
+      return { ok: true, pieces: ps.map(describe) };
+    }
+    if (ps.some((p) => !p.window)) return { error: `${args.id} is not a curtain, blind or screen` };
     if (args.amount === undefined && args.tilt === undefined) return { error: 'give amount (open or closed) or tilt' };
     if (args.tilt !== undefined && args.id !== 'all' && !catalog[ps[0].item].tilts) return { error: `${ps[0].id} does not tilt` };
     for (const p of ps) {
@@ -533,7 +549,7 @@ export function apply(name, args, ctx) {
     entry = { ...catalog[item], size: decorModel(catalog[item], fit, { draft: true }).size };
   }
   // only turning: stay put
-  const placed = ['on', 'against', 'next_to', 'at_pointing', 'in_front', 'at'].some((k) => where[k] !== undefined && where[k] !== false);
+  const placed = ['on', 'against', 'corner', 'next_to', 'at_pointing', 'in_front', 'at'].some((k) => where[k] !== undefined && where[k] !== false);
   const pose = placed || !current ? resolve(where, entry, { ...env, current }) : resolve({ ...where, at: current.at }, entry, { ...env, current });
   if (pose.error) return pose;
   const piece = current ?? { id: newId(item), item, ...(fit ? { fit, size: entry.size } : {}) };
@@ -543,6 +559,12 @@ export function apply(name, args, ctx) {
   if (mountOf(entry) === 'wall') piece.at[1] = round3(Math.max(floorOf(env.room) + 0.05, Math.min(ceilingOf(env.room) - entry.size[1] - 0.05, piece.at[1])));
   if (!current) scene.push(piece);
   const issues = check(piece, sizeOf(piece, catalog), env);
+  // a TV wants a console at least as wide as it is (about 30 cm wider looks right)
+  const host = entry.kind === 'tv' ? scene.find((x) => x.id.toLowerCase() === String(where.on ?? where.above ?? '').toLowerCase()) : null;
+  if (host && catalog[host.item].kind === 'media') {
+    const room = holdsWidth(catalog[host.item], sizeOf(host, catalog)), tvw = sizeOf(piece, catalog)[0];
+    if (room < tvw) issues.push(`the TV (${tvw} m) is wider than ${host.id} (${round3(room)} m): a console about 30 cm wider than the TV suits it (resize one of them)`);
+  }
   return { ok: true, piece: describe(piece), issues };
 }
 

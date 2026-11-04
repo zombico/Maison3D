@@ -73,7 +73,7 @@ export const PIECES = [
   { id: 'COF', name: 'Coffee table', room: 'living', job: 'converse', source: 'furniture', recipe: "like 'coffee-table'", sizes: { std: [1100, 600, 400], long: [1300, 700, 380] }, in: ALL },
   { id: 'SID', name: 'Side table', room: 'living', job: 'read', source: 'furniture', recipe: "like 'coffee-table', at side-table size", sizes: { std: [450, 450, 550] }, in: ALL },
   { id: 'MED', name: 'Media console', room: 'living', job: 'media', source: 'furniture', recipe: "like 'media-console'", sizes: { short: [1200, 420, 520], std: [1800, 450, 520], long: [2400, 450, 520] }, in: ALL },
-  { id: 'MDU', name: 'Media wall unit', room: 'living', job: 'media', source: 'furniture', recipe: "piece 'casework', front 'doors', tall", sizes: { std: [2000, 420, 1800] }, in: ['HIN', 'CAL', 'SAB'] },
+  { id: 'MDU', name: 'Tall media cabinet', room: 'living', job: 'media', source: 'furniture', recipe: "piece 'casework', front 'doors', tall", sizes: { std: [2000, 420, 1800] }, in: ['HIN', 'CAL', 'SAB'] },
   { id: 'BKC', name: 'Bookcase', room: 'living', job: 'display', source: 'furniture', recipe: "like 'bookcase'", sizes: { std: [800, 320, 1830], tall: [1000, 350, 2100] }, in: ALL },
   { id: 'SDB', name: 'Sideboard', room: 'living', job: 'store', source: 'furniture', recipe: "like 'sideboard'", sizes: { std: [1600, 450, 800], long: [2000, 460, 800] }, in: ALL },
   { id: 'BEN', name: 'Low bench', room: 'living', job: 'converse', source: 'furniture', recipe: "piece 'table', at seat height", sizes: { std: [1200, 400, 450] }, in: ['HIN', 'LIT', 'SAB'] },
@@ -138,7 +138,6 @@ export const PIECES = [
   { id: 'ART', name: 'Wall art', room: 'any', job: 'display', source: 'roster', recipe: "furnishing 'picture'", sizes: { small: [600, 30, 800], large: [900, 30, 1200] }, in: ALL },
   { id: 'MIR', name: 'Floor mirror', room: 'any', job: 'dress', source: 'roster', recipe: "furnishing 'mirror'", sizes: { std: [600, 40, 1700] }, in: ALL },
   { id: 'VAS', name: 'Vase', room: 'any', job: 'display', source: 'maison', mount: 'surface', recipe: "objects.mjs: a turned vase in the collection's glaze", sizes: { std: [160, 160, 330], tall: [220, 220, 600] }, in: ALL },
-  { id: 'TV', name: 'Television', room: 'any', job: 'media', source: 'maison', mount: 'wall', hang: 1.25, recipe: 'objects.mjs: a thin panel', sizes: { '55in': [1230, 60, 710], '65in': [1450, 60, 830] }, in: ['ALL'] },
   // --- objects and soft things (Maison3D's own builds, and mojulo's soft parts for the fabric ones) ------------
   { id: 'BWL', name: 'Bowl', room: 'any', job: 'display', source: 'maison', mount: 'surface', recipe: 'objects.mjs: a turned bowl', sizes: { std: [300, 300, 110] }, in: ALL },
   { id: 'CND', name: 'Candles', room: 'any', job: 'display', source: 'maison', mount: 'surface', recipe: 'objects.mjs: three pillar candles', sizes: { trio: [200, 90, 200] }, in: ALL },
