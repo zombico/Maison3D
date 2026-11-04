@@ -305,6 +305,13 @@ Windows and doors where you point: point the laser at a wall and say "this shoul
 this door here"); Muse's `opening` takes `at_pointing` and centres it on the point (a window 4 ft wide, 1.4 m high,
 unless sized).
 
+A window has a few settings, so what hangs at it fits: its sill's depth into the room, how deep the glass sits in the
+wall (its recess), the casing's width round it (0 for none), its panes (single, two, sash, grid) and its frame (white,
+black, wood); "this window has a deep sill", "no casing", "a sash window" (Muse's `opening` move with just those). The
+VR room draws the reveal back to the glass, the sill standing out, the casing and an apron under the sill. Curtain rods
+run 20 cm past the casing with their brackets clear of the sill, and sill-length curtains stop just above a projecting
+sill; a blind goes inside a recess of 6 cm or more (else over the casing; `inside` asks for either).
+
 Every piece has a mount: floor, rug, wall (pictures hang centred about 1.45 m up, or 22 cm over what they are above:
 "the sunset print above the sofa"), window (curtains: a rod 15 cm over the window running 25 cm past each side, to the
 floor, or "high and wide" near the ceiling, or to the sill; "close the curtains"), ceiling, and surface (a small plant

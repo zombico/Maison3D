@@ -189,22 +189,28 @@ const CURTAINS = {
   'BLD-ROMAN': { label: 'roman blind', fabric: '#d8cfbd', blind: 'roman', roughness: 0.95, note: 'folds up in soft pleats, inside the window' },
   'BLD-ROLLER': { label: 'roller blind', fabric: '#ece9e2', blind: 'roller', roughness: 0.9, note: 'a flat blind on a roller' },
 };
-const DEPTH = 0.16; // a window piece's depth from the wall: the rod's brackets
 
 /** The fit of a window piece to its window: { w, top, bottom, open }, from the window's width, sill, top, the ceiling. */
-export function fitTo(id, win, { ceiling, high = false, drop = 'floor', open } = {}) {
-  const C = CURTAINS[id];
-  if (C.blind) return { w: R(win.width + 0.1), top: R(Math.min(ceiling - 0.03, win.top + 0.08)), bottom: R(win.bottom), open: open ?? 0.25 };
-  const top = high ? ceiling - 0.08 : Math.min(ceiling - 0.05, win.top + 0.15);
-  return { w: R(win.width + 0.5), top: R(top), bottom: R(drop === 'sill' ? Math.max(0.02, win.bottom - 0.1) : 0.012), open: open ?? 1 };
+export function fitTo(id, win, { ceiling, high = false, drop = 'floor', open, inside } = {}) {
+  const C = CURTAINS[id], t = win.trim ?? 0.065, sd = win.sill_depth ?? 0.05, rc = win.recess ?? 0.1;
+  if (C.blind) {
+    // inside the recess when it is deep enough for one (and not asked otherwise): the window's own width and height
+    if ((inside ?? rc >= 0.06) && rc >= 0.04) return { w: R(win.width - 0.012), top: R(win.top - 0.005), bottom: R(win.bottom), open: open ?? 0.7, mount: 'inside' };
+    return { w: R(win.width + 2 * t + 0.06), top: R(Math.min(ceiling - 0.03, win.top + t + 0.04)), bottom: R(win.bottom), open: open ?? 0.7, mount: 'outside', proj: R(Math.max(0.04, Math.min(sd, 0.08) + 0.02)) };
+  }
+  // a rod over the casing, running 20 cm past it each side, its brackets clear of the sill
+  const top = high ? ceiling - 0.08 : Math.min(ceiling - 0.05, win.top + t + 0.1);
+  const bottom = drop === 'sill' ? (sd > 0.02 ? win.bottom + 0.012 : Math.max(0.02, win.bottom - 0.1)) : 0.012;
+  return { w: R(win.width + 2 * t + 0.4), top: R(top), bottom: R(bottom), open: open ?? 1, proj: R(Math.max(0.1, sd + 0.07)) };
 }
 
-function curtain(m, id, { w, top, bottom, open }) {
-  const C = CURTAINS[id], H = top - bottom, z0 = -DEPTH / 2;
+function curtain(m, id, { w, top, bottom, open, proj = 0.1 }) {
+  // the piece's depth: from the wall to just in front of the rod (or the blind)
+  const C = CURTAINS[id], H = top - bottom, z0 = -(proj + 0.06) / 2;
   const fabric = { name: 'panel:fabric', colour: C.fabric, roughness: C.roughness, alpha: C.alpha };
   const rod = { name: 'rod:rod', colour: '#2b2a28', metallic: 0.7, roughness: 0.35 };
   if (C.blind) {
-    const zb = z0 + 0.03, drop = H * (1 - open * 0.85);
+    const zb = z0 + Math.max(0.03, proj - 0.03), drop = H * (1 - open * 0.85);
     m.box(rod, [-w / 2, H - 0.04, z0], [w / 2, H, zb + 0.02]); // head rail
     if (C.blind === 'roller') {
       m.tube(rod, [[-w / 2, H - 0.06, zb], [w / 2, H - 0.06, zb]], 0.028, { sides: 12, closeEnds: true });
@@ -219,7 +225,7 @@ function curtain(m, id, { w, top, bottom, open }) {
     return;
   }
   // the rod, its finials and brackets, a little below the top
-  const ry = H - 0.025, zr = z0 + 0.1;
+  const ry = H - 0.025, zr = z0 + proj;
   m.tube(rod, [[-w / 2 - 0.04, ry, zr], [w / 2 + 0.04, ry, zr]], 0.013, { sides: 10 });
   for (const s of [-1, 1]) {
     m.lathe(rod, [[0.001, -0.03], [0.026, -0.015], [0.03, 0], [0.026, 0.015], [0.001, 0.03]], { at: [s * (w / 2 + 0.07), ry, zr], segs: 10, caps: [false, false] });

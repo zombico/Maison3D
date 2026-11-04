@@ -119,7 +119,8 @@ picture, a style, a palette, a frame, its size.
 The room can be painted (paint): a wall by id, every wall ("all"), the floor or the ceiling; "this wall" is usually
 the pointed one, and "the wall behind the sofa" the wall it stands against. Change the room itself with room_size and
 opening ("this should be a window" while pointing at a wall: opening add, kind window, at_pointing; "move this door
-here": opening move at_pointing); pieces stay where they are, so after shrinking the room check what now runs into a wall. go_to takes the
+here": opening move at_pointing; a window's sill depth, recess, casing, panes and frame: opening move with just those,
+so curtains and blinds fit it: curtain rods clear the sill and casing, blinds go inside a deep enough recess); pieces stay where they are, so after shrinking the room check what now runs into a wall. go_to takes the
 person to stand somewhere ("take me to the window"). They can look at their real room again and come back to the
 design (view), and in a scanned room show or hide the outlines of their real furniture (outlines).
 
@@ -182,6 +183,7 @@ const WHERE = {
   high: { type: 'boolean', description: 'curtains hung high and wide, near the ceiling' },
   drop: { type: 'string', enum: ['floor', 'sill'], description: 'curtains to the floor (default) or to the sill' },
   open: { type: 'number', description: 'curtains: 1 drawn back (default), 0 closed; blinds: 1 raised, 0 down' },
+  inside: { type: 'boolean', description: 'a blind inside the window recess (true) or over its casing (false); default inside when the recess is deep enough' },
   width: { type: 'number', description: 'ART-FRAME or ART-CANVAS: its width in metres' },
   height: { type: 'number', description: 'ART-FRAME or ART-CANVAS: its height in metres' },
   style: { type: 'string', enum: CUSTOM_ART.styles, description: "ART-FRAME or ART-CANVAS: the abstract's style" },
@@ -201,7 +203,7 @@ const TOOLS = [
   { type: 'function', function: { name: 'resize', description: 'Make a placed piece the same piece in another size (a smaller sofa, a king bed), back where its back was, keeping its colours and materials.', parameters: { type: 'object', properties: { id: { type: 'string' }, size: { type: 'string', description: '"smaller", "larger", "smallest", "largest", or a size by name (queen, 2-seat, tall)' } }, required: ['id', 'size'], additionalProperties: false } } },
   { type: 'function', function: { name: 'paint', description: 'Paint a wall of the room, every wall ("all"), the floor or the ceiling. Colour "none" goes back to how it started.', parameters: { type: 'object', properties: { wall: { type: 'string', description: 'a wall id (wall2), "all", "floor" or "ceiling"' }, colour: { type: 'string', description: '#rrggbb, or "none"' } }, required: ['wall', 'colour'], additionalProperties: false } } },
   { type: 'function', function: { name: 'room_size', description: 'Set the dictated room\'s size in metres: width (wall-left to wall-right), depth (wall-front to wall-back), height. Give only what changes.', parameters: { type: 'object', properties: { width: { type: 'number' }, depth: { type: 'number' }, height: { type: 'number' } }, additionalProperties: false } } },
-  { type: 'function', function: { name: 'opening', description: 'Add, move (to another wall or along its own) or remove a door or window of the dictated room.', parameters: { type: 'object', properties: { action: { type: 'string', enum: ['add', 'move', 'remove'] }, id: { type: 'string', description: 'with move or remove: door1, window2…' }, kind: { type: 'string', enum: ['door', 'window'], description: 'with add' }, wall: { type: 'string', enum: ['wall-front', 'wall-right', 'wall-back', 'wall-left'] }, at: { type: 'string', description: '"centre", "left" or "right" as seen facing that wall from inside, or metres right of its centre ("0.8", "-1.2")' }, width: { type: 'number' }, height: { type: 'number' }, sill: { type: 'number', description: 'a window\'s height off the floor' }, at_pointing: { type: 'boolean', description: 'add or move it where the person points on a wall ("this should be a window"), centred on the point' } }, required: ['action'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'opening', description: 'Add, move (to another wall or along its own) or remove a door or window of the dictated room.', parameters: { type: 'object', properties: { action: { type: 'string', enum: ['add', 'move', 'remove'] }, id: { type: 'string', description: 'with move or remove: door1, window2…' }, kind: { type: 'string', enum: ['door', 'window'], description: 'with add' }, wall: { type: 'string', enum: ['wall-front', 'wall-right', 'wall-back', 'wall-left'] }, at: { type: 'string', description: '"centre", "left" or "right" as seen facing that wall from inside, or metres right of its centre ("0.8", "-1.2")' }, width: { type: 'number' }, height: { type: 'number' }, sill: { type: 'number', description: 'a window\'s height off the floor' }, at_pointing: { type: 'boolean', description: 'add or move it where the person points on a wall ("this should be a window"), centred on the point' }, sill_depth: { type: 'number', description: "a window: how far its sill stands out into the room, metres" }, recess: { type: 'number', description: 'a window: how deep the glass sits in the wall, metres (a blind can go inside)' }, trim: { type: 'number', description: "a window: the casing's width round it, metres (0: none)" }, panes: { type: 'string', enum: ['single', 'two', 'sash', 'grid'] }, frame: { type: 'string', enum: ['white', 'black', 'wood'] } }, required: ['action'], additionalProperties: false } } },
   { type: 'function', function: { name: 'use_room', description: 'Design in the dictated room, or in the headset\'s scan of the real room (emptied of its furniture).', parameters: { type: 'object', properties: { source: { type: 'string', enum: ['dictated', 'scan'] } }, required: ['source'], additionalProperties: false } } },
   { type: 'function', function: { name: 'go_to', description: 'Take the person to stand a step into the room from a wall, door, window or placed piece, facing it, or in the middle ("middle").', parameters: { type: 'object', properties: { to: { type: 'string' } }, required: ['to'], additionalProperties: false } } },
   { type: 'function', function: { name: 'view', description: 'Show the real room (the headset camera, the design over it) or go back to the design in VR.', parameters: { type: 'object', properties: { real: { type: 'boolean', description: 'true: the real room; false: the design' } }, required: ['real'], additionalProperties: false } } },
@@ -272,7 +274,7 @@ export function windowsOf(room) {
     const w = ws.map((x) => ({ x, off: Math.abs((i.center[0] - x.center[0]) * x.n[0] + (i.center[2] - x.center[2]) * x.n[1]) })).sort((a, b) => a.off - b.off)[0]?.x;
     if (!w) return null;
     const along = [-w.n[1], w.n[0]];
-    return { id: i.id, wall: w.id, width: i.size[0] * Math.abs(along[0]) + i.size[2] * Math.abs(along[1]), top: i.center[1] + i.size[1] / 2 - fl, bottom: i.center[1] - i.size[1] / 2 - fl, c: [i.center[0], i.center[2]], n: w.n };
+    return { id: i.id, wall: w.id, width: i.size[0] * Math.abs(along[0]) + i.size[2] * Math.abs(along[1]), top: i.center[1] + i.size[1] / 2 - fl, bottom: i.center[1] - i.size[1] / 2 - fl, c: [i.center[0], i.center[2]], n: w.n, ...rooms.WINDOW_STYLE, ...i.style };
   }).filter(Boolean);
 }
 
@@ -281,9 +283,10 @@ function hang(p, room) {
   const win = windowsOf(room).find((w) => w.id === p.window);
   if (!win) return false;
   const entry = catalog[p.item];
-  p.fit = fitTo(entry.id, win, { ceiling: ceilingOf(room) - floorOf(room), high: p.hangHigh, drop: p.drop, open: p.fit?.open });
+  p.fit = fitTo(entry.id, win, { ceiling: ceilingOf(room) - floorOf(room), high: p.hangHigh, drop: p.drop, open: p.fit?.open, inside: p.inside });
   p.size = decorModel(entry, p.fit).size;
-  const d = p.size[2] / 2 + 0.003;
+  // out from the wall's face; a blind inside the window stands in the recess, just in front of the glass
+  const d = p.fit.mount === 'inside' ? -win.recess + p.size[2] / 2 + 0.06 : p.size[2] / 2 + 0.003;
   p.at = [round3(win.c[0] + win.n[0] * d), round3(floorOf(room) + p.fit.bottom), round3(win.c[1] + win.n[1] * d)];
   p.facing = [round3(win.n[0]), 0, round3(win.n[1])];
   return true;
@@ -504,6 +507,7 @@ export function apply(name, args, ctx) {
     piece.window = win.id;
     if (args.high !== undefined) piece.hangHigh = args.high;
     if (args.drop !== undefined) piece.drop = args.drop;
+    if (args.inside !== undefined) piece.inside = args.inside;
     piece.fit = { ...piece.fit, open: args.open !== undefined ? Math.max(0, Math.min(1, args.open)) : piece.fit?.open };
     if (piece.fit.open === undefined) delete piece.fit.open;
     hang(piece, ctx.room);

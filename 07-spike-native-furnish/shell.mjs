@@ -11,6 +11,9 @@ export const FINISH = { wall: '#ece8e1', floor: '#b08d62', ceiling: '#f5f4f0', t
 /** The labels a room is made of; everything else the scan found is furniture, left out of an empty room. */
 export const SHELL = new Set(['wall', 'invisible wall', 'inner wall', 'floor', 'ceiling', 'door frame', 'window frame']);
 const T = 0.06; // wall thickness behind the scanned face
+// a window the scan found (or one with nothing said about it): a modest sill, a 10 cm recess, a casing, two panes
+const WINDOW_DEFAULT = { sill_depth: 0.05, recess: 0.1, trim: 0.065, panes: 'two', frame: 'white' };
+const FRAME_COLOUR = { white: '#f4f3ef', black: '#232323', wood: '#a57e4e' };
 const HALL = 1.2; // how deep the hall behind a door goes
 const round = (v) => Math.round(v * 1000) / 1000;
 const dot = (a, b) => a[0] * b[0] + a[1] * b[1];
@@ -35,7 +38,7 @@ export function openings(f, room) {
     const u = dot(d, f.along), w = i.size[0] * Math.abs(f.along[0]) + i.size[2] * Math.abs(f.along[1]);
     if (Math.abs(u) > f.half + w / 2) continue;
     const y0 = i.label === 'door frame' ? f.y0 : Math.max(f.y0, i.center[1] - i.size[1] / 2);
-    out.push({ kind: i.label === 'door frame' ? 'door' : 'window', u0: Math.max(-f.half, u - w / 2), u1: Math.min(f.half, u + w / 2), y0, y1: Math.min(f.y1 - 0.02, i.center[1] + i.size[1] / 2) });
+    out.push({ kind: i.label === 'door frame' ? 'door' : 'window', u0: Math.max(-f.half, u - w / 2), u1: Math.min(f.half, u + w / 2), y0, y1: Math.min(f.y1 - 0.02, i.center[1] + i.size[1] / 2), ...(i.label === 'window frame' ? { style: { ...WINDOW_DEFAULT, ...i.style } } : {}) });
   }
   return out;
 }
@@ -178,14 +181,12 @@ export function shellGlb(room, finish = {}) {
       if (Math.abs(y0 - f.y0) < 1e-6) m.wallBox(F.trim, f, u0, u1, y0, y0 + 0.09, 0, 0.014); // skirting
     }
     for (const o of ops) {
+      if (o.kind === 'window') { windowIn(m, f, o, F); continue; }
       const w = 0.06; // the trim round the opening
       m.wallBox(F.trim, f, o.u0 - w, o.u0, o.y0, o.y1 + w, 0, 0.012);
       m.wallBox(F.trim, f, o.u1, o.u1 + w, o.y0, o.y1 + w, 0, 0.012);
       m.wallBox(F.trim, f, o.u0 - w, o.u1 + w, o.y1, o.y1 + w, 0, 0.012);
-      if (o.kind === 'window') {
-        m.wallBox(F.glass, f, o.u0, o.u1, o.y0, o.y1, -T - 0.002, -T, true); // the glass, bright, at the wall's back face
-        m.wallBox(F.trim, f, o.u0 - w, o.u1 + w, o.y0 - 0.03, o.y0, -T, 0.12); // the sill
-      } else {
+      {
         // a short hall behind the door: its floor, two sides, an end and a ceiling, in a quieter colour
         m.wallBox(F.floor, f, o.u0, o.u1, floorY - 0.021, floorY - 0.001, -T - HALL, 0.01); // runs under the wall to the room's floor
         m.wallBox(F.hall, f, o.u0 - 0.02, o.u0, floorY, o.y1, -T - HALL, -T);
@@ -196,6 +197,33 @@ export function shellGlb(room, finish = {}) {
     }
   }
   return m.glb('room');
+}
+
+/**
+ * A window in wall `f`: its reveal back to the glass (the recess), the glass and its frame and panes there, the sill
+ * standing out into the room, and the casing and apron round it (none when the trim is 0).
+ */
+function windowIn(m, f, o, F) {
+  const S = o.style, r = S.recess, t = S.trim, sd = S.sill_depth, frame = FRAME_COLOUR[S.frame] ?? FRAME_COLOUR.white;
+  const { u0, u1, y0, y1 } = o, fb = 0.045, fd = 0.05; // the frame's bars, wide and deep
+  // the reveal: the wall's sides, head and bottom back to the glass
+  m.wallBox(F.trim, f, u0 - 0.015, u0, y0, y1, -r, 0); m.wallBox(F.trim, f, u1, u1 + 0.015, y0, y1, -r, 0);
+  m.wallBox(F.trim, f, u0 - 0.015, u1 + 0.015, y1, y1 + 0.015, -r, 0);
+  // the glass, bright, and its frame at the back of the recess
+  m.wallBox(F.glass, f, u0, u1, y0, y1, -r - 0.004, -r - 0.002, true);
+  const fbox = (a0, a1, b0, b1) => m.wallBox(frame, f, a0, a1, b0, b1, -r - 0.002, -r + fd);
+  fbox(u0, u0 + fb, y0, y1); fbox(u1 - fb, u1, y0, y1); fbox(u0, u1, y0, y0 + fb); fbox(u0, u1, y1 - fb, y1);
+  const mu = 0.025, cx = (u0 + u1) / 2, cy = (y0 + y1) / 2;
+  if (S.panes === 'two') fbox(cx - mu, cx + mu, y0, y1);
+  if (S.panes === 'sash') fbox(u0, u1, cy - mu, cy + mu);
+  if (S.panes === 'grid') { for (const k of [1, 2]) { const x = u0 + ((u1 - u0) * k) / 3; fbox(x - 0.012, x + 0.012, y0, y1); } fbox(u0, u1, cy - 0.012, cy + 0.012); }
+  // the sill: from the glass out into the room, past the casing a little each side
+  m.wallBox(F.trim, f, u0 - t - 0.02, u1 + t + 0.02, y0 - 0.028, y0, -r, sd);
+  if (t > 0) {
+    m.wallBox(F.trim, f, u0 - t, u0, y0, y1 + t, 0, 0.012); m.wallBox(F.trim, f, u1, u1 + t, y0, y1 + t, 0, 0.012);
+    m.wallBox(F.trim, f, u0 - t, u1 + t, y1, y1 + t, 0, 0.012);
+    if (sd > 0.02) m.wallBox(F.trim, f, u0 - t, u1 + t, y0 - 0.028 - t * 1.1, y0 - 0.028, 0, 0.012); // the apron under the sill
+  }
 }
 
 /** The real furniture the scan found, as outlines (edges 1 cm thick, bright and unlit), for walking among in VR. */
@@ -216,7 +244,7 @@ export function ghostsGlb(room) {
 
 /** A short key for a room and its finish, so a changed room or colour is a new model the headset loads afresh. */
 export function shellKey(room, finish) {
-  const shape = (room.items ?? []).map((i) => [i.id, i.label, i.center, i.size, i.normal, i.footprint, i.outline, i.top]);
+  const shape = (room.items ?? []).map((i) => [i.id, i.label, i.center, i.size, i.normal, i.footprint, i.outline, i.top, i.style]);
   return createHash('sha1').update(JSON.stringify([shape, room.floorY, finish])).digest('hex').slice(0, 12);
 }
 

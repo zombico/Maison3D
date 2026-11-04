@@ -7,6 +7,12 @@
 import { emptyRoom, shellHit, SHELL } from './shell.mjs';
 
 const WALL_SIDES = ['front', 'right', 'back', 'left'];
+/**
+ * A window's settings, for what hangs at it: how far its sill stands out into the room, how deep the glass sits in
+ * the wall (a blind can go inside that), the casing's width round it, its panes and its frame's colour.
+ */
+export const WINDOW_STYLE = { sill_depth: 0.05, recess: 0.1, trim: 0.065, panes: 'two', frame: 'white' };
+export const PANES = ['single', 'two', 'sash', 'grid'], FRAMES = ['white', 'black', 'wood'];
 const round = (v) => Math.round(v * 1000) / 1000;
 
 export const state = {
@@ -62,7 +68,7 @@ export function dictatedRoom(spec = state.spec, anchor = state.anchor, viewer = 
     const W = ws[o.wall];
     const y0 = o.kind === 'door' ? 0 : o.sill ?? 0.9, y1 = Math.min(height - 0.05, y0 + o.height);
     const c = [W.c[0] + W.along[0] * o.at, W.c[1] + W.along[1] * o.at];
-    items.push(item(o.id, o.kind === 'door' ? 'door frame' : 'window frame', c, y0, y1, W.along, o.width, W.n));
+    items.push({ ...item(o.id, o.kind === 'door' ? 'door frame' : 'window frame', c, y0, y1, W.along, o.width, W.n), ...(o.kind === 'window' ? { style: { ...WINDOW_STYLE, ...o.style } } : {}) });
   }
   return { loaded: true, source: 'dictated', floorY: 0, items, viewer };
 }
@@ -107,7 +113,7 @@ export function newSession(session, scene) {
 /** The room's size and openings, as Muse reads them. */
 export function describeSpec() {
   const { width, depth, height, openings } = state.spec;
-  return { source: state.source, width, depth, height, walls: Object.fromEntries(Object.entries(wallsOf(state.spec)).map(([k, w]) => [`wall-${k}`, { length: w.length }])), openings: openings.map((o) => ({ ...o, wall: `wall-${o.wall}` })) };
+  return { source: state.source, width, depth, height, walls: Object.fromEntries(Object.entries(wallsOf(state.spec)).map(([k, w]) => [`wall-${k}`, { length: w.length }])), openings: openings.map(({ style, ...o }) => ({ ...o, wall: `wall-${o.wall}`, ...(o.kind === 'window' ? { ...WINDOW_STYLE, ...style } : {}) })) };
 }
 
 // --- changing the dictated room -----------------------------------------------------------------------------------
@@ -150,7 +156,20 @@ export function openingAt(wallId, point, kind, height) {
 }
 
 /** Adds, moves (to another wall or along its own), resizes or removes a door or window. */
-export function changeOpening({ action, id, kind, wall, at, width, height, sill }) {
+/** A window's settings from a change: each given one checked, the rest kept. */
+function styleOf(was = {}, { sill_depth, recess, trim, panes, frame }) {
+  if (panes !== undefined && !PANES.includes(panes)) throw new Error(`panes: ${PANES.join(', ')}`);
+  if (frame !== undefined && !FRAMES.includes(frame)) throw new Error(`frame: ${FRAMES.join(', ')}`);
+  return {
+    ...was,
+    ...(sill_depth !== undefined ? { sill_depth: metres(sill_depth, 'sill depth', 0, 0.4) } : {}),
+    ...(recess !== undefined ? { recess: metres(recess, 'recess', 0.02, 0.5) } : {}),
+    ...(trim !== undefined ? { trim: metres(trim, 'trim', 0, 0.2) } : {}),
+    ...(panes !== undefined ? { panes } : {}), ...(frame !== undefined ? { frame } : {}),
+  };
+}
+
+export function changeOpening({ action, id, kind, wall, at, width, height, sill, ...style }) {
   const s = state.spec;
   if (action === 'add') {
     if (kind !== 'door' && kind !== 'window') throw new Error("kind: 'door' or 'window'");
@@ -158,6 +177,7 @@ export function changeOpening({ action, id, kind, wall, at, width, height, sill 
     while (s.openings.some((o) => o.id === `${kind}${n}`)) n++;
     const o = { id: `${kind}${n}`, kind, wall: sideOf(wall), width: metres(width, 'width', 0.4, 4) ?? (kind === 'door' ? 0.9 : 1.2), height: metres(height, 'height', 0.3, 3) ?? (kind === 'door' ? 2.1 : 1.3), ...(kind === 'window' ? { sill: metres(sill, 'sill', 0, 2) ?? 0.85 } : {}) };
     o.at = along(at, o.wall, o.width);
+    if (kind === 'window') o.style = styleOf({}, style);
     s.openings.push(o);
     return { added: o, room: describeSpec() };
   }
@@ -168,7 +188,7 @@ export function changeOpening({ action, id, kind, wall, at, width, height, sill 
   if (wall !== undefined) o.wall = sideOf(wall);
   o.width = metres(width, 'width', 0.4, 4) ?? o.width;
   o.height = metres(height, 'height', 0.3, 3) ?? o.height;
-  if (o.kind === 'window') o.sill = metres(sill, 'sill', 0, 2) ?? o.sill;
+  if (o.kind === 'window') { o.sill = metres(sill, 'sill', 0, 2) ?? o.sill; o.style = styleOf(o.style, style); }
   o.at = along(at ?? (wall !== undefined ? 'centre' : o.at), o.wall, o.width);
   return { moved: o, room: describeSpec() };
 }
