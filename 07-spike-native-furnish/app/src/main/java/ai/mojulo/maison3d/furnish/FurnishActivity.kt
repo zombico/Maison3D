@@ -576,9 +576,6 @@ class FurnishActivity : AppSystemActivity() {
             .firstOrNull { it.isLocal() && it.getComponent<AvatarBody>().isPlayerControlled }
             ?.getComponent<AvatarBody>()
 
-    private fun pressed(c: Controller, button: Int) = (c.buttonState and c.changedButtons and button) != 0
-
-    private fun released(c: Controller, button: Int) = (c.buttonState and button) == 0 && (c.changedButtons and button) != 0
 
     /** A mesh is hittable by default and would catch the pointer before the panel (spike 05). */
     private fun clearTintHits() {
@@ -591,6 +588,10 @@ class FurnishActivity : AppSystemActivity() {
       }
     }
   }
+
+  private fun pressed(c: Controller, button: Int) = (c.buttonState and c.changedButtons and button) != 0
+
+  private fun released(c: Controller, button: Int) = (c.buttonState and button) == 0 && (c.changedButtons and button) != 0
 
   /** What the laser from `hand` lands on first: a piece, a wall, the floor or the ceiling (null over the panel). */
   private fun castFrom(hand: Pose): Laser.Hit? {
