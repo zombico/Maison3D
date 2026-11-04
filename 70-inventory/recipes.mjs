@@ -1,0 +1,103 @@
+// Each SKU's mojulo recipe: the piece's own recipe, worn in its collection's finish, filled to its size exactly.
+// Returns the mint_solid call ({ kind, spec }) the build sends to mojulo.
+import { COLLECTIONS, PIECES } from './catalogue.mjs';
+
+const byCode = Object.fromEntries(COLLECTIONS.map((c) => [c.code, c]));
+
+const upholstered = (c, { accent = false } = {}) => ({ fabric: accent ? c.accent : c.fabric, timber: c.timber });
+const wooden = (c) => ({ timber: c.timber, wood: c.wood });
+const casework = (c) => ({ board: c.board, wood: c.wood, ...(c.paint ? { paint: c.paint } : {}) });
+
+const furniture = (spec) => ({ kind: 'furniture', spec });
+
+/**
+ * Degrees to turn an export so the piece's front faces +z. mojulo's furniture kind faces -z (its sofas and casework
+ * show their backs from +z); workbench pieces drawn front to -y, like Maison3D's beds, already face +z. Found by
+ * looking at each piece from the front.
+ */
+export const frontTurn = (kind) => (kind === 'furniture' ? 180 : 0);
+
+/** The mojulo mint for one SKU. */
+export function recipeFor(pieceId, collectionCode, size) {
+  const p = PIECES.find((x) => x.id === pieceId);
+  const c = byCode[collectionCode]?.mojulo;
+  if (!p) throw new Error(`no piece ${pieceId}`);
+  if (!c) throw new Error(`no collection ${collectionCode}`);
+  const mm = p.sizes[size];
+  if (!mm) throw new Error(`${pieceId} has no size ${size}`);
+  const sofaForms = { ...c.sofa, legs: c.legs };
+  switch (p.id) {
+    case 'SOF': return furniture({ like: 'sofa', forms: sofaForms, finish: upholstered(c), size: mm });
+    case 'LOV': return furniture({ like: 'settee', forms: { legs: c.legs }, finish: upholstered(c), size: mm });
+    case 'MCS': return furniture({ like: 'mid-century-sofa', finish: upholstered(c), size: mm });
+    case 'CHS': return furniture({ like: 'chesterfield', finish: upholstered(c), size: mm });
+    case 'TUX': return furniture({ like: 'tuxedo', finish: upholstered(c), size: mm });
+    case 'ERA': return furniture({ like: 'english-roll-arm', finish: upholstered(c), size: mm });
+    case 'ARM': return furniture({ like: 'armchair', forms: sofaForms, finish: upholstered(c, { accent: true }), size: mm });
+    case 'CLB':
+    case 'LNG': return furniture({ like: 'club-chair', forms: { legs: c.legs }, finish: upholstered(c, { accent: true }), size: mm });
+    case 'ACC':
+    case 'DCH': return furniture({ like: 'chair', forms: { legs: c.legs }, finish: wooden(c), size: mm });
+    case 'COF':
+    case 'SID': return furniture({ like: 'coffee-table', forms: { legs: c.legs }, finish: wooden(c), size: mm });
+    case 'BEN':
+    case 'BEB':
+    case 'DBN':
+    case 'EBN': return furniture({ piece: 'table', forms: { legs: c.legs }, finish: wooden(c), size: mm });
+    case 'MED': return furniture({ like: 'media-console', finish: casework(c), size: mm });
+    case 'MDU':
+    case 'WRD':
+    case 'SHO': return furniture({ piece: 'casework', forms: { front: 'doors' }, finish: casework(c), size: mm });
+    case 'BKC':
+    case 'KBK': return furniture({ like: 'bookcase', finish: casework(c), size: mm });
+    case 'SDB':
+    case 'CON': return furniture({ like: 'sideboard', finish: casework(c), size: mm });
+    case 'NST': return furniture({ like: 'nightstand', finish: casework(c), size: mm });
+    case 'DRS':
+    case 'CHT': return furniture({ piece: 'casework', forms: { front: 'drawers' }, finish: casework(c), size: mm });
+    case 'CAB': return furniture({ piece: 'casework', forms: { front: 'doors-over-drawer' }, finish: casework(c), size: mm });
+    case 'BCH':
+    case 'KCT': return furniture({ like: 'chest', finish: casework(c), size: mm });
+    case 'BED': return { kind: 'workbench', spec: bed({ size: mm, platform: false, c }) };
+    case 'PLT': return { kind: 'workbench', spec: bed({ size: mm, platform: true, c }) };
+    default: throw new Error(`no recipe yet for ${p.id} (${p.source})`);
+  }
+}
+
+/**
+ * Maison3D's bed, from mojulo's workbench parts: a frame in the collection's timber (on legs, or on a plinth), a
+ * boxed mattress, two pillows in the collection's fabric and a folded throw in its accent. Drawn x across, y from the head
+ * (0) to the foot, z up, then turned so the foot is the front. Soft parts on a 45 mm grain and coarse wood figure keep it near 12,000 triangles. The throw is a boxed
+ * cushion standing 40 mm proud of the mattress with as much again sunk into it: on this grain a part needs about two
+ * cells of depth, and a thinner one (a 30 mm knife throw) fell between the cells on the king and vanished.
+ */
+export function bed({ size: [w, d, h], platform, c }) {
+  const leg = platform ? 0 : 160, rail = 28, frameT = platform ? 300 : 120, mattress = 220;
+  const baseTop = leg + frameT;
+  const wood = { species: c.timber, finish: c.wood };
+  const above = leg + (platform ? 60 : 0);
+  const members = [];
+  if (platform) members.push({ id: 'plinth', box: { min: [20, 60, 0], max: [w - 20, d - 20, 60] }, ...wood });
+  members.push(
+    { id: 'rail-l', box: { min: [0, 60, above], max: [rail, d, baseTop] }, ...wood },
+    { id: 'rail-r', box: { min: [w - rail, 60, above], max: [w, d, baseTop] }, ...wood },
+    { id: 'foot', box: { min: [rail, d - rail, above], max: [w - rail, d, baseTop] }, ...wood },
+    { id: 'head', box: { min: [0, 0, 0], max: [w, 60, Math.max(h, baseTop + mattress + 300)] }, ...wood },
+  );
+  if (!platform) {
+    for (const [x, y, id] of [[0, 60, 'leg-hl'], [w - 60, 60, 'leg-hr'], [0, d - 60, 'leg-fl'], [w - 60, d - 60, 'leg-fr']]) {
+      members.push({ id, box: { min: [x, y, 0], max: [x + 60, y + 60, leg] }, ...wood });
+    }
+  }
+  const top = baseTop + mattress;
+  const soft = [
+    { id: 'mattress', kind: 'cushion', style: 'boxed', box: { min: [rail + 5, 65, baseTop], max: [w - rail - 5, d - rail - 5, top] }, fabric: 'ticking', crown: 10 },
+    { id: 'pillow-l', kind: 'pillow', box: { min: [rail + 60, 90, top], max: [w / 2 - 30, 450, top + 140] }, fabric: c.fabric, tilt: 20 },
+    { id: 'pillow-r', kind: 'pillow', box: { min: [w / 2 + 30, 90, top], max: [w - rail - 60, 450, top + 140] }, fabric: c.fabric, tilt: 20 },
+    { id: 'throw', kind: 'cushion', style: 'boxed', box: { min: [rail + 5, d * 0.62, top - 40], max: [w - rail - 5, d - rail - 5, top + 40] }, fabric: c.accent },
+  ];
+  // drawn head at y = 0; mojulo's front is -y (it becomes +z, the way a placed piece faces), so the foot goes there
+  const flip = (box) => ({ min: [box.min[0], d - box.max[1], box.min[2]], max: [box.max[0], d - box.min[1], box.max[2]] });
+  for (const part of [...members, ...soft]) part.box = flip(part.box);
+  return { units: 'mm', frames: [{ id: 'bed', unit: 'mm', detail: 'boxes', members, soft, fabric: c.fabric, softCell: 45, figure: 'coarse' }] };
+}

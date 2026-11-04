@@ -217,3 +217,32 @@ MAISON_LAYOUT=08-spike-mojulo-furnish/layout.json npm run spike:furnish
 
 The design stands in the room on the first turn (say "show me the design"), and the pieces then move, swap and go like
 any other.
+
+## 70: the inventory
+
+Maison3D's own catalogue, made with mojulo: seven collections (a finish each: fabric, accent, timber, board, legs,
+sofa forms) worn by one set of pieces, each piece in its listed sizes. `70-inventory/catalogue.mjs` lists them,
+`recipes.mjs` is each SKU's mojulo recipe (mojulo's furniture builds, and Maison3D's own bed from workbench parts),
+`ready.mjs` readies an export for the headset and `build.mjs` builds SKUs and writes `catalog.json`. Each SKU is
+checked against the headset budgets (30,000 triangles, 1.5 MB) and its listed size (within 40 mm), and a soft part
+mojulo's grain lost is reported.
+
+The first slice is built: Hinoki (japandi) and Sable (modern-organic), living room and bedroom, 64 SKUs, all clean.
+The models are not committed (mojulo is deterministic, so a build gives the same pieces); on the laptop, once
+`npm run mojulo:setup` has run:
+
+```bash
+npm run inventory:build -- --collections HIN,SAB --rooms living,bedroom
+```
+
+Then furnish with them: the inventory joins spike 07's six pieces, with the same Maison3D Furnish app.
+
+```bash
+MAISON_CATALOG=70-inventory/catalog.json npm run spike:furnish
+```
+
+Pieces are named by collection, so "a Sable sofa against that wall" or "swap the armchair for the Hinoki one" work.
+
+Two things mojulo's lit export gets wrong are fixed in `ready.mjs` and `recipes.mjs`: sheet goods (plywood and MDF
+casework) come out white, so their board colour is put back from mojulo's own sheet table; and mojulo's furniture
+builds face away from you, so they are turned to face +z like everything else.

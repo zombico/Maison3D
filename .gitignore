@@ -9,3 +9,4 @@ local.properties
 *.apk
 07-spike-native-furnish/plan.svg
 .mojulo/
+70-inventory/models/

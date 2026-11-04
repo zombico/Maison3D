@@ -41,7 +41,7 @@ async function turn(req, res) {
   const t0 = Date.now();
   // typed text (for trying it without speaking) skips transcription
   // bias the words toward this room and this catalogue: table, storage, sofa, armchair, rug…
-  const keywords = [...new Set([...catalogList.flatMap((c) => [c.id.replace('-', ' '), c.name]), ...(body.room?.items ?? []).map((i) => i.label)])];
+  const keywords = [...new Set([...catalogList.flatMap((c) => c.words ?? [c.id.replace('-', ' '), c.name]), ...(body.room?.items ?? []).map((i) => i.label)])];
   const said = typeof body.text === 'string' && body.text.trim() ? body.text.trim() : await transcribe(Buffer.from(body.audio ?? '', 'base64'), keywords);
   const heardMs = Date.now() - t0;
   if (!said) return send(res, 200, { said: '', reply: '', scene: sceneJson(), note: 'heard nothing' });

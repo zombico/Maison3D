@@ -24,6 +24,18 @@ export const config = {
 export const catalogList = JSON.parse(readFileSync(join(here, 'catalog', 'catalog.json'), 'utf8'));
 export const catalog = Object.fromEntries(catalogList.map((c) => [c.id, c]));
 
+// More pieces (70-inventory's catalog.json, built by its build.mjs): they join the six, served from beside that file.
+if (process.env.MAISON_CATALOG) {
+  const path = resolvePath(process.env.MAISON_CATALOG);
+  const more = JSON.parse(readFileSync(path, 'utf8'));
+  for (const c of more.catalog ?? more) {
+    if (c.issues?.length) continue; // a piece that failed its checks stays out
+    const entry = { ...c, dir: dirname(path) };
+    catalog[c.id] = entry;
+    catalogList.push(entry);
+  }
+}
+
 // A designed layout (spike 08: mojulo's design_interior, split into pieces): its pieces join the catalogue, and its
 // scene waits, in the room's own terms, until a turn brings the room's walls to place it by.
 let pendingLayout = null;

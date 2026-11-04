@@ -1,0 +1,5102 @@
+{
+ "built": "2026-11-04",
+ "mojulo": "3.1.1",
+ "catalog": [
+  {
+   "id": "HIN-ACC-std",
+   "name": "Hinoki accent chair",
+   "kind": "converse",
+   "piece": "ACC",
+   "collection": "HIN",
+   "room": "living",
+   "job": "converse",
+   "size": [
+    0.56,
+    0.82,
+    0.58
+   ],
+   "listed": [
+    560,
+    580,
+    820
+   ],
+   "triangles": 156,
+   "bytes": 61068,
+   "file": "models/HIN-ACC-std.glb",
+   "mojulo": {
+    "ref": "sku_hin_acc_std_mw1n6edk",
+    "kind": "furniture",
+    "spec": {
+     "like": "chair",
+     "forms": {
+      "legs": "block"
+     },
+     "finish": {
+      "timber": "oak",
+      "wood": "oil"
+     },
+     "size": [
+      560,
+      580,
+      820
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, living",
+   "words": [
+    "Hinoki",
+    "accent chair"
+   ]
+  },
+  {
+   "id": "HIN-ARM-std",
+   "name": "Hinoki armchair",
+   "kind": "converse",
+   "piece": "ARM",
+   "collection": "HIN",
+   "room": "living",
+   "job": "converse",
+   "size": [
+    0.85,
+    0.8,
+    0.85
+   ],
+   "listed": [
+    850,
+    850,
+    800
+   ],
+   "triangles": 4956,
+   "bytes": 465952,
+   "file": "models/HIN-ARM-std.glb",
+   "mojulo": {
+    "ref": "sku_hin_arm_std_mw1n6b13",
+    "kind": "furniture",
+    "spec": {
+     "like": "armchair",
+     "forms": {
+      "arms": "track",
+      "back": "tight",
+      "seat": "bench",
+      "legs": "block"
+     },
+     "finish": {
+      "fabric": {
+       "preset": "boucle",
+       "warp": "cream",
+       "weft": "cream"
+      },
+      "timber": "oak"
+     },
+     "size": [
+      850,
+      850,
+      800
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, living",
+   "words": [
+    "Hinoki",
+    "armchair"
+   ]
+  },
+  {
+   "id": "HIN-BCH-std",
+   "name": "Hinoki blanket chest",
+   "kind": "store",
+   "piece": "BCH",
+   "collection": "HIN",
+   "room": "bedroom",
+   "job": "store",
+   "size": [
+    0.9,
+    0.48,
+    0.477
+   ],
+   "listed": [
+    900,
+    450,
+    480
+   ],
+   "triangles": 240,
+   "bytes": 376860,
+   "file": "models/HIN-BCH-std.glb",
+   "mojulo": {
+    "ref": "sku_hin_bch_std_mw1nlqej",
+    "kind": "furniture",
+    "spec": {
+     "like": "chest",
+     "finish": {
+      "board": "plywood",
+      "wood": "oil"
+     },
+     "size": [
+      900,
+      450,
+      480
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, bedroom",
+   "words": [
+    "Hinoki",
+    "blanket chest"
+   ]
+  },
+  {
+   "id": "HIN-BEB-std",
+   "name": "Hinoki bed-end bench",
+   "kind": "sleep",
+   "piece": "BEB",
+   "collection": "HIN",
+   "room": "bedroom",
+   "job": "sleep",
+   "size": [
+    1.3,
+    0.45,
+    0.42
+   ],
+   "listed": [
+    1300,
+    420,
+    450
+   ],
+   "triangles": 108,
+   "bytes": 55656,
+   "file": "models/HIN-BEB-std.glb",
+   "mojulo": {
+    "ref": "sku_hin_beb_std_mw1nlp09",
+    "kind": "furniture",
+    "spec": {
+     "piece": "table",
+     "forms": {
+      "legs": "block"
+     },
+     "finish": {
+      "timber": "oak",
+      "wood": "oil"
+     },
+     "size": [
+      1300,
+      420,
+      450
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, bedroom",
+   "words": [
+    "Hinoki",
+    "bed-end bench"
+   ]
+  },
+  {
+   "id": "HIN-BED-double",
+   "name": "Hinoki bed, double",
+   "kind": "sleep",
+   "piece": "BED",
+   "collection": "HIN",
+   "room": "bedroom",
+   "job": "sleep",
+   "note": "Hinoki collection, japandi, bedroom",
+   "words": [
+    "Hinoki",
+    "bed"
+   ],
+   "size": [
+    1.4,
+    1,
+    2.05
+   ],
+   "listed": [
+    1400,
+    2050,
+    1000
+   ],
+   "triangles": 8044,
+   "bytes": 532680,
+   "file": "models/HIN-BED-double.glb",
+   "mojulo": {
+    "ref": "sku_hin_bed_double_mw1nngvr",
+    "kind": "workbench",
+    "spec": {
+     "units": "mm",
+     "frames": [
+      {
+       "id": "bed",
+       "unit": "mm",
+       "detail": "boxes",
+       "members": [
+        {
+         "id": "rail-l",
+         "box": {
+          "min": [
+           0,
+           0,
+           160
+          ],
+          "max": [
+           28,
+           1990,
+           280
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "rail-r",
+         "box": {
+          "min": [
+           1372,
+           0,
+           160
+          ],
+          "max": [
+           1400,
+           1990,
+           280
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "foot",
+         "box": {
+          "min": [
+           28,
+           0,
+           160
+          ],
+          "max": [
+           1372,
+           28,
+           280
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "head",
+         "box": {
+          "min": [
+           0,
+           1990,
+           0
+          ],
+          "max": [
+           1400,
+           2050,
+           1000
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "leg-hl",
+         "box": {
+          "min": [
+           0,
+           1930,
+           0
+          ],
+          "max": [
+           60,
+           1990,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "leg-hr",
+         "box": {
+          "min": [
+           1340,
+           1930,
+           0
+          ],
+          "max": [
+           1400,
+           1990,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "leg-fl",
+         "box": {
+          "min": [
+           0,
+           0,
+           0
+          ],
+          "max": [
+           60,
+           60,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "leg-fr",
+         "box": {
+          "min": [
+           1340,
+           0,
+           0
+          ],
+          "max": [
+           1400,
+           60,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        }
+       ],
+       "soft": [
+        {
+         "id": "mattress",
+         "kind": "cushion",
+         "style": "boxed",
+         "box": {
+          "min": [
+           33,
+           33,
+           280
+          ],
+          "max": [
+           1367,
+           1985,
+           500
+          ]
+         },
+         "fabric": "ticking",
+         "crown": 10
+        },
+        {
+         "id": "pillow-l",
+         "kind": "pillow",
+         "box": {
+          "min": [
+           88,
+           1600,
+           500
+          ],
+          "max": [
+           670,
+           1960,
+           640
+          ]
+         },
+         "fabric": {
+          "preset": "linen",
+          "warp": "oat",
+          "weft": "oat"
+         },
+         "tilt": 20
+        },
+        {
+         "id": "pillow-r",
+         "kind": "pillow",
+         "box": {
+          "min": [
+           730,
+           1600,
+           500
+          ],
+          "max": [
+           1312,
+           1960,
+           640
+          ]
+         },
+         "fabric": {
+          "preset": "linen",
+          "warp": "oat",
+          "weft": "oat"
+         },
+         "tilt": 20
+        },
+        {
+         "id": "throw",
+         "kind": "cushion",
+         "style": "boxed",
+         "box": {
+          "min": [
+           33,
+           33,
+           460
+          ],
+          "max": [
+           1367,
+           779,
+           540
+          ]
+         },
+         "fabric": {
+          "preset": "boucle",
+          "warp": "cream",
+          "weft": "cream"
+         }
+        }
+       ],
+       "fabric": {
+        "preset": "linen",
+        "warp": "oat",
+        "weft": "oat"
+       },
+       "softCell": 45,
+       "figure": "coarse"
+      }
+     ]
+    }
+   },
+   "issues": []
+  },
+  {
+   "id": "HIN-BED-king",
+   "name": "Hinoki bed, king",
+   "kind": "sleep",
+   "piece": "BED",
+   "collection": "HIN",
+   "room": "bedroom",
+   "job": "sleep",
+   "note": "Hinoki collection, japandi, bedroom",
+   "words": [
+    "Hinoki",
+    "bed"
+   ],
+   "size": [
+    1.93,
+    1.1,
+    2.13
+   ],
+   "listed": [
+    1930,
+    2130,
+    1100
+   ],
+   "triangles": 11920,
+   "bytes": 742952,
+   "file": "models/HIN-BED-king.glb",
+   "mojulo": {
+    "ref": "sku_hin_bed_king_mw1nnhpv",
+    "kind": "workbench",
+    "spec": {
+     "units": "mm",
+     "frames": [
+      {
+       "id": "bed",
+       "unit": "mm",
+       "detail": "boxes",
+       "members": [
+        {
+         "id": "rail-l",
+         "box": {
+          "min": [
+           0,
+           0,
+           160
+          ],
+          "max": [
+           28,
+           2070,
+           280
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "rail-r",
+         "box": {
+          "min": [
+           1902,
+           0,
+           160
+          ],
+          "max": [
+           1930,
+           2070,
+           280
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "foot",
+         "box": {
+          "min": [
+           28,
+           0,
+           160
+          ],
+          "max": [
+           1902,
+           28,
+           280
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "head",
+         "box": {
+          "min": [
+           0,
+           2070,
+           0
+          ],
+          "max": [
+           1930,
+           2130,
+           1100
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "leg-hl",
+         "box": {
+          "min": [
+           0,
+           2010,
+           0
+          ],
+          "max": [
+           60,
+           2070,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "leg-hr",
+         "box": {
+          "min": [
+           1870,
+           2010,
+           0
+          ],
+          "max": [
+           1930,
+           2070,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "leg-fl",
+         "box": {
+          "min": [
+           0,
+           0,
+           0
+          ],
+          "max": [
+           60,
+           60,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "leg-fr",
+         "box": {
+          "min": [
+           1870,
+           0,
+           0
+          ],
+          "max": [
+           1930,
+           60,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        }
+       ],
+       "soft": [
+        {
+         "id": "mattress",
+         "kind": "cushion",
+         "style": "boxed",
+         "box": {
+          "min": [
+           33,
+           33,
+           280
+          ],
+          "max": [
+           1897,
+           2065,
+           500
+          ]
+         },
+         "fabric": "ticking",
+         "crown": 10
+        },
+        {
+         "id": "pillow-l",
+         "kind": "pillow",
+         "box": {
+          "min": [
+           88,
+           1680,
+           500
+          ],
+          "max": [
+           935,
+           2040,
+           640
+          ]
+         },
+         "fabric": {
+          "preset": "linen",
+          "warp": "oat",
+          "weft": "oat"
+         },
+         "tilt": 20
+        },
+        {
+         "id": "pillow-r",
+         "kind": "pillow",
+         "box": {
+          "min": [
+           995,
+           1680,
+           500
+          ],
+          "max": [
+           1842,
+           2040,
+           640
+          ]
+         },
+         "fabric": {
+          "preset": "linen",
+          "warp": "oat",
+          "weft": "oat"
+         },
+         "tilt": 20
+        },
+        {
+         "id": "throw",
+         "kind": "cushion",
+         "style": "boxed",
+         "box": {
+          "min": [
+           33,
+           33,
+           460
+          ],
+          "max": [
+           1897,
+           809.4000000000001,
+           540
+          ]
+         },
+         "fabric": {
+          "preset": "boucle",
+          "warp": "cream",
+          "weft": "cream"
+         }
+        }
+       ],
+       "fabric": {
+        "preset": "linen",
+        "warp": "oat",
+        "weft": "oat"
+       },
+       "softCell": 45,
+       "figure": "coarse"
+      }
+     ]
+    }
+   },
+   "issues": []
+  },
+  {
+   "id": "HIN-BED-queen",
+   "name": "Hinoki bed, queen",
+   "kind": "sleep",
+   "piece": "BED",
+   "collection": "HIN",
+   "room": "bedroom",
+   "job": "sleep",
+   "note": "Hinoki collection, japandi, bedroom",
+   "words": [
+    "Hinoki",
+    "bed"
+   ],
+   "size": [
+    1.6,
+    1.05,
+    2.1
+   ],
+   "listed": [
+    1600,
+    2100,
+    1050
+   ],
+   "triangles": 9848,
+   "bytes": 622580,
+   "file": "models/HIN-BED-queen.glb",
+   "mojulo": {
+    "ref": "sku_hin_bed_queen_mw1nnhcy",
+    "kind": "workbench",
+    "spec": {
+     "units": "mm",
+     "frames": [
+      {
+       "id": "bed",
+       "unit": "mm",
+       "detail": "boxes",
+       "members": [
+        {
+         "id": "rail-l",
+         "box": {
+          "min": [
+           0,
+           0,
+           160
+          ],
+          "max": [
+           28,
+           2040,
+           280
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "rail-r",
+         "box": {
+          "min": [
+           1572,
+           0,
+           160
+          ],
+          "max": [
+           1600,
+           2040,
+           280
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "foot",
+         "box": {
+          "min": [
+           28,
+           0,
+           160
+          ],
+          "max": [
+           1572,
+           28,
+           280
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "head",
+         "box": {
+          "min": [
+           0,
+           2040,
+           0
+          ],
+          "max": [
+           1600,
+           2100,
+           1050
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "leg-hl",
+         "box": {
+          "min": [
+           0,
+           1980,
+           0
+          ],
+          "max": [
+           60,
+           2040,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "leg-hr",
+         "box": {
+          "min": [
+           1540,
+           1980,
+           0
+          ],
+          "max": [
+           1600,
+           2040,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "leg-fl",
+         "box": {
+          "min": [
+           0,
+           0,
+           0
+          ],
+          "max": [
+           60,
+           60,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "leg-fr",
+         "box": {
+          "min": [
+           1540,
+           0,
+           0
+          ],
+          "max": [
+           1600,
+           60,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        }
+       ],
+       "soft": [
+        {
+         "id": "mattress",
+         "kind": "cushion",
+         "style": "boxed",
+         "box": {
+          "min": [
+           33,
+           33,
+           280
+          ],
+          "max": [
+           1567,
+           2035,
+           500
+          ]
+         },
+         "fabric": "ticking",
+         "crown": 10
+        },
+        {
+         "id": "pillow-l",
+         "kind": "pillow",
+         "box": {
+          "min": [
+           88,
+           1650,
+           500
+          ],
+          "max": [
+           770,
+           2010,
+           640
+          ]
+         },
+         "fabric": {
+          "preset": "linen",
+          "warp": "oat",
+          "weft": "oat"
+         },
+         "tilt": 20
+        },
+        {
+         "id": "pillow-r",
+         "kind": "pillow",
+         "box": {
+          "min": [
+           830,
+           1650,
+           500
+          ],
+          "max": [
+           1512,
+           2010,
+           640
+          ]
+         },
+         "fabric": {
+          "preset": "linen",
+          "warp": "oat",
+          "weft": "oat"
+         },
+         "tilt": 20
+        },
+        {
+         "id": "throw",
+         "kind": "cushion",
+         "style": "boxed",
+         "box": {
+          "min": [
+           33,
+           33,
+           460
+          ],
+          "max": [
+           1567,
+           798,
+           540
+          ]
+         },
+         "fabric": {
+          "preset": "boucle",
+          "warp": "cream",
+          "weft": "cream"
+         }
+        }
+       ],
+       "fabric": {
+        "preset": "linen",
+        "warp": "oat",
+        "weft": "oat"
+       },
+       "softCell": 45,
+       "figure": "coarse"
+      }
+     ]
+    }
+   },
+   "issues": []
+  },
+  {
+   "id": "HIN-BEN-std",
+   "name": "Hinoki low bench",
+   "kind": "converse",
+   "piece": "BEN",
+   "collection": "HIN",
+   "room": "living",
+   "job": "converse",
+   "size": [
+    1.2,
+    0.45,
+    0.4
+   ],
+   "listed": [
+    1200,
+    400,
+    450
+   ],
+   "triangles": 108,
+   "bytes": 53064,
+   "file": "models/HIN-BEN-std.glb",
+   "mojulo": {
+    "ref": "sku_hin_ben_std_mw1ndsy7",
+    "kind": "furniture",
+    "spec": {
+     "piece": "table",
+     "forms": {
+      "legs": "block"
+     },
+     "finish": {
+      "timber": "oak",
+      "wood": "oil"
+     },
+     "size": [
+      1200,
+      400,
+      450
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, living",
+   "words": [
+    "Hinoki",
+    "low bench"
+   ]
+  },
+  {
+   "id": "HIN-BKC-std",
+   "name": "Hinoki bookcase, std",
+   "kind": "display",
+   "piece": "BKC",
+   "collection": "HIN",
+   "room": "living",
+   "job": "display",
+   "size": [
+    0.8,
+    1.83,
+    0.32
+   ],
+   "listed": [
+    800,
+    320,
+    1830
+   ],
+   "triangles": 204,
+   "bytes": 278704,
+   "file": "models/HIN-BKC-std.glb",
+   "mojulo": {
+    "ref": "sku_hin_bkc_std_mw1ndpav",
+    "kind": "furniture",
+    "spec": {
+     "like": "bookcase",
+     "finish": {
+      "board": "plywood",
+      "wood": "oil"
+     },
+     "size": [
+      800,
+      320,
+      1830
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, living",
+   "words": [
+    "Hinoki",
+    "bookcase"
+   ]
+  },
+  {
+   "id": "HIN-BKC-tall",
+   "name": "Hinoki bookcase, tall",
+   "kind": "display",
+   "piece": "BKC",
+   "collection": "HIN",
+   "room": "living",
+   "job": "display",
+   "size": [
+    1,
+    2.1,
+    0.35
+   ],
+   "listed": [
+    1000,
+    350,
+    2100
+   ],
+   "triangles": 228,
+   "bytes": 312064,
+   "file": "models/HIN-BKC-tall.glb",
+   "mojulo": {
+    "ref": "sku_hin_bkc_tall_mw1ndq49",
+    "kind": "furniture",
+    "spec": {
+     "like": "bookcase",
+     "finish": {
+      "board": "plywood",
+      "wood": "oil"
+     },
+     "size": [
+      1000,
+      350,
+      2100
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, living",
+   "words": [
+    "Hinoki",
+    "bookcase"
+   ]
+  },
+  {
+   "id": "HIN-CHT-tall",
+   "name": "Hinoki chest of drawers, tall",
+   "kind": "dress",
+   "piece": "CHT",
+   "collection": "HIN",
+   "room": "bedroom",
+   "job": "dress",
+   "size": [
+    0.8,
+    1.1,
+    0.477
+   ],
+   "listed": [
+    800,
+    450,
+    1100
+   ],
+   "triangles": 492,
+   "bytes": 719672,
+   "file": "models/HIN-CHT-tall.glb",
+   "mojulo": {
+    "ref": "sku_hin_cht_tall_mw1nllrb",
+    "kind": "furniture",
+    "spec": {
+     "piece": "casework",
+     "forms": {
+      "front": "drawers"
+     },
+     "finish": {
+      "board": "plywood",
+      "wood": "oil"
+     },
+     "size": [
+      800,
+      450,
+      1100
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, bedroom",
+   "words": [
+    "Hinoki",
+    "chest of drawers"
+   ]
+  },
+  {
+   "id": "HIN-COF-long",
+   "name": "Hinoki coffee table, long",
+   "kind": "converse",
+   "piece": "COF",
+   "collection": "HIN",
+   "room": "living",
+   "job": "converse",
+   "size": [
+    1.3,
+    0.38,
+    0.7
+   ],
+   "listed": [
+    1300,
+    700,
+    380
+   ],
+   "triangles": 108,
+   "bytes": 61720,
+   "file": "models/HIN-COF-long.glb",
+   "mojulo": {
+    "ref": "sku_hin_cof_long_mw1n6rrr",
+    "kind": "furniture",
+    "spec": {
+     "like": "coffee-table",
+     "forms": {
+      "legs": "block"
+     },
+     "finish": {
+      "timber": "oak",
+      "wood": "oil"
+     },
+     "size": [
+      1300,
+      700,
+      380
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, living",
+   "words": [
+    "Hinoki",
+    "coffee table"
+   ]
+  },
+  {
+   "id": "HIN-COF-std",
+   "name": "Hinoki coffee table, std",
+   "kind": "converse",
+   "piece": "COF",
+   "collection": "HIN",
+   "room": "living",
+   "job": "converse",
+   "size": [
+    1.1,
+    0.4,
+    0.6
+   ],
+   "listed": [
+    1100,
+    600,
+    400
+   ],
+   "triangles": 108,
+   "bytes": 55224,
+   "file": "models/HIN-COF-std.glb",
+   "mojulo": {
+    "ref": "sku_hin_cof_std_mw1n6k39",
+    "kind": "furniture",
+    "spec": {
+     "like": "coffee-table",
+     "forms": {
+      "legs": "block"
+     },
+     "finish": {
+      "timber": "oak",
+      "wood": "oil"
+     },
+     "size": [
+      1100,
+      600,
+      400
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, living",
+   "words": [
+    "Hinoki",
+    "coffee table"
+   ]
+  },
+  {
+   "id": "HIN-DRS-std",
+   "name": "Hinoki dresser, std",
+   "kind": "dress",
+   "piece": "DRS",
+   "collection": "HIN",
+   "room": "bedroom",
+   "job": "dress",
+   "size": [
+    1.2,
+    0.8,
+    0.527
+   ],
+   "listed": [
+    1200,
+    500,
+    800
+   ],
+   "triangles": 408,
+   "bytes": 615168,
+   "file": "models/HIN-DRS-std.glb",
+   "mojulo": {
+    "ref": "sku_hin_drs_std_mw1nhpfb",
+    "kind": "furniture",
+    "spec": {
+     "piece": "casework",
+     "forms": {
+      "front": "drawers"
+     },
+     "finish": {
+      "board": "plywood",
+      "wood": "oil"
+     },
+     "size": [
+      1200,
+      500,
+      800
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, bedroom",
+   "words": [
+    "Hinoki",
+    "dresser"
+   ]
+  },
+  {
+   "id": "HIN-DRS-wide",
+   "name": "Hinoki dresser, wide",
+   "kind": "dress",
+   "piece": "DRS",
+   "collection": "HIN",
+   "room": "bedroom",
+   "job": "dress",
+   "size": [
+    1.6,
+    0.8,
+    0.527
+   ],
+   "listed": [
+    1600,
+    500,
+    800
+   ],
+   "triangles": 408,
+   "bytes": 623812,
+   "file": "models/HIN-DRS-wide.glb",
+   "mojulo": {
+    "ref": "sku_hin_drs_wide_mw1nhrrp",
+    "kind": "furniture",
+    "spec": {
+     "piece": "casework",
+     "forms": {
+      "front": "drawers"
+     },
+     "finish": {
+      "board": "plywood",
+      "wood": "oil"
+     },
+     "size": [
+      1600,
+      500,
+      800
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, bedroom",
+   "words": [
+    "Hinoki",
+    "dresser"
+   ]
+  },
+  {
+   "id": "HIN-LNG-std",
+   "name": "Hinoki lounge chair",
+   "kind": "read",
+   "piece": "LNG",
+   "collection": "HIN",
+   "room": "living",
+   "job": "read",
+   "size": [
+    0.76,
+    0.76,
+    0.82
+   ],
+   "listed": [
+    760,
+    820,
+    760
+   ],
+   "triangles": 5368,
+   "bytes": 470100,
+   "file": "models/HIN-LNG-std.glb",
+   "mojulo": {
+    "ref": "sku_hin_lng_std_mw1n6c4k",
+    "kind": "furniture",
+    "spec": {
+     "like": "club-chair",
+     "forms": {
+      "legs": "block"
+     },
+     "finish": {
+      "fabric": {
+       "preset": "boucle",
+       "warp": "cream",
+       "weft": "cream"
+      },
+      "timber": "oak"
+     },
+     "size": [
+      760,
+      820,
+      760
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, living",
+   "words": [
+    "Hinoki",
+    "lounge chair"
+   ]
+  },
+  {
+   "id": "HIN-LOV-std",
+   "name": "Hinoki loveseat",
+   "kind": "converse",
+   "piece": "LOV",
+   "collection": "HIN",
+   "room": "living",
+   "job": "converse",
+   "size": [
+    1.45,
+    0.8,
+    0.85
+   ],
+   "listed": [
+    1450,
+    850,
+    800
+   ],
+   "triangles": 6224,
+   "bytes": 324980,
+   "file": "models/HIN-LOV-std.glb",
+   "mojulo": {
+    "ref": "sku_hin_lov_std_mw1n69cj",
+    "kind": "furniture",
+    "spec": {
+     "like": "settee",
+     "forms": {
+      "legs": "block"
+     },
+     "finish": {
+      "fabric": {
+       "preset": "linen",
+       "warp": "oat",
+       "weft": "oat"
+      },
+      "timber": "oak"
+     },
+     "size": [
+      1450,
+      850,
+      800
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, living",
+   "words": [
+    "Hinoki",
+    "loveseat"
+   ]
+  },
+  {
+   "id": "HIN-MDU-std",
+   "name": "Hinoki media wall unit",
+   "kind": "media",
+   "piece": "MDU",
+   "collection": "HIN",
+   "room": "living",
+   "job": "media",
+   "size": [
+    2,
+    1.8,
+    0.447
+   ],
+   "listed": [
+    2000,
+    420,
+    1800
+   ],
+   "triangles": 156,
+   "bytes": 235288,
+   "file": "models/HIN-MDU-std.glb",
+   "mojulo": {
+    "ref": "sku_hin_mdu_std_mw1nanuj",
+    "kind": "furniture",
+    "spec": {
+     "piece": "casework",
+     "forms": {
+      "front": "doors"
+     },
+     "finish": {
+      "board": "plywood",
+      "wood": "oil"
+     },
+     "size": [
+      2000,
+      420,
+      1800
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, living",
+   "words": [
+    "Hinoki",
+    "media wall unit"
+   ]
+  },
+  {
+   "id": "HIN-MED-long",
+   "name": "Hinoki media console, long",
+   "kind": "media",
+   "piece": "MED",
+   "collection": "HIN",
+   "room": "living",
+   "job": "media",
+   "size": [
+    2.4,
+    0.52,
+    0.477
+   ],
+   "listed": [
+    2400,
+    450,
+    520
+   ],
+   "triangles": 156,
+   "bytes": 244608,
+   "file": "models/HIN-MED-long.glb",
+   "mojulo": {
+    "ref": "sku_hin_med_long_mw1n9rb9",
+    "kind": "furniture",
+    "spec": {
+     "like": "media-console",
+     "finish": {
+      "board": "plywood",
+      "wood": "oil"
+     },
+     "size": [
+      2400,
+      450,
+      520
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, living",
+   "words": [
+    "Hinoki",
+    "media console"
+   ]
+  },
+  {
+   "id": "HIN-MED-short",
+   "name": "Hinoki media console, short",
+   "kind": "media",
+   "piece": "MED",
+   "collection": "HIN",
+   "room": "living",
+   "job": "media",
+   "size": [
+    1.2,
+    0.52,
+    0.447
+   ],
+   "listed": [
+    1200,
+    420,
+    520
+   ],
+   "triangles": 156,
+   "bytes": 217980,
+   "file": "models/HIN-MED-short.glb",
+   "mojulo": {
+    "ref": "sku_hin_med_short_mw1n76hd",
+    "kind": "furniture",
+    "spec": {
+     "like": "media-console",
+     "finish": {
+      "board": "plywood",
+      "wood": "oil"
+     },
+     "size": [
+      1200,
+      420,
+      520
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, living",
+   "words": [
+    "Hinoki",
+    "media console"
+   ]
+  },
+  {
+   "id": "HIN-MED-std",
+   "name": "Hinoki media console, std",
+   "kind": "media",
+   "piece": "MED",
+   "collection": "HIN",
+   "room": "living",
+   "job": "media",
+   "size": [
+    1.8,
+    0.52,
+    0.477
+   ],
+   "listed": [
+    1800,
+    450,
+    520
+   ],
+   "triangles": 156,
+   "bytes": 231580,
+   "file": "models/HIN-MED-std.glb",
+   "mojulo": {
+    "ref": "sku_hin_med_std_mw1n8uz9",
+    "kind": "furniture",
+    "spec": {
+     "like": "media-console",
+     "finish": {
+      "board": "plywood",
+      "wood": "oil"
+     },
+     "size": [
+      1800,
+      450,
+      520
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, living",
+   "words": [
+    "Hinoki",
+    "media console"
+   ]
+  },
+  {
+   "id": "HIN-NST-std",
+   "name": "Hinoki nightstand",
+   "kind": "sleep",
+   "piece": "NST",
+   "collection": "HIN",
+   "room": "bedroom",
+   "job": "sleep",
+   "size": [
+    0.5,
+    0.55,
+    0.427
+   ],
+   "listed": [
+    500,
+    400,
+    550
+   ],
+   "triangles": 240,
+   "bytes": 367072,
+   "file": "models/HIN-NST-std.glb",
+   "mojulo": {
+    "ref": "sku_hin_nst_std_mw1nhk9e",
+    "kind": "furniture",
+    "spec": {
+     "like": "nightstand",
+     "finish": {
+      "board": "plywood",
+      "wood": "oil"
+     },
+     "size": [
+      500,
+      400,
+      550
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, bedroom",
+   "words": [
+    "Hinoki",
+    "nightstand"
+   ]
+  },
+  {
+   "id": "HIN-PLT-king",
+   "name": "Hinoki platform bed, king",
+   "kind": "sleep",
+   "piece": "PLT",
+   "collection": "HIN",
+   "room": "bedroom",
+   "job": "sleep",
+   "note": "Hinoki collection, japandi, bedroom",
+   "words": [
+    "Hinoki",
+    "platform bed"
+   ],
+   "size": [
+    2.03,
+    0.9,
+    2.18
+   ],
+   "listed": [
+    2030,
+    2180,
+    900
+   ],
+   "triangles": 12688,
+   "bytes": 778720,
+   "file": "models/HIN-PLT-king.glb",
+   "mojulo": {
+    "ref": "sku_hin_plt_king_mw1nnjw3",
+    "kind": "workbench",
+    "spec": {
+     "units": "mm",
+     "frames": [
+      {
+       "id": "bed",
+       "unit": "mm",
+       "detail": "boxes",
+       "members": [
+        {
+         "id": "plinth",
+         "box": {
+          "min": [
+           20,
+           20,
+           0
+          ],
+          "max": [
+           2010,
+           2120,
+           60
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "rail-l",
+         "box": {
+          "min": [
+           0,
+           0,
+           60
+          ],
+          "max": [
+           28,
+           2120,
+           300
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "rail-r",
+         "box": {
+          "min": [
+           2002,
+           0,
+           60
+          ],
+          "max": [
+           2030,
+           2120,
+           300
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "foot",
+         "box": {
+          "min": [
+           28,
+           0,
+           60
+          ],
+          "max": [
+           2002,
+           28,
+           300
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "head",
+         "box": {
+          "min": [
+           0,
+           2120,
+           0
+          ],
+          "max": [
+           2030,
+           2180,
+           900
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        }
+       ],
+       "soft": [
+        {
+         "id": "mattress",
+         "kind": "cushion",
+         "style": "boxed",
+         "box": {
+          "min": [
+           33,
+           33,
+           300
+          ],
+          "max": [
+           1997,
+           2115,
+           520
+          ]
+         },
+         "fabric": "ticking",
+         "crown": 10
+        },
+        {
+         "id": "pillow-l",
+         "kind": "pillow",
+         "box": {
+          "min": [
+           88,
+           1730,
+           520
+          ],
+          "max": [
+           985,
+           2090,
+           660
+          ]
+         },
+         "fabric": {
+          "preset": "linen",
+          "warp": "oat",
+          "weft": "oat"
+         },
+         "tilt": 20
+        },
+        {
+         "id": "pillow-r",
+         "kind": "pillow",
+         "box": {
+          "min": [
+           1045,
+           1730,
+           520
+          ],
+          "max": [
+           1942,
+           2090,
+           660
+          ]
+         },
+         "fabric": {
+          "preset": "linen",
+          "warp": "oat",
+          "weft": "oat"
+         },
+         "tilt": 20
+        },
+        {
+         "id": "throw",
+         "kind": "cushion",
+         "style": "boxed",
+         "box": {
+          "min": [
+           33,
+           33,
+           480
+          ],
+          "max": [
+           1997,
+           828.4000000000001,
+           560
+          ]
+         },
+         "fabric": {
+          "preset": "boucle",
+          "warp": "cream",
+          "weft": "cream"
+         }
+        }
+       ],
+       "fabric": {
+        "preset": "linen",
+        "warp": "oat",
+        "weft": "oat"
+       },
+       "softCell": 45,
+       "figure": "coarse"
+      }
+     ]
+    }
+   },
+   "issues": []
+  },
+  {
+   "id": "HIN-PLT-queen",
+   "name": "Hinoki platform bed, queen",
+   "kind": "sleep",
+   "piece": "PLT",
+   "collection": "HIN",
+   "room": "bedroom",
+   "job": "sleep",
+   "note": "Hinoki collection, japandi, bedroom",
+   "words": [
+    "Hinoki",
+    "platform bed"
+   ],
+   "size": [
+    1.7,
+    0.9,
+    2.15
+   ],
+   "listed": [
+    1700,
+    2150,
+    900
+   ],
+   "triangles": 10484,
+   "bytes": 653784,
+   "file": "models/HIN-PLT-queen.glb",
+   "mojulo": {
+    "ref": "sku_hin_plt_queen_mw1nnjia",
+    "kind": "workbench",
+    "spec": {
+     "units": "mm",
+     "frames": [
+      {
+       "id": "bed",
+       "unit": "mm",
+       "detail": "boxes",
+       "members": [
+        {
+         "id": "plinth",
+         "box": {
+          "min": [
+           20,
+           20,
+           0
+          ],
+          "max": [
+           1680,
+           2090,
+           60
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "rail-l",
+         "box": {
+          "min": [
+           0,
+           0,
+           60
+          ],
+          "max": [
+           28,
+           2090,
+           300
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "rail-r",
+         "box": {
+          "min": [
+           1672,
+           0,
+           60
+          ],
+          "max": [
+           1700,
+           2090,
+           300
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "foot",
+         "box": {
+          "min": [
+           28,
+           0,
+           60
+          ],
+          "max": [
+           1672,
+           28,
+           300
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        },
+        {
+         "id": "head",
+         "box": {
+          "min": [
+           0,
+           2090,
+           0
+          ],
+          "max": [
+           1700,
+           2150,
+           900
+          ]
+         },
+         "species": "oak",
+         "finish": "oil"
+        }
+       ],
+       "soft": [
+        {
+         "id": "mattress",
+         "kind": "cushion",
+         "style": "boxed",
+         "box": {
+          "min": [
+           33,
+           33,
+           300
+          ],
+          "max": [
+           1667,
+           2085,
+           520
+          ]
+         },
+         "fabric": "ticking",
+         "crown": 10
+        },
+        {
+         "id": "pillow-l",
+         "kind": "pillow",
+         "box": {
+          "min": [
+           88,
+           1700,
+           520
+          ],
+          "max": [
+           820,
+           2060,
+           660
+          ]
+         },
+         "fabric": {
+          "preset": "linen",
+          "warp": "oat",
+          "weft": "oat"
+         },
+         "tilt": 20
+        },
+        {
+         "id": "pillow-r",
+         "kind": "pillow",
+         "box": {
+          "min": [
+           880,
+           1700,
+           520
+          ],
+          "max": [
+           1612,
+           2060,
+           660
+          ]
+         },
+         "fabric": {
+          "preset": "linen",
+          "warp": "oat",
+          "weft": "oat"
+         },
+         "tilt": 20
+        },
+        {
+         "id": "throw",
+         "kind": "cushion",
+         "style": "boxed",
+         "box": {
+          "min": [
+           33,
+           33,
+           480
+          ],
+          "max": [
+           1667,
+           817,
+           560
+          ]
+         },
+         "fabric": {
+          "preset": "boucle",
+          "warp": "cream",
+          "weft": "cream"
+         }
+        }
+       ],
+       "fabric": {
+        "preset": "linen",
+        "warp": "oat",
+        "weft": "oat"
+       },
+       "softCell": 45,
+       "figure": "coarse"
+      }
+     ]
+    }
+   },
+   "issues": []
+  },
+  {
+   "id": "HIN-SDB-long",
+   "name": "Hinoki sideboard, long",
+   "kind": "store",
+   "piece": "SDB",
+   "collection": "HIN",
+   "room": "living",
+   "job": "store",
+   "size": [
+    2,
+    0.8,
+    0.487
+   ],
+   "listed": [
+    2000,
+    460,
+    800
+   ],
+   "triangles": 252,
+   "bytes": 365144,
+   "file": "models/HIN-SDB-long.glb",
+   "mojulo": {
+    "ref": "sku_hin_sdb_long_mw1ndrlu",
+    "kind": "furniture",
+    "spec": {
+     "like": "sideboard",
+     "finish": {
+      "board": "plywood",
+      "wood": "oil"
+     },
+     "size": [
+      2000,
+      460,
+      800
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, living",
+   "words": [
+    "Hinoki",
+    "sideboard"
+   ]
+  },
+  {
+   "id": "HIN-SDB-std",
+   "name": "Hinoki sideboard, std",
+   "kind": "store",
+   "piece": "SDB",
+   "collection": "HIN",
+   "room": "living",
+   "job": "store",
+   "size": [
+    1.6,
+    0.8,
+    0.477
+   ],
+   "listed": [
+    1600,
+    450,
+    800
+   ],
+   "triangles": 252,
+   "bytes": 356272,
+   "file": "models/HIN-SDB-std.glb",
+   "mojulo": {
+    "ref": "sku_hin_sdb_std_mw1ndr84",
+    "kind": "furniture",
+    "spec": {
+     "like": "sideboard",
+     "finish": {
+      "board": "plywood",
+      "wood": "oil"
+     },
+     "size": [
+      1600,
+      450,
+      800
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, living",
+   "words": [
+    "Hinoki",
+    "sideboard"
+   ]
+  },
+  {
+   "id": "HIN-SID-std",
+   "name": "Hinoki side table",
+   "kind": "read",
+   "piece": "SID",
+   "collection": "HIN",
+   "room": "living",
+   "job": "read",
+   "size": [
+    0.45,
+    0.55,
+    0.45
+   ],
+   "listed": [
+    450,
+    450,
+    550
+   ],
+   "triangles": 108,
+   "bytes": 37944,
+   "file": "models/HIN-SID-std.glb",
+   "mojulo": {
+    "ref": "sku_hin_sid_std_mw1n70ei",
+    "kind": "furniture",
+    "spec": {
+     "like": "coffee-table",
+     "forms": {
+      "legs": "block"
+     },
+     "finish": {
+      "timber": "oak",
+      "wood": "oil"
+     },
+     "size": [
+      450,
+      450,
+      550
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, living",
+   "words": [
+    "Hinoki",
+    "side table"
+   ]
+  },
+  {
+   "id": "HIN-SOF-2-seat",
+   "name": "Hinoki sofa, 2-seat",
+   "kind": "converse",
+   "piece": "SOF",
+   "collection": "HIN",
+   "room": "living",
+   "job": "converse",
+   "size": [
+    1.7,
+    0.78,
+    0.9
+   ],
+   "listed": [
+    1700,
+    900,
+    780
+   ],
+   "triangles": 7628,
+   "bytes": 416516,
+   "file": "models/HIN-SOF-2-seat.glb",
+   "mojulo": {
+    "ref": "sku_hin_sof_2_seat_mw1n66pq",
+    "kind": "furniture",
+    "spec": {
+     "like": "sofa",
+     "forms": {
+      "arms": "track",
+      "back": "tight",
+      "seat": "bench",
+      "legs": "block"
+     },
+     "finish": {
+      "fabric": {
+       "preset": "linen",
+       "warp": "oat",
+       "weft": "oat"
+      },
+      "timber": "oak"
+     },
+     "size": [
+      1700,
+      900,
+      780
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, living",
+   "words": [
+    "Hinoki",
+    "sofa"
+   ]
+  },
+  {
+   "id": "HIN-SOF-3-seat",
+   "name": "Hinoki sofa, 3-seat",
+   "kind": "converse",
+   "piece": "SOF",
+   "collection": "HIN",
+   "room": "living",
+   "job": "converse",
+   "size": [
+    2.1,
+    0.78,
+    0.92
+   ],
+   "listed": [
+    2100,
+    920,
+    780
+   ],
+   "triangles": 9540,
+   "bytes": 459604,
+   "file": "models/HIN-SOF-3-seat.glb",
+   "mojulo": {
+    "ref": "sku_hin_sof_3_seat_mw1n676p",
+    "kind": "furniture",
+    "spec": {
+     "like": "sofa",
+     "forms": {
+      "arms": "track",
+      "back": "tight",
+      "seat": "bench",
+      "legs": "block"
+     },
+     "finish": {
+      "fabric": {
+       "preset": "linen",
+       "warp": "oat",
+       "weft": "oat"
+      },
+      "timber": "oak"
+     },
+     "size": [
+      2100,
+      920,
+      780
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, living",
+   "words": [
+    "Hinoki",
+    "sofa"
+   ]
+  },
+  {
+   "id": "HIN-SOF-4-seat",
+   "name": "Hinoki sofa, 4-seat",
+   "kind": "converse",
+   "piece": "SOF",
+   "collection": "HIN",
+   "room": "living",
+   "job": "converse",
+   "size": [
+    2.6,
+    0.78,
+    0.95
+   ],
+   "listed": [
+    2600,
+    950,
+    780
+   ],
+   "triangles": 11880,
+   "bytes": 509660,
+   "file": "models/HIN-SOF-4-seat.glb",
+   "mojulo": {
+    "ref": "sku_hin_sof_4_seat_mw1n67mz",
+    "kind": "furniture",
+    "spec": {
+     "like": "sofa",
+     "forms": {
+      "arms": "track",
+      "back": "tight",
+      "seat": "bench",
+      "legs": "block"
+     },
+     "finish": {
+      "fabric": {
+       "preset": "linen",
+       "warp": "oat",
+       "weft": "oat"
+      },
+      "timber": "oak"
+     },
+     "size": [
+      2600,
+      950,
+      780
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, living",
+   "words": [
+    "Hinoki",
+    "sofa"
+   ]
+  },
+  {
+   "id": "HIN-WRD-double",
+   "name": "Hinoki wardrobe, double",
+   "kind": "store",
+   "piece": "WRD",
+   "collection": "HIN",
+   "room": "bedroom",
+   "job": "store",
+   "size": [
+    1.6,
+    2.1,
+    0.627
+   ],
+   "listed": [
+    1600,
+    600,
+    2100
+   ],
+   "triangles": 156,
+   "bytes": 230532,
+   "file": "models/HIN-WRD-double.glb",
+   "mojulo": {
+    "ref": "sku_hin_wrd_double_mw1nlnwd",
+    "kind": "furniture",
+    "spec": {
+     "piece": "casework",
+     "forms": {
+      "front": "doors"
+     },
+     "finish": {
+      "board": "plywood",
+      "wood": "oil"
+     },
+     "size": [
+      1600,
+      600,
+      2100
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, bedroom",
+   "words": [
+    "Hinoki",
+    "wardrobe"
+   ]
+  },
+  {
+   "id": "HIN-WRD-single",
+   "name": "Hinoki wardrobe, single",
+   "kind": "store",
+   "piece": "WRD",
+   "collection": "HIN",
+   "room": "bedroom",
+   "job": "store",
+   "size": [
+    1,
+    2,
+    0.627
+   ],
+   "listed": [
+    1000,
+    600,
+    2000
+   ],
+   "triangles": 156,
+   "bytes": 217556,
+   "file": "models/HIN-WRD-single.glb",
+   "mojulo": {
+    "ref": "sku_hin_wrd_single_mw1nlnme",
+    "kind": "furniture",
+    "spec": {
+     "piece": "casework",
+     "forms": {
+      "front": "doors"
+     },
+     "finish": {
+      "board": "plywood",
+      "wood": "oil"
+     },
+     "size": [
+      1000,
+      600,
+      2000
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Hinoki collection, japandi, bedroom",
+   "words": [
+    "Hinoki",
+    "wardrobe"
+   ]
+  },
+  {
+   "id": "SAB-ACC-std",
+   "name": "Sable accent chair",
+   "kind": "converse",
+   "piece": "ACC",
+   "collection": "SAB",
+   "room": "living",
+   "job": "converse",
+   "size": [
+    0.56,
+    0.82,
+    0.58
+   ],
+   "listed": [
+    560,
+    580,
+    820
+   ],
+   "triangles": 1012,
+   "bytes": 116924,
+   "file": "models/SAB-ACC-std.glb",
+   "mojulo": {
+    "ref": "sku_sab_acc_std_mw1n6ifd",
+    "kind": "furniture",
+    "spec": {
+     "like": "chair",
+     "forms": {
+      "legs": "bun"
+     },
+     "finish": {
+      "timber": "oak",
+      "wood": "wax"
+     },
+     "size": [
+      560,
+      580,
+      820
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, living",
+   "words": [
+    "Sable",
+    "accent chair"
+   ]
+  },
+  {
+   "id": "SAB-ARM-std",
+   "name": "Sable armchair",
+   "kind": "converse",
+   "piece": "ARM",
+   "collection": "SAB",
+   "room": "living",
+   "job": "converse",
+   "size": [
+    0.85,
+    0.8,
+    0.85
+   ],
+   "listed": [
+    850,
+    850,
+    800
+   ],
+   "triangles": 7576,
+   "bytes": 410420,
+   "file": "models/SAB-ARM-std.glb",
+   "mojulo": {
+    "ref": "sku_sab_arm_std_mw1n6bfp",
+    "kind": "furniture",
+    "spec": {
+     "like": "armchair",
+     "forms": {
+      "arms": "rolled",
+      "back": "loose",
+      "seat": "loose",
+      "legs": "bun"
+     },
+     "finish": {
+      "fabric": {
+       "preset": "canvas",
+       "warp": "rust",
+       "weft": "rust"
+      },
+      "timber": "oak"
+     },
+     "size": [
+      850,
+      850,
+      800
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, living",
+   "words": [
+    "Sable",
+    "armchair"
+   ]
+  },
+  {
+   "id": "SAB-BEB-std",
+   "name": "Sable bed-end bench",
+   "kind": "sleep",
+   "piece": "BEB",
+   "collection": "SAB",
+   "room": "bedroom",
+   "job": "sleep",
+   "size": [
+    1.3,
+    0.45,
+    0.42
+   ],
+   "listed": [
+    1300,
+    420,
+    450
+   ],
+   "triangles": 940,
+   "bytes": 109244,
+   "file": "models/SAB-BEB-std.glb",
+   "mojulo": {
+    "ref": "sku_sab_beb_std_mw1nlper",
+    "kind": "furniture",
+    "spec": {
+     "piece": "table",
+     "forms": {
+      "legs": "bun"
+     },
+     "finish": {
+      "timber": "oak",
+      "wood": "wax"
+     },
+     "size": [
+      1300,
+      420,
+      450
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, bedroom",
+   "words": [
+    "Sable",
+    "bed-end bench"
+   ]
+  },
+  {
+   "id": "SAB-BED-double",
+   "name": "Sable bed, double",
+   "kind": "sleep",
+   "piece": "BED",
+   "collection": "SAB",
+   "room": "bedroom",
+   "job": "sleep",
+   "note": "Sable collection, modern-organic, bedroom",
+   "words": [
+    "Sable",
+    "bed"
+   ],
+   "size": [
+    1.4,
+    1,
+    2.05
+   ],
+   "listed": [
+    1400,
+    2050,
+    1000
+   ],
+   "triangles": 8044,
+   "bytes": 532680,
+   "file": "models/SAB-BED-double.glb",
+   "mojulo": {
+    "ref": "sku_sab_bed_double_mw1nni1u",
+    "kind": "workbench",
+    "spec": {
+     "units": "mm",
+     "frames": [
+      {
+       "id": "bed",
+       "unit": "mm",
+       "detail": "boxes",
+       "members": [
+        {
+         "id": "rail-l",
+         "box": {
+          "min": [
+           0,
+           0,
+           160
+          ],
+          "max": [
+           28,
+           1990,
+           280
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "rail-r",
+         "box": {
+          "min": [
+           1372,
+           0,
+           160
+          ],
+          "max": [
+           1400,
+           1990,
+           280
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "foot",
+         "box": {
+          "min": [
+           28,
+           0,
+           160
+          ],
+          "max": [
+           1372,
+           28,
+           280
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "head",
+         "box": {
+          "min": [
+           0,
+           1990,
+           0
+          ],
+          "max": [
+           1400,
+           2050,
+           1000
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "leg-hl",
+         "box": {
+          "min": [
+           0,
+           1930,
+           0
+          ],
+          "max": [
+           60,
+           1990,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "leg-hr",
+         "box": {
+          "min": [
+           1340,
+           1930,
+           0
+          ],
+          "max": [
+           1400,
+           1990,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "leg-fl",
+         "box": {
+          "min": [
+           0,
+           0,
+           0
+          ],
+          "max": [
+           60,
+           60,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "leg-fr",
+         "box": {
+          "min": [
+           1340,
+           0,
+           0
+          ],
+          "max": [
+           1400,
+           60,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        }
+       ],
+       "soft": [
+        {
+         "id": "mattress",
+         "kind": "cushion",
+         "style": "boxed",
+         "box": {
+          "min": [
+           33,
+           33,
+           280
+          ],
+          "max": [
+           1367,
+           1985,
+           500
+          ]
+         },
+         "fabric": "ticking",
+         "crown": 10
+        },
+        {
+         "id": "pillow-l",
+         "kind": "pillow",
+         "box": {
+          "min": [
+           88,
+           1600,
+           500
+          ],
+          "max": [
+           670,
+           1960,
+           640
+          ]
+         },
+         "fabric": {
+          "preset": "boucle",
+          "warp": "sand",
+          "weft": "sand"
+         },
+         "tilt": 20
+        },
+        {
+         "id": "pillow-r",
+         "kind": "pillow",
+         "box": {
+          "min": [
+           730,
+           1600,
+           500
+          ],
+          "max": [
+           1312,
+           1960,
+           640
+          ]
+         },
+         "fabric": {
+          "preset": "boucle",
+          "warp": "sand",
+          "weft": "sand"
+         },
+         "tilt": 20
+        },
+        {
+         "id": "throw",
+         "kind": "cushion",
+         "style": "boxed",
+         "box": {
+          "min": [
+           33,
+           33,
+           460
+          ],
+          "max": [
+           1367,
+           779,
+           540
+          ]
+         },
+         "fabric": {
+          "preset": "canvas",
+          "warp": "rust",
+          "weft": "rust"
+         }
+        }
+       ],
+       "fabric": {
+        "preset": "boucle",
+        "warp": "sand",
+        "weft": "sand"
+       },
+       "softCell": 45,
+       "figure": "coarse"
+      }
+     ]
+    }
+   },
+   "issues": []
+  },
+  {
+   "id": "SAB-BED-king",
+   "name": "Sable bed, king",
+   "kind": "sleep",
+   "piece": "BED",
+   "collection": "SAB",
+   "room": "bedroom",
+   "job": "sleep",
+   "note": "Sable collection, modern-organic, bedroom",
+   "words": [
+    "Sable",
+    "bed"
+   ],
+   "size": [
+    1.93,
+    1.1,
+    2.13
+   ],
+   "listed": [
+    1930,
+    2130,
+    1100
+   ],
+   "triangles": 11920,
+   "bytes": 742952,
+   "file": "models/SAB-BED-king.glb",
+   "mojulo": {
+    "ref": "sku_sab_bed_king_mw1nnipo",
+    "kind": "workbench",
+    "spec": {
+     "units": "mm",
+     "frames": [
+      {
+       "id": "bed",
+       "unit": "mm",
+       "detail": "boxes",
+       "members": [
+        {
+         "id": "rail-l",
+         "box": {
+          "min": [
+           0,
+           0,
+           160
+          ],
+          "max": [
+           28,
+           2070,
+           280
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "rail-r",
+         "box": {
+          "min": [
+           1902,
+           0,
+           160
+          ],
+          "max": [
+           1930,
+           2070,
+           280
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "foot",
+         "box": {
+          "min": [
+           28,
+           0,
+           160
+          ],
+          "max": [
+           1902,
+           28,
+           280
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "head",
+         "box": {
+          "min": [
+           0,
+           2070,
+           0
+          ],
+          "max": [
+           1930,
+           2130,
+           1100
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "leg-hl",
+         "box": {
+          "min": [
+           0,
+           2010,
+           0
+          ],
+          "max": [
+           60,
+           2070,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "leg-hr",
+         "box": {
+          "min": [
+           1870,
+           2010,
+           0
+          ],
+          "max": [
+           1930,
+           2070,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "leg-fl",
+         "box": {
+          "min": [
+           0,
+           0,
+           0
+          ],
+          "max": [
+           60,
+           60,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "leg-fr",
+         "box": {
+          "min": [
+           1870,
+           0,
+           0
+          ],
+          "max": [
+           1930,
+           60,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        }
+       ],
+       "soft": [
+        {
+         "id": "mattress",
+         "kind": "cushion",
+         "style": "boxed",
+         "box": {
+          "min": [
+           33,
+           33,
+           280
+          ],
+          "max": [
+           1897,
+           2065,
+           500
+          ]
+         },
+         "fabric": "ticking",
+         "crown": 10
+        },
+        {
+         "id": "pillow-l",
+         "kind": "pillow",
+         "box": {
+          "min": [
+           88,
+           1680,
+           500
+          ],
+          "max": [
+           935,
+           2040,
+           640
+          ]
+         },
+         "fabric": {
+          "preset": "boucle",
+          "warp": "sand",
+          "weft": "sand"
+         },
+         "tilt": 20
+        },
+        {
+         "id": "pillow-r",
+         "kind": "pillow",
+         "box": {
+          "min": [
+           995,
+           1680,
+           500
+          ],
+          "max": [
+           1842,
+           2040,
+           640
+          ]
+         },
+         "fabric": {
+          "preset": "boucle",
+          "warp": "sand",
+          "weft": "sand"
+         },
+         "tilt": 20
+        },
+        {
+         "id": "throw",
+         "kind": "cushion",
+         "style": "boxed",
+         "box": {
+          "min": [
+           33,
+           33,
+           460
+          ],
+          "max": [
+           1897,
+           809.4000000000001,
+           540
+          ]
+         },
+         "fabric": {
+          "preset": "canvas",
+          "warp": "rust",
+          "weft": "rust"
+         }
+        }
+       ],
+       "fabric": {
+        "preset": "boucle",
+        "warp": "sand",
+        "weft": "sand"
+       },
+       "softCell": 45,
+       "figure": "coarse"
+      }
+     ]
+    }
+   },
+   "issues": []
+  },
+  {
+   "id": "SAB-BED-queen",
+   "name": "Sable bed, queen",
+   "kind": "sleep",
+   "piece": "BED",
+   "collection": "SAB",
+   "room": "bedroom",
+   "job": "sleep",
+   "note": "Sable collection, modern-organic, bedroom",
+   "words": [
+    "Sable",
+    "bed"
+   ],
+   "size": [
+    1.6,
+    1.05,
+    2.1
+   ],
+   "listed": [
+    1600,
+    2100,
+    1050
+   ],
+   "triangles": 9848,
+   "bytes": 622580,
+   "file": "models/SAB-BED-queen.glb",
+   "mojulo": {
+    "ref": "sku_sab_bed_queen_mw1nnicd",
+    "kind": "workbench",
+    "spec": {
+     "units": "mm",
+     "frames": [
+      {
+       "id": "bed",
+       "unit": "mm",
+       "detail": "boxes",
+       "members": [
+        {
+         "id": "rail-l",
+         "box": {
+          "min": [
+           0,
+           0,
+           160
+          ],
+          "max": [
+           28,
+           2040,
+           280
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "rail-r",
+         "box": {
+          "min": [
+           1572,
+           0,
+           160
+          ],
+          "max": [
+           1600,
+           2040,
+           280
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "foot",
+         "box": {
+          "min": [
+           28,
+           0,
+           160
+          ],
+          "max": [
+           1572,
+           28,
+           280
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "head",
+         "box": {
+          "min": [
+           0,
+           2040,
+           0
+          ],
+          "max": [
+           1600,
+           2100,
+           1050
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "leg-hl",
+         "box": {
+          "min": [
+           0,
+           1980,
+           0
+          ],
+          "max": [
+           60,
+           2040,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "leg-hr",
+         "box": {
+          "min": [
+           1540,
+           1980,
+           0
+          ],
+          "max": [
+           1600,
+           2040,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "leg-fl",
+         "box": {
+          "min": [
+           0,
+           0,
+           0
+          ],
+          "max": [
+           60,
+           60,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "leg-fr",
+         "box": {
+          "min": [
+           1540,
+           0,
+           0
+          ],
+          "max": [
+           1600,
+           60,
+           160
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        }
+       ],
+       "soft": [
+        {
+         "id": "mattress",
+         "kind": "cushion",
+         "style": "boxed",
+         "box": {
+          "min": [
+           33,
+           33,
+           280
+          ],
+          "max": [
+           1567,
+           2035,
+           500
+          ]
+         },
+         "fabric": "ticking",
+         "crown": 10
+        },
+        {
+         "id": "pillow-l",
+         "kind": "pillow",
+         "box": {
+          "min": [
+           88,
+           1650,
+           500
+          ],
+          "max": [
+           770,
+           2010,
+           640
+          ]
+         },
+         "fabric": {
+          "preset": "boucle",
+          "warp": "sand",
+          "weft": "sand"
+         },
+         "tilt": 20
+        },
+        {
+         "id": "pillow-r",
+         "kind": "pillow",
+         "box": {
+          "min": [
+           830,
+           1650,
+           500
+          ],
+          "max": [
+           1512,
+           2010,
+           640
+          ]
+         },
+         "fabric": {
+          "preset": "boucle",
+          "warp": "sand",
+          "weft": "sand"
+         },
+         "tilt": 20
+        },
+        {
+         "id": "throw",
+         "kind": "cushion",
+         "style": "boxed",
+         "box": {
+          "min": [
+           33,
+           33,
+           460
+          ],
+          "max": [
+           1567,
+           798,
+           540
+          ]
+         },
+         "fabric": {
+          "preset": "canvas",
+          "warp": "rust",
+          "weft": "rust"
+         }
+        }
+       ],
+       "fabric": {
+        "preset": "boucle",
+        "warp": "sand",
+        "weft": "sand"
+       },
+       "softCell": 45,
+       "figure": "coarse"
+      }
+     ]
+    }
+   },
+   "issues": []
+  },
+  {
+   "id": "SAB-BEN-std",
+   "name": "Sable low bench",
+   "kind": "converse",
+   "piece": "BEN",
+   "collection": "SAB",
+   "room": "living",
+   "job": "converse",
+   "size": [
+    1.2,
+    0.45,
+    0.4
+   ],
+   "listed": [
+    1200,
+    400,
+    450
+   ],
+   "triangles": 940,
+   "bytes": 106652,
+   "file": "models/SAB-BEN-std.glb",
+   "mojulo": {
+    "ref": "sku_sab_ben_std_mw1ndt7f",
+    "kind": "furniture",
+    "spec": {
+     "piece": "table",
+     "forms": {
+      "legs": "bun"
+     },
+     "finish": {
+      "timber": "oak",
+      "wood": "wax"
+     },
+     "size": [
+      1200,
+      400,
+      450
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, living",
+   "words": [
+    "Sable",
+    "low bench"
+   ]
+  },
+  {
+   "id": "SAB-BKC-std",
+   "name": "Sable bookcase, std",
+   "kind": "display",
+   "piece": "BKC",
+   "collection": "SAB",
+   "room": "living",
+   "job": "display",
+   "size": [
+    0.8,
+    1.83,
+    0.32
+   ],
+   "listed": [
+    800,
+    320,
+    1830
+   ],
+   "triangles": 204,
+   "bytes": 278708,
+   "file": "models/SAB-BKC-std.glb",
+   "mojulo": {
+    "ref": "sku_sab_bkc_std_mw1ndqfr",
+    "kind": "furniture",
+    "spec": {
+     "like": "bookcase",
+     "finish": {
+      "board": "plywood",
+      "wood": "wax"
+     },
+     "size": [
+      800,
+      320,
+      1830
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, living",
+   "words": [
+    "Sable",
+    "bookcase"
+   ]
+  },
+  {
+   "id": "SAB-BKC-tall",
+   "name": "Sable bookcase, tall",
+   "kind": "display",
+   "piece": "BKC",
+   "collection": "SAB",
+   "room": "living",
+   "job": "display",
+   "size": [
+    1,
+    2.1,
+    0.35
+   ],
+   "listed": [
+    1000,
+    350,
+    2100
+   ],
+   "triangles": 228,
+   "bytes": 312064,
+   "file": "models/SAB-BKC-tall.glb",
+   "mojulo": {
+    "ref": "sku_sab_bkc_tall_mw1ndquk",
+    "kind": "furniture",
+    "spec": {
+     "like": "bookcase",
+     "finish": {
+      "board": "plywood",
+      "wood": "wax"
+     },
+     "size": [
+      1000,
+      350,
+      2100
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, living",
+   "words": [
+    "Sable",
+    "bookcase"
+   ]
+  },
+  {
+   "id": "SAB-CHT-tall",
+   "name": "Sable chest of drawers, tall",
+   "kind": "dress",
+   "piece": "CHT",
+   "collection": "SAB",
+   "room": "bedroom",
+   "job": "dress",
+   "size": [
+    0.8,
+    1.1,
+    0.477
+   ],
+   "listed": [
+    800,
+    450,
+    1100
+   ],
+   "triangles": 492,
+   "bytes": 719688,
+   "file": "models/SAB-CHT-tall.glb",
+   "mojulo": {
+    "ref": "sku_sab_cht_tall_mw1nln8x",
+    "kind": "furniture",
+    "spec": {
+     "piece": "casework",
+     "forms": {
+      "front": "drawers"
+     },
+     "finish": {
+      "board": "plywood",
+      "wood": "wax"
+     },
+     "size": [
+      800,
+      450,
+      1100
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, bedroom",
+   "words": [
+    "Sable",
+    "chest of drawers"
+   ]
+  },
+  {
+   "id": "SAB-COF-long",
+   "name": "Sable coffee table, long",
+   "kind": "converse",
+   "piece": "COF",
+   "collection": "SAB",
+   "room": "living",
+   "job": "converse",
+   "size": [
+    1.3,
+    0.38,
+    0.7
+   ],
+   "listed": [
+    1300,
+    700,
+    380
+   ],
+   "triangles": 940,
+   "bytes": 115304,
+   "file": "models/SAB-COF-long.glb",
+   "mojulo": {
+    "ref": "sku_sab_cof_long_mw1n6tca",
+    "kind": "furniture",
+    "spec": {
+     "like": "coffee-table",
+     "forms": {
+      "legs": "bun"
+     },
+     "finish": {
+      "timber": "oak",
+      "wood": "wax"
+     },
+     "size": [
+      1300,
+      700,
+      380
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, living",
+   "words": [
+    "Sable",
+    "coffee table"
+   ]
+  },
+  {
+   "id": "SAB-COF-std",
+   "name": "Sable coffee table, std",
+   "kind": "converse",
+   "piece": "COF",
+   "collection": "SAB",
+   "room": "living",
+   "job": "converse",
+   "size": [
+    1.1,
+    0.4,
+    0.6
+   ],
+   "listed": [
+    1100,
+    600,
+    400
+   ],
+   "triangles": 940,
+   "bytes": 108804,
+   "file": "models/SAB-COF-std.glb",
+   "mojulo": {
+    "ref": "sku_sab_cof_std_mw1n6sdp",
+    "kind": "furniture",
+    "spec": {
+     "like": "coffee-table",
+     "forms": {
+      "legs": "bun"
+     },
+     "finish": {
+      "timber": "oak",
+      "wood": "wax"
+     },
+     "size": [
+      1100,
+      600,
+      400
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, living",
+   "words": [
+    "Sable",
+    "coffee table"
+   ]
+  },
+  {
+   "id": "SAB-DRS-std",
+   "name": "Sable dresser, std",
+   "kind": "dress",
+   "piece": "DRS",
+   "collection": "SAB",
+   "room": "bedroom",
+   "job": "dress",
+   "size": [
+    1.2,
+    0.8,
+    0.527
+   ],
+   "listed": [
+    1200,
+    500,
+    800
+   ],
+   "triangles": 408,
+   "bytes": 615184,
+   "file": "models/SAB-DRS-std.glb",
+   "mojulo": {
+    "ref": "sku_sab_drs_std_mw1nhu5z",
+    "kind": "furniture",
+    "spec": {
+     "piece": "casework",
+     "forms": {
+      "front": "drawers"
+     },
+     "finish": {
+      "board": "plywood",
+      "wood": "wax"
+     },
+     "size": [
+      1200,
+      500,
+      800
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, bedroom",
+   "words": [
+    "Sable",
+    "dresser"
+   ]
+  },
+  {
+   "id": "SAB-DRS-wide",
+   "name": "Sable dresser, wide",
+   "kind": "dress",
+   "piece": "DRS",
+   "collection": "SAB",
+   "room": "bedroom",
+   "job": "dress",
+   "size": [
+    1.6,
+    0.8,
+    0.527
+   ],
+   "listed": [
+    1600,
+    500,
+    800
+   ],
+   "triangles": 408,
+   "bytes": 623828,
+   "file": "models/SAB-DRS-wide.glb",
+   "mojulo": {
+    "ref": "sku_sab_drs_wide_mw1nlf4x",
+    "kind": "furniture",
+    "spec": {
+     "piece": "casework",
+     "forms": {
+      "front": "drawers"
+     },
+     "finish": {
+      "board": "plywood",
+      "wood": "wax"
+     },
+     "size": [
+      1600,
+      500,
+      800
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, bedroom",
+   "words": [
+    "Sable",
+    "dresser"
+   ]
+  },
+  {
+   "id": "SAB-LNG-std",
+   "name": "Sable lounge chair",
+   "kind": "read",
+   "piece": "LNG",
+   "collection": "SAB",
+   "room": "living",
+   "job": "read",
+   "size": [
+    0.76,
+    0.76,
+    0.82
+   ],
+   "listed": [
+    760,
+    820,
+    760
+   ],
+   "triangles": 6200,
+   "bytes": 352924,
+   "file": "models/SAB-LNG-std.glb",
+   "mojulo": {
+    "ref": "sku_sab_lng_std_mw1n6ctg",
+    "kind": "furniture",
+    "spec": {
+     "like": "club-chair",
+     "forms": {
+      "legs": "bun"
+     },
+     "finish": {
+      "fabric": {
+       "preset": "canvas",
+       "warp": "rust",
+       "weft": "rust"
+      },
+      "timber": "oak"
+     },
+     "size": [
+      760,
+      820,
+      760
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, living",
+   "words": [
+    "Sable",
+    "lounge chair"
+   ]
+  },
+  {
+   "id": "SAB-LOV-std",
+   "name": "Sable loveseat",
+   "kind": "converse",
+   "piece": "LOV",
+   "collection": "SAB",
+   "room": "living",
+   "job": "converse",
+   "size": [
+    1.45,
+    0.8,
+    0.85
+   ],
+   "listed": [
+    1450,
+    850,
+    800
+   ],
+   "triangles": 7472,
+   "bytes": 471980,
+   "file": "models/SAB-LOV-std.glb",
+   "mojulo": {
+    "ref": "sku_sab_lov_std_mw1n69mc",
+    "kind": "furniture",
+    "spec": {
+     "like": "settee",
+     "forms": {
+      "legs": "bun"
+     },
+     "finish": {
+      "fabric": {
+       "preset": "boucle",
+       "warp": "sand",
+       "weft": "sand"
+      },
+      "timber": "oak"
+     },
+     "size": [
+      1450,
+      850,
+      800
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, living",
+   "words": [
+    "Sable",
+    "loveseat"
+   ]
+  },
+  {
+   "id": "SAB-MCS-3-seat",
+   "name": "Sable mid-century sofa, 3-seat",
+   "kind": "converse",
+   "piece": "MCS",
+   "collection": "SAB",
+   "room": "living",
+   "job": "converse",
+   "size": [
+    2,
+    0.78,
+    0.85
+   ],
+   "listed": [
+    2000,
+    850,
+    780
+   ],
+   "triangles": 8972,
+   "bytes": 552648,
+   "file": "models/SAB-MCS-3-seat.glb",
+   "mojulo": {
+    "ref": "sku_sab_mcs_3_seat_mw1n6a53",
+    "kind": "furniture",
+    "spec": {
+     "like": "mid-century-sofa",
+     "finish": {
+      "fabric": {
+       "preset": "boucle",
+       "warp": "sand",
+       "weft": "sand"
+      },
+      "timber": "oak"
+     },
+     "size": [
+      2000,
+      850,
+      780
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, living",
+   "words": [
+    "Sable",
+    "mid-century sofa"
+   ]
+  },
+  {
+   "id": "SAB-MDU-std",
+   "name": "Sable media wall unit",
+   "kind": "media",
+   "piece": "MDU",
+   "collection": "SAB",
+   "room": "living",
+   "job": "media",
+   "size": [
+    2,
+    1.8,
+    0.447
+   ],
+   "listed": [
+    2000,
+    420,
+    1800
+   ],
+   "triangles": 156,
+   "bytes": 235292,
+   "file": "models/SAB-MDU-std.glb",
+   "mojulo": {
+    "ref": "sku_sab_mdu_std_mw1nap22",
+    "kind": "furniture",
+    "spec": {
+     "piece": "casework",
+     "forms": {
+      "front": "doors"
+     },
+     "finish": {
+      "board": "plywood",
+      "wood": "wax"
+     },
+     "size": [
+      2000,
+      420,
+      1800
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, living",
+   "words": [
+    "Sable",
+    "media wall unit"
+   ]
+  },
+  {
+   "id": "SAB-MED-long",
+   "name": "Sable media console, long",
+   "kind": "media",
+   "piece": "MED",
+   "collection": "SAB",
+   "room": "living",
+   "job": "media",
+   "size": [
+    2.4,
+    0.52,
+    0.477
+   ],
+   "listed": [
+    2400,
+    450,
+    520
+   ],
+   "triangles": 156,
+   "bytes": 244612,
+   "file": "models/SAB-MED-long.glb",
+   "mojulo": {
+    "ref": "sku_sab_med_long_mw1n9ub0",
+    "kind": "furniture",
+    "spec": {
+     "like": "media-console",
+     "finish": {
+      "board": "plywood",
+      "wood": "wax"
+     },
+     "size": [
+      2400,
+      450,
+      520
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, living",
+   "words": [
+    "Sable",
+    "media console"
+   ]
+  },
+  {
+   "id": "SAB-MED-short",
+   "name": "Sable media console, short",
+   "kind": "media",
+   "piece": "MED",
+   "collection": "SAB",
+   "room": "living",
+   "job": "media",
+   "size": [
+    1.2,
+    0.52,
+    0.447
+   ],
+   "listed": [
+    1200,
+    420,
+    520
+   ],
+   "triangles": 156,
+   "bytes": 217980,
+   "file": "models/SAB-MED-short.glb",
+   "mojulo": {
+    "ref": "sku_sab_med_short_mw1n9s21",
+    "kind": "furniture",
+    "spec": {
+     "like": "media-console",
+     "finish": {
+      "board": "plywood",
+      "wood": "wax"
+     },
+     "size": [
+      1200,
+      420,
+      520
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, living",
+   "words": [
+    "Sable",
+    "media console"
+   ]
+  },
+  {
+   "id": "SAB-MED-std",
+   "name": "Sable media console, std",
+   "kind": "media",
+   "piece": "MED",
+   "collection": "SAB",
+   "room": "living",
+   "job": "media",
+   "size": [
+    1.8,
+    0.52,
+    0.477
+   ],
+   "listed": [
+    1800,
+    450,
+    520
+   ],
+   "triangles": 156,
+   "bytes": 231584,
+   "file": "models/SAB-MED-std.glb",
+   "mojulo": {
+    "ref": "sku_sab_med_std_mw1n9t0w",
+    "kind": "furniture",
+    "spec": {
+     "like": "media-console",
+     "finish": {
+      "board": "plywood",
+      "wood": "wax"
+     },
+     "size": [
+      1800,
+      450,
+      520
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, living",
+   "words": [
+    "Sable",
+    "media console"
+   ]
+  },
+  {
+   "id": "SAB-NST-std",
+   "name": "Sable nightstand",
+   "kind": "sleep",
+   "piece": "NST",
+   "collection": "SAB",
+   "room": "bedroom",
+   "job": "sleep",
+   "size": [
+    0.5,
+    0.55,
+    0.427
+   ],
+   "listed": [
+    500,
+    400,
+    550
+   ],
+   "triangles": 240,
+   "bytes": 367080,
+   "file": "models/SAB-NST-std.glb",
+   "mojulo": {
+    "ref": "sku_sab_nst_std_mw1nhobq",
+    "kind": "furniture",
+    "spec": {
+     "like": "nightstand",
+     "finish": {
+      "board": "plywood",
+      "wood": "wax"
+     },
+     "size": [
+      500,
+      400,
+      550
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, bedroom",
+   "words": [
+    "Sable",
+    "nightstand"
+   ]
+  },
+  {
+   "id": "SAB-PLT-king",
+   "name": "Sable platform bed, king",
+   "kind": "sleep",
+   "piece": "PLT",
+   "collection": "SAB",
+   "room": "bedroom",
+   "job": "sleep",
+   "note": "Sable collection, modern-organic, bedroom",
+   "words": [
+    "Sable",
+    "platform bed"
+   ],
+   "size": [
+    2.03,
+    0.9,
+    2.18
+   ],
+   "listed": [
+    2030,
+    2180,
+    900
+   ],
+   "triangles": 12688,
+   "bytes": 778720,
+   "file": "models/SAB-PLT-king.glb",
+   "mojulo": {
+    "ref": "sku_sab_plt_king_mw1nnlik",
+    "kind": "workbench",
+    "spec": {
+     "units": "mm",
+     "frames": [
+      {
+       "id": "bed",
+       "unit": "mm",
+       "detail": "boxes",
+       "members": [
+        {
+         "id": "plinth",
+         "box": {
+          "min": [
+           20,
+           20,
+           0
+          ],
+          "max": [
+           2010,
+           2120,
+           60
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "rail-l",
+         "box": {
+          "min": [
+           0,
+           0,
+           60
+          ],
+          "max": [
+           28,
+           2120,
+           300
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "rail-r",
+         "box": {
+          "min": [
+           2002,
+           0,
+           60
+          ],
+          "max": [
+           2030,
+           2120,
+           300
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "foot",
+         "box": {
+          "min": [
+           28,
+           0,
+           60
+          ],
+          "max": [
+           2002,
+           28,
+           300
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "head",
+         "box": {
+          "min": [
+           0,
+           2120,
+           0
+          ],
+          "max": [
+           2030,
+           2180,
+           900
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        }
+       ],
+       "soft": [
+        {
+         "id": "mattress",
+         "kind": "cushion",
+         "style": "boxed",
+         "box": {
+          "min": [
+           33,
+           33,
+           300
+          ],
+          "max": [
+           1997,
+           2115,
+           520
+          ]
+         },
+         "fabric": "ticking",
+         "crown": 10
+        },
+        {
+         "id": "pillow-l",
+         "kind": "pillow",
+         "box": {
+          "min": [
+           88,
+           1730,
+           520
+          ],
+          "max": [
+           985,
+           2090,
+           660
+          ]
+         },
+         "fabric": {
+          "preset": "boucle",
+          "warp": "sand",
+          "weft": "sand"
+         },
+         "tilt": 20
+        },
+        {
+         "id": "pillow-r",
+         "kind": "pillow",
+         "box": {
+          "min": [
+           1045,
+           1730,
+           520
+          ],
+          "max": [
+           1942,
+           2090,
+           660
+          ]
+         },
+         "fabric": {
+          "preset": "boucle",
+          "warp": "sand",
+          "weft": "sand"
+         },
+         "tilt": 20
+        },
+        {
+         "id": "throw",
+         "kind": "cushion",
+         "style": "boxed",
+         "box": {
+          "min": [
+           33,
+           33,
+           480
+          ],
+          "max": [
+           1997,
+           828.4000000000001,
+           560
+          ]
+         },
+         "fabric": {
+          "preset": "canvas",
+          "warp": "rust",
+          "weft": "rust"
+         }
+        }
+       ],
+       "fabric": {
+        "preset": "boucle",
+        "warp": "sand",
+        "weft": "sand"
+       },
+       "softCell": 45,
+       "figure": "coarse"
+      }
+     ]
+    }
+   },
+   "issues": []
+  },
+  {
+   "id": "SAB-PLT-queen",
+   "name": "Sable platform bed, queen",
+   "kind": "sleep",
+   "piece": "PLT",
+   "collection": "SAB",
+   "room": "bedroom",
+   "job": "sleep",
+   "note": "Sable collection, modern-organic, bedroom",
+   "words": [
+    "Sable",
+    "platform bed"
+   ],
+   "size": [
+    1.7,
+    0.9,
+    2.15
+   ],
+   "listed": [
+    1700,
+    2150,
+    900
+   ],
+   "triangles": 10484,
+   "bytes": 653784,
+   "file": "models/SAB-PLT-queen.glb",
+   "mojulo": {
+    "ref": "sku_sab_plt_queen_mw1nnkkk",
+    "kind": "workbench",
+    "spec": {
+     "units": "mm",
+     "frames": [
+      {
+       "id": "bed",
+       "unit": "mm",
+       "detail": "boxes",
+       "members": [
+        {
+         "id": "plinth",
+         "box": {
+          "min": [
+           20,
+           20,
+           0
+          ],
+          "max": [
+           1680,
+           2090,
+           60
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "rail-l",
+         "box": {
+          "min": [
+           0,
+           0,
+           60
+          ],
+          "max": [
+           28,
+           2090,
+           300
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "rail-r",
+         "box": {
+          "min": [
+           1672,
+           0,
+           60
+          ],
+          "max": [
+           1700,
+           2090,
+           300
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "foot",
+         "box": {
+          "min": [
+           28,
+           0,
+           60
+          ],
+          "max": [
+           1672,
+           28,
+           300
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        },
+        {
+         "id": "head",
+         "box": {
+          "min": [
+           0,
+           2090,
+           0
+          ],
+          "max": [
+           1700,
+           2150,
+           900
+          ]
+         },
+         "species": "oak",
+         "finish": "wax"
+        }
+       ],
+       "soft": [
+        {
+         "id": "mattress",
+         "kind": "cushion",
+         "style": "boxed",
+         "box": {
+          "min": [
+           33,
+           33,
+           300
+          ],
+          "max": [
+           1667,
+           2085,
+           520
+          ]
+         },
+         "fabric": "ticking",
+         "crown": 10
+        },
+        {
+         "id": "pillow-l",
+         "kind": "pillow",
+         "box": {
+          "min": [
+           88,
+           1700,
+           520
+          ],
+          "max": [
+           820,
+           2060,
+           660
+          ]
+         },
+         "fabric": {
+          "preset": "boucle",
+          "warp": "sand",
+          "weft": "sand"
+         },
+         "tilt": 20
+        },
+        {
+         "id": "pillow-r",
+         "kind": "pillow",
+         "box": {
+          "min": [
+           880,
+           1700,
+           520
+          ],
+          "max": [
+           1612,
+           2060,
+           660
+          ]
+         },
+         "fabric": {
+          "preset": "boucle",
+          "warp": "sand",
+          "weft": "sand"
+         },
+         "tilt": 20
+        },
+        {
+         "id": "throw",
+         "kind": "cushion",
+         "style": "boxed",
+         "box": {
+          "min": [
+           33,
+           33,
+           480
+          ],
+          "max": [
+           1667,
+           817,
+           560
+          ]
+         },
+         "fabric": {
+          "preset": "canvas",
+          "warp": "rust",
+          "weft": "rust"
+         }
+        }
+       ],
+       "fabric": {
+        "preset": "boucle",
+        "warp": "sand",
+        "weft": "sand"
+       },
+       "softCell": 45,
+       "figure": "coarse"
+      }
+     ]
+    }
+   },
+   "issues": []
+  },
+  {
+   "id": "SAB-SDB-long",
+   "name": "Sable sideboard, long",
+   "kind": "store",
+   "piece": "SDB",
+   "collection": "SAB",
+   "room": "living",
+   "job": "store",
+   "size": [
+    2,
+    0.8,
+    0.487
+   ],
+   "listed": [
+    2000,
+    460,
+    800
+   ],
+   "triangles": 252,
+   "bytes": 365148,
+   "file": "models/SAB-SDB-long.glb",
+   "mojulo": {
+    "ref": "sku_sab_sdb_long_mw1ndsth",
+    "kind": "furniture",
+    "spec": {
+     "like": "sideboard",
+     "finish": {
+      "board": "plywood",
+      "wood": "wax"
+     },
+     "size": [
+      2000,
+      460,
+      800
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, living",
+   "words": [
+    "Sable",
+    "sideboard"
+   ]
+  },
+  {
+   "id": "SAB-SDB-std",
+   "name": "Sable sideboard, std",
+   "kind": "store",
+   "piece": "SDB",
+   "collection": "SAB",
+   "room": "living",
+   "job": "store",
+   "size": [
+    1.6,
+    0.8,
+    0.477
+   ],
+   "listed": [
+    1600,
+    450,
+    800
+   ],
+   "triangles": 252,
+   "bytes": 356280,
+   "file": "models/SAB-SDB-std.glb",
+   "mojulo": {
+    "ref": "sku_sab_sdb_std_mw1ndsca",
+    "kind": "furniture",
+    "spec": {
+     "like": "sideboard",
+     "finish": {
+      "board": "plywood",
+      "wood": "wax"
+     },
+     "size": [
+      1600,
+      450,
+      800
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, living",
+   "words": [
+    "Sable",
+    "sideboard"
+   ]
+  },
+  {
+   "id": "SAB-SID-std",
+   "name": "Sable side table",
+   "kind": "read",
+   "piece": "SID",
+   "collection": "SAB",
+   "room": "living",
+   "job": "read",
+   "size": [
+    0.45,
+    0.55,
+    0.45
+   ],
+   "listed": [
+    450,
+    450,
+    550
+   ],
+   "triangles": 940,
+   "bytes": 91536,
+   "file": "models/SAB-SID-std.glb",
+   "mojulo": {
+    "ref": "sku_sab_sid_std_mw1n71ix",
+    "kind": "furniture",
+    "spec": {
+     "like": "coffee-table",
+     "forms": {
+      "legs": "bun"
+     },
+     "finish": {
+      "timber": "oak",
+      "wood": "wax"
+     },
+     "size": [
+      450,
+      450,
+      550
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, living",
+   "words": [
+    "Sable",
+    "side table"
+   ]
+  },
+  {
+   "id": "SAB-SOF-2-seat",
+   "name": "Sable sofa, 2-seat",
+   "kind": "converse",
+   "piece": "SOF",
+   "collection": "SAB",
+   "room": "living",
+   "job": "converse",
+   "size": [
+    1.7,
+    0.78,
+    0.9
+   ],
+   "listed": [
+    1700,
+    900,
+    780
+   ],
+   "triangles": 11676,
+   "bytes": 810000,
+   "file": "models/SAB-SOF-2-seat.glb",
+   "mojulo": {
+    "ref": "sku_sab_sof_2_seat_mw1n67uk",
+    "kind": "furniture",
+    "spec": {
+     "like": "sofa",
+     "forms": {
+      "arms": "rolled",
+      "back": "loose",
+      "seat": "loose",
+      "legs": "bun"
+     },
+     "finish": {
+      "fabric": {
+       "preset": "boucle",
+       "warp": "sand",
+       "weft": "sand"
+      },
+      "timber": "oak"
+     },
+     "size": [
+      1700,
+      900,
+      780
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, living",
+   "words": [
+    "Sable",
+    "sofa"
+   ]
+  },
+  {
+   "id": "SAB-SOF-3-seat",
+   "name": "Sable sofa, 3-seat",
+   "kind": "converse",
+   "piece": "SOF",
+   "collection": "SAB",
+   "room": "living",
+   "job": "converse",
+   "size": [
+    2.1,
+    0.78,
+    0.92
+   ],
+   "listed": [
+    2100,
+    920,
+    780
+   ],
+   "triangles": 13492,
+   "bytes": 874152,
+   "file": "models/SAB-SOF-3-seat.glb",
+   "mojulo": {
+    "ref": "sku_sab_sof_3_seat_mw1n684b",
+    "kind": "furniture",
+    "spec": {
+     "like": "sofa",
+     "forms": {
+      "arms": "rolled",
+      "back": "loose",
+      "seat": "loose",
+      "legs": "bun"
+     },
+     "finish": {
+      "fabric": {
+       "preset": "boucle",
+       "warp": "sand",
+       "weft": "sand"
+      },
+      "timber": "oak"
+     },
+     "size": [
+      2100,
+      920,
+      780
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, living",
+   "words": [
+    "Sable",
+    "sofa"
+   ]
+  },
+  {
+   "id": "SAB-SOF-4-seat",
+   "name": "Sable sofa, 4-seat",
+   "kind": "converse",
+   "piece": "SOF",
+   "collection": "SAB",
+   "room": "living",
+   "job": "converse",
+   "size": [
+    2.6,
+    0.78,
+    0.95
+   ],
+   "listed": [
+    2600,
+    950,
+    780
+   ],
+   "triangles": 17572,
+   "bytes": 1111472,
+   "file": "models/SAB-SOF-4-seat.glb",
+   "mojulo": {
+    "ref": "sku_sab_sof_4_seat_mw1n68dj",
+    "kind": "furniture",
+    "spec": {
+     "like": "sofa",
+     "forms": {
+      "arms": "rolled",
+      "back": "loose",
+      "seat": "loose",
+      "legs": "bun"
+     },
+     "finish": {
+      "fabric": {
+       "preset": "boucle",
+       "warp": "sand",
+       "weft": "sand"
+      },
+      "timber": "oak"
+     },
+     "size": [
+      2600,
+      950,
+      780
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, living",
+   "words": [
+    "Sable",
+    "sofa"
+   ]
+  },
+  {
+   "id": "SAB-WRD-double",
+   "name": "Sable wardrobe, double",
+   "kind": "store",
+   "piece": "WRD",
+   "collection": "SAB",
+   "room": "bedroom",
+   "job": "store",
+   "size": [
+    1.6,
+    2.1,
+    0.627
+   ],
+   "listed": [
+    1600,
+    600,
+    2100
+   ],
+   "triangles": 156,
+   "bytes": 230532,
+   "file": "models/SAB-WRD-double.glb",
+   "mojulo": {
+    "ref": "sku_sab_wrd_double_mw1nlorr",
+    "kind": "furniture",
+    "spec": {
+     "piece": "casework",
+     "forms": {
+      "front": "doors"
+     },
+     "finish": {
+      "board": "plywood",
+      "wood": "wax"
+     },
+     "size": [
+      1600,
+      600,
+      2100
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, bedroom",
+   "words": [
+    "Sable",
+    "wardrobe"
+   ]
+  },
+  {
+   "id": "SAB-WRD-single",
+   "name": "Sable wardrobe, single",
+   "kind": "store",
+   "piece": "WRD",
+   "collection": "SAB",
+   "room": "bedroom",
+   "job": "store",
+   "size": [
+    1,
+    2,
+    0.627
+   ],
+   "listed": [
+    1000,
+    600,
+    2000
+   ],
+   "triangles": 156,
+   "bytes": 217560,
+   "file": "models/SAB-WRD-single.glb",
+   "mojulo": {
+    "ref": "sku_sab_wrd_single_mw1nlokc",
+    "kind": "furniture",
+    "spec": {
+     "piece": "casework",
+     "forms": {
+      "front": "doors"
+     },
+     "finish": {
+      "board": "plywood",
+      "wood": "wax"
+     },
+     "size": [
+      1000,
+      600,
+      2000
+     ]
+    }
+   },
+   "issues": [],
+   "note": "Sable collection, modern-organic, bedroom",
+   "words": [
+    "Sable",
+    "wardrobe"
+   ]
+  }
+ ]
+}
