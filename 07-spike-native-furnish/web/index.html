@@ -21,6 +21,11 @@
     <div class="brand"><img src="/favicon.svg" alt=""> Maison3D</div>
     <div class="actions">
       <span id="limit" class="pill" hidden></span>
+      <button id="add" class="ghost" type="button" title="Browse the library and add a piece">Add</button>
+      <button id="roomBtn" class="ghost" type="button" title="The room's size and surfaces">Room</button>
+      <button id="highlight" class="ghost" type="button" aria-pressed="false" title="Drag over the floor or a wall to mark an area (or shift-drag)">Highlight</button>
+      <button id="light" class="ghost" type="button" title="Daylight or evening, lamps on">Day</button>
+      <button id="export" class="ghost" type="button" title="Download the room">Export</button>
       <button id="help" class="ghost" type="button" title="What can I say?">?</button>
       <button id="voice" class="ghost" type="button" aria-pressed="true" title="Read replies aloud">Voice on</button>
       <button id="restart" class="ghost" type="button" title="An empty room again">Start over</button>
@@ -32,13 +37,25 @@
     <button id="close" class="x" type="button" aria-label="Close">×</button>
     <h1>Furnish a room by talking to it</h1>
     <p>You're standing in an empty 20 by 15 ft room. Say or type what you want; click the floor, a wall or a piece first
-      to say "here" or "this". Drag to look around, scroll to move in.</p>
+      to say "here" or "this". Drag to look around, scroll to move in. Drag a piece to move it (Q and E turn it,
+      Delete removes it). Shift-drag over the floor or a wall to highlight an area: "a sofa that fits here".</p>
     <div class="chips" id="examples"></div>
     <p class="small">On a Quest, open this page in the browser and press <b>Enter VR</b>: hold the grip to talk, pull
-      the trigger to point, push the thumbstick forward to step to where you point, left or right to turn.</p>
+      the trigger to point (hold it on a piece to move it, the thumbstick turns it), hold B and sweep to highlight an
+      area, push the thumbstick forward to step to where you point, left or right to turn.</p>
   </section>
 
+  <section id="panel" class="panel" hidden></section>
+
+  <div id="exportMenu" class="menu" hidden>
+    <button type="button" data-export="glb">3D model (.glb) — Blender, Godot, three.js</button>
+    <button type="button" data-export="html">Walkable page (.html) — open in any browser, or VR</button>
+    <button type="button" data-export="mojulo" id="exportMojulo" hidden>With mojulo (USDZ, Godot project)</button>
+  </div>
+
   <aside id="log" aria-live="polite"></aside>
+
+  <div id="area" class="pill" hidden><span></span> <button type="button" class="x" aria-label="Clear the area">×</button></div>
 
   <div id="pointing" class="pill" hidden></div>
 

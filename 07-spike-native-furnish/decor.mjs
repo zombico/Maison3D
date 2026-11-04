@@ -8,7 +8,7 @@ import { partsOf } from '../70-inventory/colour.mjs';
 import { applianceEntries } from './appliances.mjs';
 import { mediaEntries } from './media.mjs';
 import { rugEntries } from './rugs.mjs';
-import { lightEntries } from './lights.mjs';
+import { lightEntries, ceilingEntries } from './lights.mjs';
 import { storageEntries } from './storage.mjs';
 import { vaseEntries } from './vases.mjs';
 
@@ -398,7 +398,7 @@ entries.push(...applianceEntries);
 // media and entertainment (media.mjs): consoles, entertainment centres, TVs and their stands, speakers, a projector
 entries.push(...mediaEntries);
 // rugs in shapes, designs and colourways (rugs.mjs); pot lights (lights.mjs)
-entries.push(...rugEntries, ...lightEntries);
+entries.push(...rugEntries, ...lightEntries, ...ceilingEntries);
 // storage (storage.mjs) and vases (vases.mjs)
 entries.push(...storageEntries, ...vaseEntries);
 

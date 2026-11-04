@@ -14,6 +14,36 @@ The repo holds the product only:
 
 How this becomes a submitted app: [`docs/packaging-proposal.md`](docs/packaging-proposal.md).
 
+## In the browser, by hand as well as by voice
+
+The web client (`07-spike-native-furnish/web/`) does a lot without any model in between: it calls the same tools Muse
+uses (`/api/tool`):
+
+- **Add:** browse the whole library by category or search. A piece goes where you clicked, into your highlighted
+  area, or in front of you.
+- **Move and turn:** drag a piece to move it (on the floor, its wall, or what it stands on). Q and E turn it, Delete
+  removes it. In VR, hold the trigger on a piece to carry it and the thumbstick turns it.
+- **A piece's panel:** turn it, the next size down or up, its finish, its parts' colours, remove.
+- **The room:** its size in feet, and what the floor, walls and ceiling are made of, with their colours.
+- **Highlight an area:** shift-drag (or the Highlight button) over the floor, a wall or the ceiling; in VR, hold B
+  and sweep. Then "a sofa that fits here", or add from the library: the largest size that fits is chosen, backed onto
+  a wall the area runs along; a picture is made to the area; pot lights fill it.
+- **Day and evening:** daylight through the windows, or the evening with the lamps, ceiling lights and pot lights
+  lighting the room (each fixture knows where its bulb is; the nearest eight light the view).
+
+**Every piece keeps its own space.** Its box is its budget: a placement, a move, a resize or a drag that would put it
+in another's is an error, and it is moved to the nearest free spot beside it (a lamp on a table stays on the table;
+rugs, curtains and chairs tucked under their table are exempt). The tool's answer says so.
+
+**Export:**
+- **3D model (.glb):** the room and every piece, its lights as glTF lights, for Blender, Godot, Unity or three.js.
+  It passes the Khronos glTF validator.
+- **Walkable page (.html):** that GLB inside a page that opens in any browser and enters VR on a Quest.
+- **With mojulo** (on a laptop with mojulo, `npm run mojulo:setup`): the room and its pieces are bound as a mesh onto
+  a mojulo sketch and placed in a mojulo floorplan the room's size. mojulo's own exporters then make its walkable
+  `world.html` (orbit, walk with gravity and walls, fly), a USDZ for AR Quick Look, its lit GLB and a Godot 4 project.
+  All of it comes zipped, in about seven seconds.
+
 ## The public demo
 
 The same server serves a web client (`07-spike-native-furnish/web/`): the room in 3D in any browser, typed or spoken

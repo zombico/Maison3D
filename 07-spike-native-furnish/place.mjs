@@ -259,6 +259,18 @@ export function check(piece, size, { room, scene, catalog }) {
   }
   const mount = mountOf(catalog[piece.item]);
   if (mount === 'rug' || mount === 'window') return issues;
+  // the space budget: every piece keeps its own box. One that would stand in another's is an error, and it is moved to
+  // the nearest free spot beside it rather than left inside it
+  const ctx = { room, scene, catalog };
+  const inTheWay = blockers(piece, size, ctx);
+  if (inTheWay.length) {
+    const spot = freeSpot(piece, size, ctx);
+    if (spot) {
+      piece.at = spot.at;
+      box = pieceBox(piece, size);
+      issues.push(`would overlap ${inTheWay.join(', ')}: moved ${spot.d} m to stand beside instead (every piece keeps its own space)`);
+    } else issues.push(`overlaps ${inTheWay.join(', ')} and there is no free spot near it: move or remove something`);
+  }
   if (mount === 'wall') {
     for (const f of room?.items ?? []) {
       if (f.label !== 'door frame' && f.label !== 'window frame') continue;
@@ -287,6 +299,53 @@ export function check(piece, size, { room, scene, catalog }) {
     if (o > 0.02 && vertical(box, b)) issues.push(`overlaps ${other.id} by ${round(o)} m`);
   }
   return issues;
+}
+
+/** The pieces (and real furniture) a piece at its pose would stand in: their ids. */
+function blockers(piece, size, { room, scene, catalog }) {
+  const box = pieceBox(piece, size), out = [];
+  const vertical = (a, b) => Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0) > 0.02;
+  for (const other of scene) {
+    if (other.id === piece.id || ['rug', 'window'].includes(mountOf(catalog[other.item]))) continue;
+    if (piece.around === other.id || other.around === piece.id) continue;
+    const b = pieceBox(other, sizeOf(other, catalog));
+    if (within(other, b, box, catalog) || within(piece, box, b, catalog)) continue;
+    if (overlap(box, b) > 0.02 && vertical(box, b)) out.push(other.id);
+  }
+  for (const item of room?.items ?? []) {
+    if (STRUCTURE.has(item.label)) continue;
+    const b = itemBox(item);
+    if (overlap(box, b) > 0.02 && vertical(box, b)) out.push(`the real ${item.label} ${item.id}`);
+  }
+  return out;
+}
+
+/**
+ * The nearest pose to a piece's own where it stands in nobody's way, inside the walls and clear of the doors: out from
+ * where it is in widening rings, its own sides first (a wall piece slides along its wall; a piece standing on another
+ * stays on it). Null if there is none within 3 m.
+ */
+function freeSpot(piece, size, ctx) {
+  const mount = mountOf(ctx.catalog[piece.item]), f = norm(xz(piece.facing)), r = rightOf(f);
+  const host = piece.on ? ctx.scene.find((p) => p.id === piece.on) : null, hb = host && pieceBox(host, sizeOf(host, ctx.catalog));
+  const dirs = mount === 'wall' ? [r, [-r[0], -r[1]]] : [r, [-r[0], -r[1]], f, [-f[0], -f[1]], ...[0, 1, 2, 3].map((k) => turn(r, 45 + k * 90))];
+  const ws = walls(ctx.room), doors = mount === 'floor' ? doorZones(ctx.room) : [];
+  for (let d = 0.05; d <= 3.0001; d += 0.05) {
+    for (const dir of dirs) {
+      const cand = { ...piece, at: [round(piece.at[0] + dir[0] * d), piece.at[1], round(piece.at[2] + dir[1] * d)] }, box = pieceBox(cand, size);
+      // still on what it stands on
+      if (hb && (Math.abs(dot([box.c[0] - hb.c[0], box.c[1] - hb.c[1]], hb.u)) + reach(box, hb.u) > hb.hu + 0.01 || Math.abs(dot([box.c[0] - hb.c[0], box.c[1] - hb.c[1]], hb.v)) + reach(box, hb.v) > hb.hv + 0.01)) continue;
+      // inside every wall it stands in front of
+      if (!ctx.catalog[piece.item].corner && ws.some((w) => { const along = [-w.n[1], w.n[0]], off = [box.c[0] - w.center[0], box.c[1] - w.center[2]]; return Math.abs(dot(off, along)) <= w.length / 2 + reach(box, along) && reach(box, w.n) - dot(off, w.n) > 0.01; })) continue;
+      if (doors.some((z) => overlap(box, z) > 0.02)) continue;
+      if (!blockers(cand, size, ctx).length) {
+        // a hand's breadth more, so the two do not touch, when that is free too
+        const more = { ...cand, at: [round(cand.at[0] + dir[0] * 0.05), cand.at[1], round(cand.at[2] + dir[1] * 0.05)] };
+        return blockers(more, size, ctx).length ? { at: cand.at, d: round(d) } : { at: more.at, d: round(d + 0.05) };
+      }
+    }
+  }
+  return null;
 }
 
 /** Whether box `g` sits inside the opening of `host` (box `hb`): an entertainment centre's, where the TV goes. */

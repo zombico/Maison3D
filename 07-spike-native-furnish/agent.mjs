@@ -9,7 +9,7 @@ import { decorCatalog, decorModel, fitTo, customFit, CUSTOM_ART } from './decor.
 import { FINISHES } from './appliances.mjs';
 import { MEDIA_FINISHES, holdsWidth } from './media.mjs';
 import { rugFit, RUG_DESIGNS, RUG_PALETTES } from './rugs.mjs';
-import { TRIMS } from './lights.mjs';
+import { TRIMS, lampLight } from './lights.mjs';
 import { GLAZES } from './vases.mjs';
 import { SURFACES, SURFACE_KINDS } from './surfaces.mjs';
 import { PIECES as INVENTORY_PIECES, COLLECTIONS } from '../70-inventory/catalogue.mjs';
@@ -62,6 +62,8 @@ for (const e of decorCatalog()) { catalog[e.id] = e; catalogList.push(e); }
 // loveseat is the sofa's smallest), so "a smaller one" is the next one down and keeps the piece's colours and materials.
 const LADDER = { LOV: 'SOF' };
 for (const c of catalogList) if (c.piece && c.collection && c.parts) c.made = materialsOf(c.piece, c.collection, Object.keys(c.parts));
+// where the inventory's lamps (and a fireplace) give their light
+for (const c of catalogList) if (!c.light) { const l = lampLight(c); if (l) c.light = l; }
 const area = (c) => (c.listed ? c.listed[0] * c.listed[1] : c.size[0] * Math.max(c.size[1], c.size[2]));
 export const sizesOf = (item) => {
   const c = catalog[item];
@@ -122,6 +124,16 @@ bins, floating shelves and wall cabinets (on the wall), a medicine cabinet, a la
 cabinets, a storage bench, a hall tree, a bar cart and a bookcase with doors, beside the collections' sideboards,
 dressers, chests, wardrobes and bookcases. Vases (VSE-…): bud vases, bottles, an amphora, a jug, a moon jar, a ribbed
 vase, a footed bowl, flowers, eucalyptus, and floor vases of pampas or olive branches. Chairs round a table: around.
+Light: lamps (floor, table, pendants, sconces), ceiling lights (CLF flush mounts, CLS a semi-flush bowl, CHD a
+chandelier, PDG globe pendants, PDL a linear pendant over a table, TRK track lighting) and pot lights really light the
+room (the person switches between day, the light through the windows, and evening, the lamps); a dark corner wants a
+lamp, a dining table a pendant or a chandelier over it (place at its x, z, or with in_area over it).
+Every piece keeps its own space: one placed where another stands is moved beside it, and the result says so; say where
+it ended up, or move something else.
+An area the person highlighted (context.area: on the floor, a wall or the ceiling, its size in metres): "a sofa that fits
+here", "a rug for this", "a frame here", "pot lights here" go into it with in_area (place, or potlights): the largest
+size that fits is chosen and backed onto a wall the area runs along, a picture or canvas is made to the area's size.
+If nothing fits, say the smallest size and the area's.
 Rugs (RUGM rectangles 5x8 to 9x12 ft, RUGN runners, RUGR rounds 4 to 8 ft, RUGO an oval) are woven in a design
 (${RUG_DESIGNS.join(', ')}) and a colourway (${Object.keys(RUG_PALETTES).join(', ')}): place one with design and
 palette, change it with rug; a bigger one is resize, a round one is swap. Under a sofa group a rug reaches under the
@@ -195,6 +207,7 @@ const WHERE = {
   side: { type: 'string', enum: ['left', 'right', 'front', 'behind'], description: 'with next_to, as the person sees it' },
   at_pointing: { type: 'boolean', description: 'where the person pointed: on that floor or surface, or against that wall' },
   in_front: { type: 'boolean', description: 'in front of the person, on the floor' },
+  in_area: { type: 'boolean', description: 'into the area the person highlighted (context.area): the largest of its sizes that fits it, a picture made to it' },
   corner: { type: 'string', description: 'a corner, by the two walls that meet there ("front-left"): a corner piece fits into it; anything else stands with its back to the first wall and its side to the second' },
   at: { type: 'array', items: { type: 'number' }, minItems: 2, maxItems: 3, description: '[x, z] on the floor, or [x, y, z]' },
   face: { type: 'string', description: '"me", "away", or an id to face; default: as the placement implies, else the person' },
@@ -337,6 +350,50 @@ function openingsAround(room) {
   const out = windowsOf(room).map((w) => ({ id: w.id, kind: 'window', wall: w.wall, width: round3(w.width), sill: round3(w.bottom), top: round3(w.top), ...(fromViewer(room?.viewer, w.c) ?? {}), dressed: scene.filter((p) => p.window === w.id).map((p) => p.id) }));
   for (const d of (room?.items ?? []).filter((i) => i.label === 'door frame')) out.push({ id: d.id, kind: 'door', ...(fromViewer(room?.viewer, [d.center[0], d.center[2]]) ?? {}) });
   return out;
+}
+
+const dot2 = (a, b) => a[0] * b[0] + a[1] * b[1];
+/**
+ * Where a piece goes in a highlighted area: { item (the size that fits), where, facing?, pointing?, note } or { error }.
+ * The area: { surface: 'floor' | 'wall' | 'ceiling', wall?, centre [x, y, z], size [along u, along v], u [x, z] }.
+ */
+function fitToArea(item, area, ctx, keepSize = false) {
+  const entry = catalog[item], mount = mountOf(entry), [cx, cy, cz] = area.centre, [a, b] = area.size, u = area.u ?? [1, 0];
+  const ladder = keepSize ? [entry] : sizesOf(item).length ? sizesOf(item) : [entry];
+  const name = entry.name.split(',')[0].toLowerCase(), r2 = (v) => Math.round(v * 100) / 100;
+  if (area.surface === 'floor') {
+    if (!['floor', 'rug'].includes(mount)) return { error: `the ${name} ${mount === 'wall' ? 'hangs on a wall: highlight a wall' : mount === 'ceiling' ? 'hangs from the ceiling: highlight the ceiling' : mount === 'surface' ? 'stands on another piece, not in an area' : 'does not stand on the floor'}` };
+    const long = Math.max(a, b), short = Math.min(a, b), longDir = a >= b ? u : [-u[1], u[0]], shortDir = [-longDir[1], longDir[0]];
+    // a piece's width runs along the area's long side (a rug's length does)
+    const fits = ladder.filter((o) => (mount === 'rug' ? o.size[2] <= long + 0.03 && o.size[0] <= short + 0.03 : o.size[0] <= long + 0.03 && o.size[2] <= short + 0.03));
+    if (!fits.length) return { error: `the highlighted area is ${r2(long)} x ${r2(short)} m; the smallest ${name} is ${ladder[0].size[0]} x ${ladder[0].size[2]} m: highlight a bigger area or pick something smaller` };
+    const pick = fits.at(-1);
+    let facing = longDir, at = [r2(cx), r2(cz)];
+    if (mount !== 'rug') {
+      // backed onto a wall the area runs along, else facing the person
+      const wall = walls(ctx.room).find((w) => Math.abs(dot2(longDir, w.n)) < 0.3 && dot2([cx - w.center[0], cz - w.center[2]], w.n) - short / 2 < 0.5);
+      if (wall) {
+        facing = wall.n;
+        const along = [-wall.n[1], wall.n[0]], s = dot2([cx - wall.center[0], cz - wall.center[2]], along), off = pick.size[2] / 2 + 0.02;
+        at = [r2(wall.center[0] + along[0] * s + wall.n[0] * off), r2(wall.center[2] + along[1] * s + wall.n[1] * off)];
+      } else {
+        const v = ctx.room?.viewer?.position, toV = v ? [v[0] - cx, v[2] - cz] : shortDir;
+        facing = dot2(toV, shortDir) >= 0 ? shortDir : [-shortDir[0], -shortDir[1]];
+      }
+    }
+    return { item: pick.id, where: { at }, facing: [r2(facing[0]), 0, r2(facing[1])], note: `${pick.id} (${pick.size[0]} x ${pick.size[2]} m) in the ${r2(long)} x ${r2(short)} m area${pick.id !== item ? ', the largest size that fits' : ''}` };
+  }
+  if (area.surface === 'wall') {
+    if (mount !== 'wall') return { error: `the ${name} ${mount === 'window' ? 'hangs at a window' : 'does not hang on a wall'}: highlight the floor${mount === 'window' ? ' or point at the window' : ''}` };
+    const pointing = { target: 'wall', id: area.wall, wall: area.wall, point: area.centre, normal: area.normal };
+    const where = { against: area.wall, centre_height: r2(cy - floorOf(ctx.room)) };
+    if (entry.custom) return { item, where: { ...where, width: r2(Math.min(3, a * 0.94)), height: r2(Math.min(3, b * 0.94)) }, pointing, note: `made to the ${r2(a)} x ${r2(b)} m area` };
+    const fits = ladder.filter((o) => o.size[0] <= a + 0.03 && o.size[1] <= b + 0.03);
+    if (!fits.length) return { error: `the highlighted area is ${r2(a)} wide x ${r2(b)} high; the smallest ${name} is ${ladder[0].size[0]} x ${ladder[0].size[1]} m` };
+    return { item: fits.at(-1).id, where, pointing, note: `${fits.at(-1).id} centred in the area` };
+  }
+  if (mount !== 'ceiling') return { error: `the ${name} does not hang from the ceiling: highlight the floor or a wall` };
+  return { item, where: { at: [r2(cx), r2(cz)] }, note: 'centred in the area' };
 }
 
 /** The window meant: asked for, else the pointed one (or the one on the pointed wall nearest the point), else the room's only one, else the one the person faces. */
@@ -495,7 +552,17 @@ export function apply(name, args, ctx) {
     if (!ws.length) return { error: 'the room has no walls yet' };
     const ceil = ceilingOf(ctx.room) - floorOf(ctx.room), spacing = Math.max(0.5, Math.min(3, args.spacing ?? Math.max(1.2, Math.min(1.8, ceil / 2))));
     let spots = [], layout;
-    if (args.over) {
+    if (args.in_area && ctx.area) {
+      // a grid filling the highlighted area (on the ceiling, or the floor under it)
+      const A = ctx.area, u = A.u, v = A.surface === 'wall' ? null : [-u[1], u[0]];
+      if (!v) return { error: 'pot lights go in the ceiling: highlight the ceiling or the floor under where they go' };
+      const na = Math.max(1, Math.round(A.size[0] / spacing)), nb = Math.max(1, Math.round(A.size[1] / spacing));
+      for (let i = 0; i < na; i++) for (let j = 0; j < nb; j++) {
+        const s = -A.size[0] / 2 + (A.size[0] * (i + 0.5)) / na, t = -A.size[1] / 2 + (A.size[1] * (j + 0.5)) / nb;
+        spots.push([A.centre[0] + u[0] * s + v[0] * t, A.centre[2] + u[1] * s + v[1] * t]);
+      }
+      layout = `${na} by ${nb} in the highlighted area`;
+    } else if (args.over) {
       // a line of them over a piece (or a room item), along its width
       const p = scene.find((x) => x.id.toLowerCase() === String(args.over).toLowerCase()), it = (ctx.room?.items ?? []).find((x) => x.id.toLowerCase() === String(args.over).toLowerCase());
       if (!p && !it) return { error: `nothing called ${args.over}` };
@@ -659,7 +726,21 @@ export function apply(name, args, ctx) {
 
   const current = name === 'move' ? scene.find((p) => p.id === args.id) : null;
   if (name === 'move' && !current) return { error: `no piece ${args.id}; pieces are ${scene.map((p) => p.id).join(', ') || 'none'}` };
-  const item = current ? current.item : args.item;
+  let item = current ? current.item : args.item;
+  // into a highlighted area: the largest size that fits, backed onto a wall the area runs along, a picture made to it
+  let areaFacing = null, areaNote = null;
+  if (args.in_area) {
+    if (!catalog[item]) return { error: `no catalogue item ${item}` };
+    if (!ctx.area) return { error: 'nothing is highlighted: ask the person to hold B (or shift-drag) over the area first' };
+    const fa = fitToArea(item, ctx.area, ctx, !!current);
+    if (fa.error) return fa;
+    item = fa.item;
+    args = { ...args, ...fa.where, item, in_area: undefined };
+    for (const k of ['on', 'next_to', 'at_pointing', 'in_front', 'corner']) delete args[k];
+    if (!fa.where.against) delete args.against;
+    if (fa.pointing) ctx = { ...ctx, pointing: fa.pointing };
+    areaFacing = fa.facing ?? null; areaNote = fa.note;
+  }
   if (!catalog[item]) return { error: `no catalogue item ${item}; closest: ${findPieces({ query: String(item).replace(/[-_]/g, ' '), max: 5 }).map((h) => h.id).join(', ') || 'none (try find)'}` };
   // curtains and blinds: made to fit the window they go at, and hung there
   if (mountOf(catalog[item]) === 'window') {
@@ -690,11 +771,13 @@ export function apply(name, args, ctx) {
   }
   // only turning: stay put
   const placed = ['on', 'against', 'corner', 'next_to', 'at_pointing', 'in_front', 'at'].some((k) => where[k] !== undefined && where[k] !== false);
-  const pose = placed || !current ? resolve(where, entry, { ...env, current }) : resolve({ ...where, at: current.at }, entry, { ...env, current });
+  const pose = placed || !current ? resolve(where, entry, { ...env, ...ctx, scene, catalog, current }) : resolve({ ...where, at: current.at }, entry, { ...env, current });
   if (pose.error) return pose;
   const piece = current ?? { id: newId(item), item, ...(fit ? { fit, ...(catalog[item].custom ? { size: entry.size } : {}) } : {}) };
   piece.at = pose.at;
-  piece.facing = pose.facing;
+  piece.facing = areaFacing ?? pose.facing;
+  // what it stands on (a lamp on the side table): a nudge out of another's way keeps it there
+  if (placed) { const host = where.on && scene.find((x) => x.id.toLowerCase() === String(where.on).toLowerCase()); if (host) piece.on = host.id; else delete piece.on; }
   // a tall picture is not hung through the ceiling
   if (mountOf(entry) === 'wall') piece.at[1] = round3(Math.max(floorOf(env.room) + 0.05, Math.min(ceilingOf(env.room) - entry.size[1] - 0.05, piece.at[1])));
   if (!current) scene.push(piece);
@@ -705,7 +788,7 @@ export function apply(name, args, ctx) {
     const room = holdsWidth(catalog[host.item], sizeOf(host, catalog)), tvw = sizeOf(piece, catalog)[0];
     if (room < tvw) issues.push(`the TV (${tvw} m) is wider than ${host.id} (${round3(room)} m): a console about 30 cm wider than the TV suits it (resize one of them)`);
   }
-  return { ok: true, piece: describe(piece), issues };
+  return { ok: true, piece: describe(piece), issues, ...(areaNote ? { area: areaNote } : {}) };
 }
 
 async function chat(messages) {
@@ -738,7 +821,7 @@ real. Making a part in another material is not available in the demo (say so, an
 finishes, sizes, swaps and everything else work.` : '';
 
 /** One turn: returns { reply, calls }; the scene is changed in place. */
-export async function runTurn({ said, pointing, room }) {
+export async function runTurn({ said, pointing, room, area = null }) {
   // `room` is the design's room (rooms.mjs: dictated, or the scan emptied of its furniture), `pointing` what was
   // pointed at in it
   const pointed = pointedPiece(pointing, scene, catalog);
@@ -749,6 +832,8 @@ export async function runTurn({ said, pointing, room }) {
     room: { ...rooms.describeSpec(), floorY: room?.floorY, items: (room?.items ?? []).map(({ outline, ...i }) => i), walls: walls(room).map((w) => ({ id: w.id, faces: w.n.map((v) => Math.round(v * 100) / 100), colour: finish.walls[w.id] ?? finish.wall ?? 'as it started', made: madeOf(finish.surfaces?.walls?.[w.id] ?? finish.surfaces?.wall) })), floor: finish.floor ?? 'as it started', floorMade: madeOf(finish.surfaces?.floor), ceiling: finish.ceiling ?? 'as it started', ceilingMade: madeOf(finish.surfaces?.ceiling) },
     // the windows and doors, as the person sees them from where they stand (and what already hangs at each window)
     openings: openingsAround(room),
+    // what the person highlighted (B in VR, a shift-drag in the browser): where a piece "that fits here" goes
+    area: area ? { surface: area.surface, ...(area.wall ? { wall: area.wall } : {}), size: area.size, centre: area.centre } : null,
     pieces: scene.map(describe),
   };
   const messages = [{ role: 'system', content: SYSTEM + WEB_NOTE }, ...history, { role: 'user', content: JSON.stringify(context) }];
@@ -764,7 +849,7 @@ export async function runTurn({ said, pointing, room }) {
       let result;
       try {
         const args = JSON.parse(call.function?.arguments || '{}');
-        result = apply(call.function?.name, args, { room, pointing, actions });
+        result = apply(call.function?.name, args, { room, pointing, area, actions });
         // a changed room is the room the rest of this turn's calls work in
         if (['room_size', 'opening', 'use_room'].includes(call.function?.name) && result.ok) room = rooms.designRoom(room?.viewer);
         calls.push({ name: call.function?.name, args, result });
