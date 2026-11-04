@@ -49,6 +49,11 @@ class Turns(private val base: String) {
     io.execute { done(runCatching { post("/api/room", JSONObject().put("room", room).put("session", session)) }) }
   }
 
+  /** A piece the person moved with the laser: where they let go of it; answers with where it ended up, and why. */
+  fun move(id: String, at: org.json.JSONArray, facing: org.json.JSONArray, done: (Result<JSONObject>) -> Unit) {
+    io.execute { done(runCatching { post("/api/move", JSONObject().put("id", id).put("at", at).put("facing", facing)) }) }
+  }
+
   /** Takes every piece away; answers with the (empty) scene. */
   fun clear(done: (Result<JSONObject>) -> Unit) {
     io.execute { done(runCatching { post("/api/clear", JSONObject()) }) }

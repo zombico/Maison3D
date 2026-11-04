@@ -263,6 +263,29 @@ Sizes are related: each piece knows its other sizes in its collection, smallest 
 smallest, then 2-, 3- and 4-seat; double, queen, king), and Muse's `resize` tool takes "smaller", "larger" or a size
 by name. The resized piece keeps its back where it was and keeps its colours and materials.
 
+### Decor, mounts, the laser
+
+The dictated room starts at 20 × 15 feet, 10 feet high (6.1 × 4.6 × 3.05 m): a door behind you, a wide window ahead
+and one on your left.
+
+Maison3D's own pieces, for what mojulo has no kind for (`07-spike-native-furnish/decor.mjs`, built on the laptop with
+`mesh.mjs`): ten houseplants in planters (monstera, fiddle-leaf fig, snake plant, pothos, kentia palm, olive tree, ZZ,
+Boston fern, rubber plant, cactus) in their sizes; twelve framed pictures in three sizes, painted by `art.mjs` (colour
+fields, Bauhaus, line drawing, hills, arches, a pencil grid, waves, leaves, a sunset, ink); four mirrors; and curtains
+(pinch-pleat, ripple-fold, grommet, sheer, velvet) and blinds (roman, roller) made to fit the window they hang at. Their
+parts recolour like any piece's (a planter's pot, a frame, the curtain fabric).
+
+Every piece has a mount: floor, rug, wall (pictures hang centred about 1.45 m up, or 22 cm over what they are above:
+"the sunset print above the sofa"), window (curtains: a rod 15 cm over the window running 25 cm past each side, to the
+floor, or "high and wide" near the ceiling, or to the sill; "close the curtains"), ceiling, and surface (a small plant
+on the nightstand). A wall piece that would cover a window or door says so, and curtains follow their window when it
+moves and go when it does. With a catalogue this size Muse reads it as an index, one line per piece, and has `find`.
+
+The laser: a thin beam from the right controller with a dot where it lands, on the room or on a piece, which is what a
+spoken "there" and "this" mean. Point at a piece (a faint box shows round it) and hold the trigger to pick it up: a
+floor piece slides over the floor, a wall piece along its wall, and the thumbstick turns it 15° a click. Let go and the
+server checks it like any placement (`POST /api/move`), nudging it off a wall or out of a doorway and saying why.
+
 ### A dictated room
 
 The design now starts in a fresh room you dictate, not the scan: `07-spike-native-furnish/rooms.mjs` holds its size

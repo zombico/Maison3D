@@ -20,6 +20,17 @@ const STRUCTURE = new Set(['wall', 'invisible wall', 'inner wall', 'floor', 'cei
 const WALLS = new Set(['wall', 'invisible wall', 'inner wall']);
 
 export const floorOf = (room) => room?.floorY ?? 0;
+/** The ceiling's height: the ceiling's own, else the walls' top. */
+export const ceilingOf = (room) => {
+  const c = (room?.items ?? []).find((i) => i.label === 'ceiling');
+  if (c) return c.center[1];
+  const ws = (room?.items ?? []).filter((i) => WALLS.has(i.label));
+  return ws.length ? Math.max(...ws.map((w) => w.center[1] + w.size[1] / 2)) : floorOf(room) + 2.6;
+};
+/** A placed piece's size: its own when it was made to fit (curtains), else its catalogue entry's. */
+export const sizeOf = (piece, catalog) => piece.size ?? catalog[piece.item].size;
+/** How an entry sits: 'floor', 'rug', 'wall', 'window', 'ceiling' or 'surface' (on top of something, or the floor). */
+export const mountOf = (entry) => entry.mount ?? (entry.kind === 'rug' ? 'rug' : 'floor');
 
 /** A footprint: centre, the two axes (width along `r`, depth along `f`), half sizes, and the height range. */
 function pieceBox(piece, size) {
@@ -81,7 +92,7 @@ function find(id, room, scene, catalog) {
   const want = String(id ?? '').toLowerCase().replace(/\s+/g, '');
   const piece = scene.find((p) => p.id.toLowerCase() === want);
   if (piece) {
-    const size = catalog[piece.item].size;
+    const size = sizeOf(piece, catalog);
     return { kind: 'piece', id: piece.id, box: pieceBox(piece, size), top: piece.at[1] + size[1], piece };
   }
   const items = room?.items ?? [];
@@ -102,14 +113,30 @@ export function resolve(where, entry, { room, scene, catalog, pointing, current 
   const viewer = room?.viewer;
   const vpos = viewer?.position ? xz(viewer.position) : null;
   const floor = floorOf(room);
-  const [w, , d] = entry.size;
+  const [w, h, d] = entry.size;
+  const mount = mountOf(entry);
+  const onWall = mount === 'wall';
+  const gap = onWall ? 0.004 : 0.02; // off the wall: a picture hangs flush, furniture stands a little clear
+  // a wall piece's height: asked for (its centre), else over the thing it is above, else where it was, else its own
+  const hangAt = (y) => [floor + (where.height ?? entry.hang ?? 1.45) - h / 2, y].find((v) => v !== undefined);
   let at = current ? [...current.at] : null;
   let facing = current ? norm(xz(current.facing)) : null;
   let autoFace = null; // the facing a placement implies (against a wall: away from it)
 
   const own = (f) => ({ c: [0, 0], u: rightOf(f), v: f, hu: w / 2, hv: d / 2 });
 
-  if (where.on) {
+  if (where.above && onWall) {
+    // a picture over the sofa: on the wall the sofa stands against (or the one asked for), centred on it, 22 cm clear
+    const t = find(where.above, room, scene, catalog);
+    if (!t) return { error: `nothing called "${where.above}"; ids are ${ids(room, scene)}` };
+    const wall = where.against ? walls(room).find((x) => x.id.toLowerCase() === String(where.against).toLowerCase()) : walls(room).map((x) => ({ x, off: Math.abs(dot([t.box.c[0] - x.center[0], t.box.c[1] - x.center[2]], x.n)) })).sort((a, b) => a.off - b.off)[0]?.x;
+    if (!wall) return { error: 'no wall to hang it on' };
+    const along = [-wall.n[1], wall.n[0]], half = wall.length / 2, c = xz(wall.center);
+    const s = Math.max(-half + w / 2, Math.min(half - w / 2, dot([t.box.c[0] - c[0], t.box.c[1] - c[1]], along)));
+    const back = reach(own(wall.n), wall.n);
+    autoFace = wall.n;
+    at = [c[0] + along[0] * s + wall.n[0] * (back + gap), where.height !== undefined ? floor + where.height - h / 2 : t.top + 0.22, c[1] + along[1] * s + wall.n[1] * (back + gap)];
+  } else if (where.on) {
     const t = find(where.on, room, scene, catalog);
     if (!t) return { error: `nothing called "${where.on}"; ids are ${ids(room, scene)}` };
     at = [t.box.c[0], t.top, t.box.c[1]];
@@ -127,7 +154,7 @@ export function resolve(where, entry, { room, scene, catalog, pointing, current 
     }
     autoFace = wall.n;
     const back = reach(own(wall.n), wall.n);
-    at = [p[0] + wall.n[0] * (back + 0.02), floor, p[1] + wall.n[1] * (back + 0.02)];
+    at = [p[0] + wall.n[0] * (back + gap), onWall ? hangAt(where.height === undefined && current ? current.at[1] : undefined) : floor, p[1] + wall.n[1] * (back + gap)];
   } else if (where.next_to) {
     const t = find(where.next_to, room, scene, catalog);
     if (!t) return { error: `nothing called "${where.next_to}"; ids are ${ids(room, scene)}` };
@@ -151,7 +178,8 @@ export function resolve(where, entry, { room, scene, catalog, pointing, current 
       const nn = norm([n[0], n[2]]);
       autoFace = nn;
       const back = reach(own(nn), nn);
-      at = [p[0] + nn[0] * (back + 0.02), floor, p[2] + nn[1] * (back + 0.02)];
+      // a wall piece hangs where the person pointed on the wall, unless a height is asked for
+      at = [p[0] + nn[0] * (back + gap), onWall ? (where.height !== undefined ? hangAt() : p[1] - h / 2) : floor, p[2] + nn[1] * (back + gap)];
     }
   } else if (where.in_front) {
     if (!vpos || !viewer.forward) return { error: 'the headset did not say where the person is' };
@@ -164,6 +192,8 @@ export function resolve(where, entry, { room, scene, catalog, pointing, current 
     at = a.length === 2 ? [a[0], floor, a[1]] : a;
   }
   if (!at) return { error: 'say where: on, against, next_to, at_pointing, in_front or at' };
+  if (onWall && !autoFace && !current) return { error: `${entry.name} hangs on a wall: give against (a wall id), above (a piece), or at_pointing at a wall` };
+  if (mount === 'ceiling') at = [at[0], ceilingOf(room) - h, at[2]];
 
   // facing: asked for, else what the placement implies, else as it was, else towards the person
   const towards = (c) => norm([c[0] - at[0], c[1] - at[2]]);
@@ -200,7 +230,15 @@ export function check(piece, size, { room, scene, catalog }) {
       issues.push(`moved ${round(depth)} m off ${wall.id}`);
     }
   }
-  if (catalog[piece.item].kind === 'rug') return issues;
+  const mount = mountOf(catalog[piece.item]);
+  if (mount === 'rug' || mount === 'window') return issues;
+  if (mount === 'wall') {
+    for (const f of room?.items ?? []) {
+      if (f.label !== 'door frame' && f.label !== 'window frame') continue;
+      const b = itemBox(f), o = overlap(box, { ...b, hu: b.hu + 0.02, hv: b.hv + 0.05 });
+      if (o > 0.01 && Math.min(box.y1, b.y1) - Math.max(box.y0, b.y0) > 0.01) issues.push(`covers the ${f.label === 'door frame' ? 'door' : 'window'} ${f.id}`);
+    }
+  }
   const vertical = (a, b) => Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0) > 0.02;
   for (const item of room?.items ?? []) {
     if (STRUCTURE.has(item.label)) continue;
@@ -211,11 +249,11 @@ export function check(piece, size, { room, scene, catalog }) {
   // a door's opening and the 80 cm in front of it stay clear (a rug may lie there)
   for (const zone of doorZones(room)) {
     const o = overlap(box, zone);
-    if (o > 0.02) issues.push(`blocks the door ${zone.id} by ${round(o)} m (keep 80 cm in front of a door clear)`);
+    if (o > 0.02 && box.y0 < zone.y1) issues.push(`blocks the door ${zone.id} by ${round(o)} m (keep 80 cm in front of a door clear)`);
   }
   for (const other of scene) {
-    if (other.id === piece.id || catalog[other.item].kind === 'rug') continue;
-    const b = pieceBox(other, catalog[other.item].size);
+    if (other.id === piece.id || ['rug', 'window'].includes(mountOf(catalog[other.item]))) continue; // curtains and rugs are in nobody's way
+    const b = pieceBox(other, sizeOf(other, catalog));
     const o = overlap(box, b);
     if (o > 0.02 && vertical(box, b)) issues.push(`overlaps ${other.id} by ${round(o)} m`);
   }
@@ -246,7 +284,7 @@ export function pointedPiece(pointing, scene, catalog) {
   if (!ray) return null;
   let best = null;
   for (const p of scene) {
-    const b = pieceBox(p, catalog[p.item].size);
+    const b = pieceBox(p, sizeOf(p, catalog));
     // the footprint's bounding box, as a box in 3D
     const ex = reach(b, [1, 0]), ez = reach(b, [0, 1]);
     const min = [b.c[0] - ex, b.y0, b.c[1] - ez], max = [b.c[0] + ex, b.y1, b.c[1] + ez];

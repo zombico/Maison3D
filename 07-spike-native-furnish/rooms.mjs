@@ -12,10 +12,12 @@ const round = (v) => Math.round(v * 1000) / 1000;
 export const state = {
   source: 'dictated',
   spec: {
-    width: 4, depth: 5, height: 2.7,
+    // 20 by 15 feet, 10 feet high: a door behind you on the right, a wide window ahead, one on the left
+    width: 6.096, depth: 4.572, height: 3.048,
     openings: [
-      { id: 'door1', kind: 'door', wall: 'back', at: 1.0, width: 0.9, height: 2.1 },
-      { id: 'window1', kind: 'window', wall: 'left', at: 0, width: 1.4, height: 1.3, sill: 0.85 },
+      { id: 'door1', kind: 'door', wall: 'back', at: 1.8, width: 0.91, height: 2.13 },
+      { id: 'window1', kind: 'window', wall: 'front', at: 0, width: 1.8, height: 1.5, sill: 0.8 },
+      { id: 'window2', kind: 'window', wall: 'left', at: 0, width: 1.2, height: 1.5, sill: 0.8 },
     ],
   },
   // where the room stands: the person's place and facing at the start of the headset's session (y up, metres)

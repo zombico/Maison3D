@@ -4,7 +4,9 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { resolve, check, pointedPiece, walls } from './place.mjs';
+import { resolve, check, pointedPiece, walls, sizeOf, mountOf, ceilingOf, floorOf } from './place.mjs';
+import { decorCatalog, decorModel, fitTo } from './decor.mjs';
+import { PIECES as INVENTORY_PIECES, COLLECTIONS } from '../70-inventory/catalogue.mjs';
 import * as rooms from './rooms.mjs';
 import { resolve as resolvePath } from 'node:path';
 import { frameOf, toWorld, dirToWorld, FT } from '../08-spike-mojulo-furnish/toMojulo.mjs';
@@ -41,11 +43,14 @@ if (process.env.MAISON_CATALOG) {
   }
 }
 
+// Maison3D's own pieces (decor.mjs): houseplants, framed pictures, mirrors, curtains and blinds
+for (const e of decorCatalog()) { catalog[e.id] = e; catalogList.push(e); }
+
 // What each inventory piece's parts are made of, and its sizes: the same piece in its collection, smallest first (a
 // loveseat is the sofa's smallest), so "a smaller one" is the next one down and keeps the piece's colours and materials.
 const LADDER = { LOV: 'SOF' };
-for (const c of catalogList) if (c.piece && c.parts) c.made = materialsOf(c.piece, c.collection, Object.keys(c.parts));
-const area = (c) => c.listed[0] * c.listed[1];
+for (const c of catalogList) if (c.piece && c.collection && c.parts) c.made = materialsOf(c.piece, c.collection, Object.keys(c.parts));
+const area = (c) => (c.listed ? c.listed[0] * c.listed[1] : c.size[0] * Math.max(c.size[1], c.size[2]));
 export const sizesOf = (item) => {
   const c = catalog[item];
   if (!c?.piece) return [];
@@ -79,8 +84,14 @@ placed piece it hit if any), where they stand and which way they face, the room 
 door and window frames and floor with ids, centre, size, top; walls carry the way they face and their colour) and the
 pieces already placed (ids such as sofa1). "Behind me", "on my left" and the like are from where they stand now.
 
-Catalogue (width x height x depth in metres; fronts face the way they are turned):
-${catalogList.map((c) => `- ${c.id}: ${c.name}, ${c.size.join(' x ')}${c.note ? ` (${c.note})` : ''}${c.parts && Object.keys(c.parts).length ? `; parts ${Object.entries(c.parts).map(([k, v]) => `${k}${c.made?.[k] ? ` ${c.made[k]}` : ''} ${v}`).join(', ')}` : ''}`).join('\n')}
+The catalogue (${catalogList.length} pieces), one line a piece; sizes are width x depth in metres. An inventory piece's
+id is COLLECTION-PIECE-SIZE (HIN-SOF-3-seat: the Hinoki sofa, 3-seat); the rest are listed by id. find searches it
+all by words (sizes, colours, parts and notes come back with each hit); use it when unsure of an id.
+${catalogIndex()}
+
+How pieces sit: on the floor; rugs under everything; wall pieces (pictures, mirrors) hang on a wall at a height
+(pictures centred about 1.45 m up, or 22 cm over the piece they are above); window pieces (curtains, blinds) are made
+to fit the window they are put at; surface pieces (small plants) go on top of a piece, or the floor.
 
 Materials a part can be made of: ${Object.entries(MATERIALS).map(([k, v]) => `${k}: ${v.join(', ')}`).join('; ')}.
 
@@ -93,14 +104,53 @@ recoloured (the sofa's fabric, a table's wood, a dresser's body): pick the colou
 for what they said ("sage green", "darker wood", "white"), and say it in words, never as a hex. A part can also be
 made of another material (linen to velvet, oak to walnut); that rebuilds the piece and takes a few seconds to appear.
 A smaller or larger one is the same piece in its next size (resize), keeping its colours and materials.
+Curtains open and close (open: 1 drawn back, 0 closed); hung "high and wide" they start near the ceiling.
 The room can be painted (paint): a wall by id, every wall ("all"), the floor or the ceiling; "this wall" is usually
 the pointed one, and "the wall behind the sofa" the wall it stands against. Change the room itself with room_size and
 opening; pieces stay where they are, so after shrinking the room check what now runs into a wall. go_to takes the
 person to stand somewhere ("take me to the window"). They can look at their real room again and come back to the
 design (view), and in a scanned room show or hide the outlines of their real furniture (outlines).
 
+The person can also grab a piece with their laser pointer and move it themselves; the scene says where it is now.
+
 Answer in one short spoken sentence: it is read aloud in the headset. No markdown, no lists. When you call tools,
 write that sentence in the same message as the calls, saying what you did.`;
+
+/** The catalogue as one line per piece, for the prompt: its sizes and, for an inventory piece, its collections. */
+export function catalogIndex() {
+  const groups = new Map();
+  for (const c of catalogList) { const k = c.piece ?? c.id; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(c); }
+  // floor pieces by their footprint; wall and window pieces by their face (wide x high)
+  const dims = (c) => (['wall', 'window'].includes(mountOf(c)) ? `${c.size[0]} wide x ${c.size[1]} high` : `${c.size[0]} x ${c.size[2]}`);
+  const lines = [];
+  for (const [k, cs] of groups) {
+    const c = cs[0], mount = mountOf(c), how = mount === 'floor' ? '' : ` [${mount}]`;
+    if (c.collection) {
+      const name = INVENTORY_PIECES.find((p) => p.id === c.piece)?.name.toLowerCase() ?? c.name;
+      const sizes = [...new Map(cs.map((x) => [x.sizeName, dims(x)])).entries()].map(([s, d]) => `${s} ${d}`).join(', ');
+      lines.push(`- ${k} ${name}${how}: ${sizes}; in ${[...new Set(cs.map((x) => x.collection))].join(', ')}`);
+    } else if (cs.length > 1) lines.push(`- ${c.name.split(',')[0]}${how}: ${cs.map((x) => `${x.id} ${dims(x)}`).join(', ')}`);
+    else lines.push(`- ${c.id}: ${c.name}${how}, ${dims(c)}${c.note ? ` (${c.note})` : ''}`);
+  }
+  const cols = COLLECTIONS.filter((col) => catalogList.some((c) => c.collection === col.code)).map((col) => `${col.code} ${col.name} (${col.card})`);
+  return `${lines.join('\n')}${cols.length ? `\nCollections: ${cols.join(', ')}.` : ''}`;
+}
+
+/** Catalogue pieces matching `query`'s words (and the filters), best first. */
+export function findPieces({ query = '', kind, mount, collection, room, max = 12 } = {}) {
+  const words = String(query).toLowerCase().split(/[^a-z0-9-]+/).filter((w) => w.length > 1);
+  const hits = [];
+  for (const c of catalogList) {
+    if (kind && c.kind !== kind) continue;
+    if (mount && mountOf(c) !== mount) continue;
+    if (collection && c.collection !== collection) continue;
+    if (room && c.room && c.room !== room) continue;
+    const text = [c.id, c.name, c.note, c.kind, c.room, c.sizeName, ...(c.words ?? []), COLLECTIONS.find((x) => x.code === c.collection)?.name, ...Object.keys(c.parts ?? {}), ...Object.values(c.made ?? {})].filter(Boolean).join(' ').toLowerCase();
+    const score = words.reduce((s, w) => s + (text.includes(w) ? (w.length > 3 ? 2 : 1) : 0), 0);
+    if (!words.length || score) hits.push([score, c]);
+  }
+  return hits.sort((a, b) => b[0] - a[0] || a[1].id.localeCompare(b[1].id)).slice(0, max).map(([, c]) => ({ id: c.id, name: c.name, size: c.size, mount: mountOf(c), ...(c.note ? { note: c.note } : {}), ...(c.parts ? { parts: c.parts } : {}) }));
+}
 
 const WHERE = {
   on: { type: 'string', description: 'id of a room item or placed piece to stand it on (a lamp on table1)' },
@@ -112,12 +162,20 @@ const WHERE = {
   at: { type: 'array', items: { type: 'number' }, minItems: 2, maxItems: 3, description: '[x, z] on the floor, or [x, y, z]' },
   face: { type: 'string', description: '"me", "away", or an id to face; default: as the placement implies, else the person' },
   turn: { type: 'number', description: 'then turn it by this many degrees, anticlockwise seen from above (90 = a quarter turn left)' },
+  height: { type: 'number', description: "a wall piece's centre above the floor, metres (pictures hang about 1.45)" },
+  above: { type: 'string', description: 'a wall piece: hang it over this piece (art above the sofa), on the wall behind it' },
+  window: { type: 'string', description: 'a window piece (curtains, blinds): the window id it hangs at' },
+  high: { type: 'boolean', description: 'curtains hung high and wide, near the ceiling' },
+  drop: { type: 'string', enum: ['floor', 'sill'], description: 'curtains to the floor (default) or to the sill' },
+  open: { type: 'number', description: 'curtains: 1 drawn back (default), 0 closed; blinds: 1 raised, 0 down' },
 };
 
 const TOOLS = [
-  { type: 'function', function: { name: 'place', description: 'Add a catalogue piece to the room.', parameters: { type: 'object', properties: { item: { type: 'string', enum: catalogList.map((c) => c.id) }, ...WHERE }, required: ['item'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'find', description: 'Search the catalogue by words (a kind, a style, a colour, a size, a collection): the best matches with their ids, sizes and how they sit.', parameters: { type: 'object', properties: { query: { type: 'string' }, mount: { type: 'string', enum: ['floor', 'rug', 'wall', 'window', 'ceiling', 'surface'] }, max: { type: 'number' } }, required: ['query'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'place', description: 'Add a catalogue piece to the room, by its id.', parameters: { type: 'object', properties: { item: { type: 'string' }, ...WHERE }, required: ['item'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'open', description: 'Open or close placed curtains or blinds: 1 drawn back or raised, 0 closed or down, or in between.', parameters: { type: 'object', properties: { id: { type: 'string', description: 'a curtain or blind id, or "all"' }, amount: { type: 'number' } }, required: ['id', 'amount'], additionalProperties: false } } },
   { type: 'function', function: { name: 'move', description: 'Move or turn a placed piece. Give only `face` or `turn` to turn it where it stands.', parameters: { type: 'object', properties: { id: { type: 'string' }, ...WHERE }, required: ['id'], additionalProperties: false } } },
-  { type: 'function', function: { name: 'swap', description: 'Replace a placed piece with another catalogue item, keeping its place and facing.', parameters: { type: 'object', properties: { id: { type: 'string' }, item: { type: 'string', enum: catalogList.map((c) => c.id) } }, required: ['id', 'item'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'swap', description: 'Replace a placed piece with another catalogue item, keeping its place and facing.', parameters: { type: 'object', properties: { id: { type: 'string' }, item: { type: 'string' } }, required: ['id', 'item'], additionalProperties: false } } },
   { type: 'function', function: { name: 'recolour', description: "Change the colour of one part of a placed piece (its catalogue entry lists its parts and their colours now). Without `part`, the piece's first part (the sofa's fabric, the dresser's body).", parameters: { type: 'object', properties: { id: { type: 'string' }, part: { type: 'string', description: 'fabric, wood, body, seat, handles, throw, pillows or mattress, as the piece lists' }, colour: { type: 'string', description: '#rrggbb, or "original" to go back to the catalogue colour' } }, required: ['id', 'colour'], additionalProperties: false } } },
   { type: 'function', function: { name: 'material', description: "Make one part of a placed piece in another material (velvet instead of linen, walnut instead of oak). Without `part`, the piece's first part. A cloth of one colour keeps the part's colour; a patterned one (tartan, gingham, houndstooth, ticking) brings its own.", parameters: { type: 'object', properties: { id: { type: 'string' }, part: { type: 'string', enum: Object.keys(MATERIALS) }, material: { type: 'string', enum: [...new Set([...Object.values(MATERIALS).flat(), 'original'])], description: '"original" goes back to the catalogue material' } }, required: ['id', 'material'], additionalProperties: false } } },
   { type: 'function', function: { name: 'resize', description: 'Make a placed piece the same piece in another size (a smaller sofa, a king bed), back where its back was, keeping its colours and materials.', parameters: { type: 'object', properties: { id: { type: 'string' }, size: { type: 'string', description: '"smaller", "larger", "smallest", "largest", or a size by name (queen, 2-seat, tall)' } }, required: ['id', 'size'], additionalProperties: false } } },
@@ -152,7 +210,7 @@ function newId(item) {
 const describe = (p) => {
   const c = catalog[p.item];
   const parts = c.parts && Object.fromEntries(Object.keys(c.parts).map((k) => [k, [p.materials?.[k] ?? c.made?.[k], p.colours?.[k] ?? (p.materials?.[k] ? (PATTERNED.has(p.materials[k]) ? 'in its pattern' : null) : c.parts[k])].filter(Boolean).join(' ')]));
-  return { id: p.id, item: p.item, at: p.at, facing: p.facing, size: c.size, ...(parts ? { parts } : {}), ...(c.sizeName ? { sizes: sizesOf(p.item).map((o) => o.sizeName + (o.piece !== c.piece ? ` (${o.name})` : '')) } : {}) };
+  return { id: p.id, item: p.item, at: p.at, facing: p.facing, size: sizeOf(p, catalog), mount: mountOf(c), ...(p.window ? { window: p.window, open: p.fit.open } : {}), ...(parts ? { parts } : {}), ...(c.sizeName ? { sizes: sizesOf(p.item).map((o) => o.sizeName + (o.piece !== c.piece ? ` (${o.name})` : '')) } : {}) };
 };
 
 /**
@@ -162,17 +220,20 @@ const describe = (p) => {
  */
 export function modelPath(p) {
   const sorted = (o) => Object.entries(o ?? {}).sort(([a], [b]) => a.localeCompare(b));
-  return `/catalog/${encodeURIComponent(p.item)}${sorted(p.materials).map(([k, v]) => `~${k}@${v}`).join('')}${sorted(p.colours).map(([k, v]) => `~${k}-${v.slice(1).toLowerCase()}`).join('')}.glb`;
+  const fit = p.fit ? `~fit@${Math.round(p.fit.w * 1000)}_${Math.round(p.fit.top * 1000)}_${Math.round(p.fit.bottom * 1000)}_${Math.round(p.fit.open * 100)}` : '';
+  return `/catalog/${encodeURIComponent(p.item)}${fit}${sorted(p.materials).map(([k, v]) => `~${k}@${v}`).join('')}${sorted(p.colours).map(([k, v]) => `~${k}-${v.slice(1).toLowerCase()}`).join('')}.glb`;
 }
 
 /** `item~fabric@velvet~fabric-5f7a5a` -> { item, materials, colours }, as modelPath writes it. */
 export function parseModel(name) {
   const [item, ...rest] = name.split('~');
   const materials = {}, colours = {};
+  let fit = null;
   for (const r of rest) {
-    if (r.includes('@')) { const [k, v] = r.split('@'); materials[k] = v; } else { const [k, v] = r.split('-'); colours[k] = `#${v}`; }
+    if (r.startsWith('fit@')) { const [w, top, bottom, open] = r.slice(4).split('_').map(Number); fit = { w: w / 1000, top: top / 1000, bottom: bottom / 1000, open: open / 100 }; }
+    else if (r.includes('@')) { const [k, v] = r.split('@'); materials[k] = v; } else { const [k, v] = r.split('-'); colours[k] = `#${v}`; }
   }
-  return { item, materials, colours };
+  return { item, materials, colours, fit };
 }
 
 /** Keeps the colours and materials of the parts `item` also has. */
@@ -181,9 +242,72 @@ function carry(p, item) {
   p.item = item;
 }
 
+const round3 = (v) => Math.round(v * 1000) / 1000;
+
+/** The room's windows: { id, wall, width, top, bottom (above the floor), c: [x, z], n: its wall's inward normal }. */
+export function windowsOf(room) {
+  const ws = walls(room), fl = floorOf(room);
+  return (room?.items ?? []).filter((i) => i.label === 'window frame').map((i) => {
+    const w = ws.map((x) => ({ x, off: Math.abs((i.center[0] - x.center[0]) * x.n[0] + (i.center[2] - x.center[2]) * x.n[1]) })).sort((a, b) => a.off - b.off)[0]?.x;
+    if (!w) return null;
+    const along = [-w.n[1], w.n[0]];
+    return { id: i.id, wall: w.id, width: i.size[0] * Math.abs(along[0]) + i.size[2] * Math.abs(along[1]), top: i.center[1] + i.size[1] / 2 - fl, bottom: i.center[1] - i.size[1] / 2 - fl, c: [i.center[0], i.center[2]], n: w.n };
+  }).filter(Boolean);
+}
+
+/** Fits a window piece to its window (p.window) in `room`: its model's fit and size, and where it hangs. False if the window is gone. */
+function hang(p, room) {
+  const win = windowsOf(room).find((w) => w.id === p.window);
+  if (!win) return false;
+  const entry = catalog[p.item];
+  p.fit = fitTo(entry.id, win, { ceiling: ceilingOf(room) - floorOf(room), high: p.hangHigh, drop: p.drop, open: p.fit?.open });
+  p.size = decorModel(entry, p.fit).size;
+  const d = p.size[2] / 2 + 0.003;
+  p.at = [round3(win.c[0] + win.n[0] * d), round3(floorOf(room) + p.fit.bottom), round3(win.c[1] + win.n[1] * d)];
+  p.facing = [round3(win.n[0]), 0, round3(win.n[1])];
+  return true;
+}
+
+/** The window meant: asked for, else the one on the pointed wall nearest the point, else the room's only one. */
+function windowFor(args, ctx) {
+  const wins = windowsOf(ctx.room);
+  if (args.window) return wins.find((w) => w.id.toLowerCase() === String(args.window).toLowerCase()) ?? { error: `no window ${args.window}; the windows are ${wins.map((w) => w.id).join(', ') || 'none'}` };
+  const pt = ctx.pointing?.point;
+  if (pt && ctx.pointing.target === 'wall') {
+    const on = wins.filter((w) => w.wall === ctx.pointing.id).sort((a, b) => Math.hypot(a.c[0] - pt[0], a.c[1] - pt[2]) - Math.hypot(b.c[0] - pt[0], b.c[1] - pt[2]));
+    if (on.length) return on[0];
+  }
+  if (wins.length === 1) return wins[0];
+  return { error: wins.length ? `which window: ${wins.map((w) => `${w.id} on ${w.wall}`).join(', ')}?` : 'the room has no windows: add one first' };
+}
+
+/**
+ * The person moved a piece themselves (grabbed with the laser): where it ended up, checked like any placement. A floor
+ * piece stays on the floor; a piece that hangs at a window stays there.
+ */
+export function manualMove({ id, at, facing }, room) {
+  const p = scene.find((x) => x.id === id);
+  if (!p) return { error: `no piece ${id}` };
+  const entry = catalog[p.item], mount = mountOf(entry);
+  if (mount === 'window') return { error: `${p.id} hangs at its window` };
+  if (!Array.isArray(at) || at.length !== 3 || !at.every(Number.isFinite)) return { error: 'at is [x, y, z]' };
+  p.at = [round3(at[0]), mount === 'floor' || mount === 'rug' ? floorOf(room) : round3(at[1]), round3(at[2])];
+  if (Array.isArray(facing) && mount !== 'wall') { const l = Math.hypot(facing[0], facing[2]) || 1; p.facing = [round3(facing[0] / l), 0, round3(facing[2] / l)]; }
+  const issues = check(p, sizeOf(p, catalog), { room, scene, catalog });
+  return { ok: true, piece: describe(p), issues };
+}
+
 /** Runs one tool call against the scene; returns what the model reads back. */
 export function apply(name, args, ctx) {
   const env = { ...ctx, scene, catalog };
+  if (name === 'find') return { ok: true, hits: findPieces(args) };
+  if (name === 'open') {
+    const ps = args.id === 'all' ? scene.filter((p) => p.window) : scene.filter((p) => p.id === args.id);
+    if (!ps.length) return { error: args.id === 'all' ? 'no curtains or blinds are up' : `no piece ${args.id}` };
+    if (ps.some((p) => !p.window)) return { error: `${args.id} is not a curtain or blind` };
+    for (const p of ps) { p.fit = { ...p.fit, open: Math.max(0, Math.min(1, Number(args.amount))) }; hang(p, ctx.room); }
+    return { ok: true, pieces: ps.map(describe) };
+  }
   if (name === 'rescan_room') {
     ctx.actions?.push('rescan');
     return { ok: true, note: 'the headset is starting Space Setup; the person walks the room and the scan reloads after' };
@@ -230,8 +354,11 @@ export function apply(name, args, ctx) {
       const out = name === 'room_size' ? { room: rooms.setSize(args) } : rooms.changeOpening(args);
       // every piece checked against the changed room: one a wall now runs through is pushed back inside
       const changed = rooms.designRoom(ctx.room?.viewer);
-      const pieces = scene.map((p) => ({ id: p.id, issues: check(p, catalog[p.item].size, { ...ctx, room: changed, scene, catalog }) })).filter((p) => p.issues.length);
-      return { ok: true, ...out, ...(pieces.length ? { pieces } : {}) };
+      // curtains follow their window, and go with it
+      const gone = [];
+      for (const p of [...scene]) if (p.window && !hang(p, changed)) { scene.splice(scene.indexOf(p), 1); gone.push(p.id); }
+      const pieces = scene.map((p) => ({ id: p.id, issues: check(p, sizeOf(p, catalog), { ...ctx, room: changed, scene, catalog }) })).filter((p) => p.issues.length);
+      return { ok: true, ...out, ...(pieces.length ? { pieces } : {}), ...(gone.length ? { removed_with_their_window: gone } : {}) };
     } catch (e) {
       return { error: e.message };
     }
@@ -244,7 +371,7 @@ export function apply(name, args, ctx) {
       const item = (ctx.room?.items ?? []).find((i) => i.id.toLowerCase() === to);
       const wall = item && walls(ctx.room).find((w) => w.id === item.id);
       if (piece) {
-        const d = catalog[piece.item].size[2] / 2;
+        const d = sizeOf(piece, catalog)[2] / 2;
         target = { point: [piece.at[0] + piece.facing[0] * d, piece.at[2] + piece.facing[2] * d], inward: [piece.facing[0], piece.facing[2]], step: 1.4 };
       } else if (wall) target = { point: [wall.center[0], wall.center[2]], inward: wall.n };
       else if (item?.normal) {
@@ -291,7 +418,8 @@ export function apply(name, args, ctx) {
     if ((!to && end) || to?.id === p.item) return { ok: true, note: `it is already the ${end ?? to.sizeName} one; it comes in ${sizes.map((o) => o.sizeName).join(', ')}`, piece: describe(p) };
     if (!to) return { error: `no ${args.size} ${catalog[p.item].name.split(',')[0]}; it comes in ${sizes.map((o) => o.sizeName).join(', ')} and is ${catalog[p.item].sizeName}` };
     // the back stays where it was (against its wall): the centre moves by half the change in depth, along the facing
-    const dd = (to.size[2] - catalog[p.item].size[2]) / 2;
+    const dd = (to.size[2] - sizeOf(p, catalog)[2]) / 2;
+    if (mountOf(catalog[p.item]) === 'wall') p.at = [p.at[0], round3(p.at[1] + (sizeOf(p, catalog)[1] - to.size[1]) / 2), p.at[2]]; // a picture keeps its centre's height
     p.at = [p.at[0] + p.facing[0] * dd, p.at[1], p.at[2] + p.facing[2] * dd].map((v) => Math.round(v * 1000) / 1000);
     const was = p.id;
     carry(p, to.id);
@@ -303,10 +431,12 @@ export function apply(name, args, ctx) {
     const p = scene.find((x) => x.id === args.id);
     if (!p) return { error: `no piece ${args.id}` };
     if (!catalog[args.item]) return { error: `no catalogue item ${args.item}` };
-    const was = p.id;
+    const was = p.id, toWindow = mountOf(catalog[args.item]) === 'window';
+    if (!!p.window !== toWindow) return { error: p.window ? `${p.id} hangs at a window: swap it for other curtains or a blind` : `${args.item} hangs at a window: place it at one` };
     carry(p, args.item); // colours and materials carry over to the parts the new piece also has
     p.id = newId(args.item); // the id says what it is: armchair1 swapped for a sofa becomes sofa1
-    const issues = check(p, catalog[p.item].size, env);
+    if (p.window) hang(p, ctx.room); else delete p.size;
+    const issues = check(p, sizeOf(p, catalog), env);
     return { ok: true, replaced: was, piece: describe(p), issues };
   }
   if (name !== 'place' && name !== 'move') return { error: `no tool ${name}` };
@@ -314,7 +444,22 @@ export function apply(name, args, ctx) {
   const current = name === 'move' ? scene.find((p) => p.id === args.id) : null;
   if (name === 'move' && !current) return { error: `no piece ${args.id}; pieces are ${scene.map((p) => p.id).join(', ') || 'none'}` };
   const item = current ? current.item : args.item;
-  if (!catalog[item]) return { error: `no catalogue item ${item}` };
+  if (!catalog[item]) return { error: `no catalogue item ${item}; closest: ${findPieces({ query: String(item).replace(/[-_]/g, ' '), max: 5 }).map((h) => h.id).join(', ') || 'none (try find)'}` };
+  // curtains and blinds: made to fit the window they go at, and hung there
+  if (mountOf(catalog[item]) === 'window') {
+    if (current && !args.window) return { error: `${current.id} hangs at its window: say another window to move it there` };
+    const win = windowFor(args, ctx);
+    if (win.error) return win;
+    const piece = current ?? { id: newId(item), item };
+    piece.window = win.id;
+    if (args.high !== undefined) piece.hangHigh = args.high;
+    if (args.drop !== undefined) piece.drop = args.drop;
+    piece.fit = { ...piece.fit, open: args.open !== undefined ? Math.max(0, Math.min(1, args.open)) : piece.fit?.open };
+    if (piece.fit.open === undefined) delete piece.fit.open;
+    hang(piece, ctx.room);
+    if (!current) scene.push(piece);
+    return { ok: true, piece: describe(piece) };
+  }
   const where = { ...args };
   // only turning: stay put
   const placed = ['on', 'against', 'next_to', 'at_pointing', 'in_front', 'at'].some((k) => where[k] !== undefined && where[k] !== false);
@@ -324,7 +469,7 @@ export function apply(name, args, ctx) {
   piece.at = pose.at;
   piece.facing = pose.facing;
   if (!current) scene.push(piece);
-  const issues = check(piece, catalog[item].size, env);
+  const issues = check(piece, sizeOf(piece, catalog), env);
   return { ok: true, piece: describe(piece), issues };
 }
 

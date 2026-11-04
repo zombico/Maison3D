@@ -32,6 +32,7 @@ import com.meta.spatial.toolkit.Mesh
 import com.meta.spatial.toolkit.MeshCollision
 import com.meta.spatial.toolkit.Panel
 import com.meta.spatial.toolkit.PanelRegistration
+import com.meta.spatial.toolkit.Scale
 import com.meta.spatial.toolkit.Transform
 import com.meta.spatial.toolkit.Visible
 import com.meta.spatial.vr.LocomotionSystem
@@ -82,6 +83,7 @@ class FurnishActivity : AppSystemActivity() {
   @Volatile private var viewButton: android.widget.Button? = null
   // the panel waits for the head to be tracked for a moment, so it lands in front of you, not where the headset lay
   private var trackedFrames = 0
+  private var panelShown = false
   // this launch: the server stands the dictated room round you again when it sees a new one
   private val session = java.util.UUID.randomUUID().toString()
 
@@ -102,6 +104,22 @@ class FurnishActivity : AppSystemActivity() {
   private var marker: Entity? = null
   @Volatile private var pendingTeleport: Pair<Vector3, Vector3?>? = null
 
+  // the laser: where it lands (the room's walls, floor, ceiling and the pieces), what it hovers, what it holds
+  private var pieces: List<Piece> = emptyList()
+  private var roomWalls: List<Laser.Wall> = emptyList()
+  @Volatile private var ceilingY = 2.7f
+  private var laser: Entity? = null
+  private var dot: Entity? = null
+  private var halo: Entity? = null
+  private var haloFor = ""
+  private var lastHit: Laser.Hit? = null
+  // holding a piece: its id, how it sits, the plane it slides in, where on it the laser caught it, its facing
+  private var held: Piece? = null
+  private var heldAt: Vector3? = null
+  private var heldFacing: Vector3? = null
+  private var heldPlane: Pair<Vector3, Vector3>? = null
+  private var heldOffset = Vector3(0f)
+
   private var saidView: TextView? = null
   private var replyView: TextView? = null
   private var statusView: TextView? = null
@@ -111,7 +129,8 @@ class FurnishActivity : AppSystemActivity() {
 
   /** One piece of furniture: `at` is the centre of its base, `facing` the way its front points (level). */
   /** `model`: the path the server serves it at, which names its colours when recoloured (a new path, a reload). */
-  data class Piece(val id: String, val item: String, val at: Vector3, val facing: Vector3, val model: String)
+  /** `size` w x h x d; `mount` how it sits (floor, rug, wall, window, ceiling, surface); `grab` whether the laser may move it. */
+  data class Piece(val id: String, val item: String, val at: Vector3, val facing: Vector3, val model: String, val size: Vector3, val mount: String, val grab: Boolean)
 
   override fun registerFeatures(): List<SpatialFeature> {
     mruk = MRUKFeature(this, systemManager)
@@ -174,6 +193,11 @@ class FurnishActivity : AppSystemActivity() {
             ),
         )
     scene.setViewOrigin(0f, 0f, 0f, 0f)
+    // the laser: a thin beam from the right controller, a dot where it lands, a halo round the piece it hovers
+    fun glow(r: Float, g: Float, b: Float, a: Float) = Material().apply { baseColor = Color4(r, g, b, a); unlit = true; if (a < 1f) alphaMode = 1 }
+    laser = Entity.create(listOf(Mesh(Uri.parse("mesh://box")).apply { hittable = MeshCollision.NoCollision }, Box(Vector3(-0.0012f, -0.0012f, 0f), Vector3(0.0012f, 0.0012f, 1f)), glow(0.55f, 0.85f, 1f, 0.7f), Transform(), Scale(Vector3(1f)), Visible(false)))
+    dot = Entity.create(listOf(Mesh(Uri.parse("mesh://box")).apply { hittable = MeshCollision.NoCollision }, Box(Vector3(-0.012f), Vector3(0.012f)), glow(0.55f, 0.9f, 1f, 1f), Transform(), Visible(false)))
+    halo = Entity.create(listOf(Mesh(Uri.parse("mesh://box")).apply { hittable = MeshCollision.NoCollision }, Box(Vector3(-0.5f, 0f, -0.5f), Vector3(0.5f, 1f, 0.5f)), glow(0.55f, 0.85f, 1f, 0.16f), Transform(), Visible(false)))
     // what the server already holds, if it was furnishing before this launch
     turns.scene { r -> r.onSuccess { runCatching { incoming.set(parseScene(it)); it.optJSONObject("room")?.let(incomingRoom::set) } } }
   }
@@ -296,7 +320,8 @@ class FurnishActivity : AppSystemActivity() {
       showBubble("", 1L)
       return
     }
-    val pointing = controller?.let { room.pointAt(it.t, it.q.times(Vector3(0f, 0f, 1f)).normalize()) }
+    // what the laser was on when A was let go: the same point the dot showed
+    val pointing = controller?.let { c -> val d = c.q.times(Vector3(0f, 0f, 1f)).normalize(); Laser.json(c.t, d, castFrom(c)) }
     val described = room.describe().put("viewer", headPose?.let(::viewerJson) ?: JSONObject.NULL)
     busy = true
     setSaid("…")
@@ -364,7 +389,8 @@ class FurnishActivity : AppSystemActivity() {
     return (0 until list.length()).map { i ->
       val p = list.getJSONObject(i)
       val item = p.getString("item")
-      Piece(p.getString("id"), item, vec3(p.getJSONArray("at")), vec3(p.getJSONArray("facing")), p.optString("model", "/catalog/$item.glb"))
+      Piece(p.getString("id"), item, vec3(p.getJSONArray("at")), vec3(p.getJSONArray("facing")), p.optString("model", "/catalog/$item.glb"),
+          p.optJSONArray("size")?.let(::vec3) ?: Vector3(0.5f), p.optString("mount", "floor"), p.optBoolean("grab", true))
     }
   }
 
@@ -372,6 +398,7 @@ class FurnishActivity : AppSystemActivity() {
 
   /** Makes the shown furniture match `scene`: new pieces loaded, moved ones moved, swapped, recoloured or removed ones redone or gone. */
   private fun applyScene(scene: List<Piece>) {
+    pieces = scene
     val ids = scene.map { it.id }.toSet()
     for (id in shown.keys.toList().filter { it !in ids }) shown.remove(id)?.second?.destroy()
     for (p in scene) {
@@ -379,7 +406,7 @@ class FurnishActivity : AppSystemActivity() {
       val pose = Pose(p.at, Quaternion.lookRotation(p.facing))
       val have = shown[p.id]
       if (have != null && have.first == p.model) {
-        have.second.setComponent(Transform(pose))
+        if (held?.id != p.id) have.second.setComponent(Transform(pose)) // the one in hand follows the laser
         continue
       }
       have?.second?.destroy()
@@ -402,6 +429,8 @@ class FurnishActivity : AppSystemActivity() {
     val shell = if (j.isNull("shell")) null else j.optString("shell")
     val ghosts = if (j.isNull("ghosts")) null else j.optString("ghosts")
     floorY = j.optDouble("floorY", 0.0).toFloat()
+    ceilingY = j.optDouble("ceilingY", (floorY + 2.7f).toDouble()).toFloat()
+    roomWalls = Laser.walls(j.optJSONArray("walls"))
     if (shellShown?.first != shell) log(if (shell == null) "no room to show: rescan it" else "room: $shell")
     shellShown = showModel(shellShown, shell)
     ghostsShown = showModel(ghostsShown, ghosts)
@@ -491,9 +520,12 @@ class FurnishActivity : AppSystemActivity() {
         loadRoom()
       }
 
+      // the laser, and holding a piece with the trigger
+      body.rightHand.tryGetComponent<Controller>()?.let { c -> if (right != null) laserFrame(c, right) }
+
       // moving: thumbstick forward aims at the floor, letting go steps there; left or right turns 45 degrees
       body.rightHand.tryGetComponent<Controller>()?.let { c ->
-        if (head != null && right != null) {
+        if (head != null && right != null && held == null) {
           if ((c.buttonState and ButtonBits.ButtonThumbRU) != 0) {
             aiming = true
             aimAt = floorHit(right)
@@ -532,6 +564,7 @@ class FurnishActivity : AppSystemActivity() {
       if (head != null) trackedFrames++ else trackedFrames = 0
       if (placePanel && p != null && head != null && trackedFrames > 45) {
         placePanel = false
+        panelShown = true
         p.setComponents(listOf(Transform(inView(head, 0.9f, -8f)), Visible(true)))
       }
 
@@ -557,6 +590,97 @@ class FurnishActivity : AppSystemActivity() {
         ent.setComponent(mesh)
       }
     }
+  }
+
+  /** What the laser from `hand` lands on first: a piece, a wall, the floor or the ceiling (null over the panel). */
+  private fun castFrom(hand: Pose): Laser.Hit? {
+    val d = hand.q.times(Vector3(0f, 0f, 1f)).normalize()
+    val boxes = pieces.filter { it.id != held?.id }.map { Laser.Box(it.id, it.at, it.facing, it.size) }
+    val hit = Laser.cast(hand.t, d, roomWalls, floorY, ceilingY, boxes)
+    // the panel in front of it: the panel's own pointer takes over
+    val p = panel?.tryGetComponent<Transform>()?.transform
+    if (p != null && panelShown) {
+      val n = p.q.times(Vector3(0f, 0f, 1f))
+      Laser.onPlane(hand.t, d, p.t, n)?.let { q ->
+        val r = p.q.times(Vector3(1f, 0f, 0f))
+        val u = p.q.times(Vector3(0f, 1f, 0f))
+        val v = q.minus(p.t)
+        val lx = v.x * r.x + v.y * r.y + v.z * r.z
+        val ly = v.x * u.x + v.y * u.y + v.z * u.z
+        val w = q.minus(hand.t)
+        val dist = kotlin.math.sqrt(w.x * w.x + w.y * w.y + w.z * w.z)
+        if (kotlin.math.abs(lx) < 0.3f && kotlin.math.abs(ly) < 0.2f && (hit == null || dist < hit.distance)) return null
+      }
+    }
+    return hit
+  }
+
+  /** Each frame: the beam and its dot; the trigger takes hold of the hovered piece, moves it, lets it go. */
+  private fun laserFrame(c: Controller, hand: Pose) {
+    val d = hand.q.times(Vector3(0f, 0f, 1f)).normalize()
+    val hit = castFrom(hand)
+    lastHit = hit
+    val reach = hit?.distance ?: 4f
+    laser?.setComponents(listOf(Transform(Pose(hand.t, hand.q)), Scale(Vector3(1f, 1f, reach)), Visible(hit != null || held != null)))
+    dot?.setComponents(listOf(Transform(Pose(hit?.point ?: hand.t)), Visible(hit != null)))
+    val h = held
+    if (h == null) {
+      val over = hit?.takeIf { it.kind == "piece" }?.let { x -> pieces.firstOrNull { it.id == x.id } }
+      showHalo(over?.takeIf { it.grab })
+      if (over != null && over.grab && pressed(c, ButtonBits.ButtonTriggerR)) {
+        // take hold: it slides in the floor's plane at the height it was caught, or along its wall
+        val n = if (over.mount == "wall") Vector3(over.facing.x, 0f, over.facing.z).normalize() else Vector3(0f, 1f, 0f)
+        held = over
+        heldAt = over.at
+        heldFacing = over.facing
+        heldPlane = hit!!.point to n
+        heldOffset = hit.point.minus(over.at)
+        tones?.startTone(ToneGenerator.TONE_PROP_BEEP2, 40)
+      }
+      return
+    }
+    // holding: follow the laser on the plane; the thumbstick turns it (a wall piece stays square to its wall)
+    val (p0, n) = heldPlane ?: return
+    Laser.onPlane(hand.t, d, p0, n)?.let { q -> heldAt = q.minus(heldOffset).let { a -> if (h.mount == "wall") a else Vector3(a.x, h.at.y, a.z) } }
+    if (h.mount != "wall") {
+      if (pressed(c, ButtonBits.ButtonThumbRL)) heldFacing = Quaternion(0f, 15f, 0f).times(heldFacing ?: h.facing)
+      if (pressed(c, ButtonBits.ButtonThumbRR)) heldFacing = Quaternion(0f, -15f, 0f).times(heldFacing ?: h.facing)
+    }
+    val at = heldAt ?: h.at
+    val facing = heldFacing ?: h.facing
+    shown[h.id]?.second?.setComponent(Transform(Pose(at, Quaternion.lookRotation(facing))))
+    showHalo(h.copy(at = at, facing = facing), holding = true)
+    if (released(c, ButtonBits.ButtonTriggerR)) {
+      held = null
+      showHalo(null)
+      turns.move(h.id, Room.vec(at), Room.vec(facing)) { r ->
+        r.onSuccess { answer ->
+          incoming.set(parseScene(answer))
+          val issues = answer.optJSONArray("issues")
+          if (issues != null && issues.length() > 0) {
+            tones?.startTone(ToneGenerator.TONE_PROP_NACK, 120)
+            showBubble((0 until issues.length()).joinToString("; ") { issues.getString(it) }, 5_000L)
+          } else answer.optString("error").takeIf { it.isNotEmpty() }?.let { showBubble(it, 4_000L) }
+        }
+        r.onFailure { log("moving it failed: ${it.message}") }
+      }
+    }
+  }
+
+  /** A faint box round the piece the laser is on (brighter while it is held). */
+  private fun showHalo(p: Piece?, holding: Boolean = false) {
+    val e = halo ?: return
+    if (p == null) {
+      if (haloFor.isNotEmpty()) { e.setComponent(Visible(false)); haloFor = "" }
+      return
+    }
+    val key = "${p.id}:${p.size}:$holding"
+    if (key != haloFor) {
+      e.setComponent(Box(Vector3(-p.size.x / 2 - 0.02f, -0.01f, -p.size.z / 2 - 0.02f), Vector3(p.size.x / 2 + 0.02f, p.size.y + 0.02f, p.size.z / 2 + 0.02f)))
+      e.setComponent(Material().apply { baseColor = if (holding) Color4(1f, 0.8f, 0.4f, 0.22f) else Color4(0.55f, 0.85f, 1f, 0.14f); unlit = true; alphaMode = 1 })
+      haloFor = key
+    }
+    e.setComponents(listOf(Transform(Pose(p.at, Quaternion.lookRotation(p.facing))), Visible(true)))
   }
 
   /** Where the controller's ray meets the floor, within 8 m, or null. */

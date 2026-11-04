@@ -7,7 +7,10 @@ import { readFile } from 'node:fs/promises';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { config, runTurn, scene, catalog, catalogList, modelPath, parseModel, finish, settings, placeLayout } from './agent.mjs';
+import { config, runTurn, scene, catalog, catalogList, modelPath, parseModel, finish, settings, placeLayout, manualMove } from './agent.mjs';
+import { decorModel } from './decor.mjs';
+import { walls, sizeOf, mountOf, ceilingOf } from './place.mjs';
+import { frame } from './shell.mjs';
 import { shellGlb, ghostsGlb, shellKey } from './shell.mjs';
 import { state as rooms, designRoom, resolvePointing, newSession } from './rooms.mjs';
 import { recolour } from '../70-inventory/colour.mjs';
@@ -17,7 +20,8 @@ import { speak, voiceStatus } from './voice.mjs';
 
 const PORT = Number(process.env.PORT) || 8091;
 const CATALOG = join(dirname(fileURLToPath(import.meta.url)), 'catalog');
-const sceneJson = () => scene.map((p) => ({ id: p.id, item: p.item, at: p.at, facing: p.facing, model: modelPath(p) }));
+// each piece with its size and how it sits, so the headset's laser can hit it and its grab can move it the right way
+const sceneJson = () => scene.map((p) => { const mount = mountOf(catalog[p.item]); return { id: p.id, item: p.item, at: p.at, facing: p.facing, model: modelPath(p), size: sizeOf(p, catalog), mount, grab: mount !== 'window' }; });
 // The room the headset stands in VR (shell.mjs): the design's room (rooms.mjs: dictated, or the scan emptied) in the
 // room's colours, and in a scanned room the real furniture's outlines: { shell: '/room/<key>.glb', ghosts, floorY }.
 // The key names the room and its colours, so a change is a new model the headset loads afresh.
@@ -28,7 +32,9 @@ function roomJson() {
   const key = shellKey({ ...room, items: [...room.items, ...(scanned?.items ?? [])] }, finish);
   if (!built.has(key)) built.set(key, { shell: shellGlb(room, finish), ghosts: scanned ? ghostsGlb(scanned) : null });
   const b = built.get(key);
-  return { shell: b.shell ? `/room/${key}.glb` : null, ghosts: settings.outlines && b.ghosts ? `/ghosts/${key}.glb` : null, floorY: room.floorY ?? 0, source: rooms.source };
+  // the room's planes for the headset's laser: each wall (centre, inward normal, along, half its length, bottom, top)
+  const planes = walls(room).map(frame).map((f) => ({ id: f.id, c: f.c, n: f.n, along: f.along, half: f.half, y0: f.y0, y1: f.y1 }));
+  return { shell: b.shell ? `/room/${key}.glb` : null, ghosts: settings.outlines && b.ghosts ? `/ghosts/${key}.glb` : null, floorY: room.floorY ?? 0, ceilingY: ceilingOf(room), walls: planes, source: rooms.source };
 }
 // speech recognition is biased toward this catalogue, the room's words and its sizes
 const keywordsFor = (room) => [...new Set([...catalogList.flatMap((c) => c.words ?? [c.id.replace('-', ' '), c.name]), ...(room?.items ?? []).map((i) => i.label), 'wall', 'door', 'window', 'ceiling', 'floor', 'metres', 'feet', 'wider', 'longer'])];
@@ -55,11 +61,12 @@ function rebuilt(item, materials) {
   });
 }
 function modelFile(name) {
-  const { item, materials, colours } = parseModel(name);
+  const { item, materials, colours, fit } = parseModel(name);
   if (!catalog[item]) return null;
   if (!made.has(name)) {
     const job = (async () => {
-      const glb = Object.keys(materials).length ? await rebuilt(item, materials) : await readFile(join(catalog[item].dir ?? CATALOG, catalog[item].file));
+      // Maison3D's own pieces are built here (a window piece to its fit); mojulo's are read, or rebuilt in other materials
+      const glb = catalog[item].decor ? decorModel(catalog[item], fit).glb : Object.keys(materials).length ? await rebuilt(item, materials) : await readFile(join(catalog[item].dir ?? CATALOG, catalog[item].file));
       if (!Object.keys(colours).length) return glb;
       const t0 = Date.now();
       const out = recolour(glb, colours);
@@ -119,6 +126,13 @@ const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, 'http://localhost');
     if (req.method === 'GET' && url.pathname === '/api/health') return send(res, 200, { ok: true, model: config.model, key: config.hasKey, stt: sttStatus(), voice: voiceStatus(), catalog: catalogList.map((c) => c.id) });
     if (req.method === 'GET' && url.pathname === '/api/scene') return send(res, 200, { scene: sceneJson(), room: roomJson() });
+    // a piece the person moved with the laser: checked like a placement, the scene back with where it ended up
+    if (req.method === 'POST' && url.pathname === '/api/move') {
+      const body = await readJson(req);
+      const r = manualMove(body, designRoom());
+      console.log(`\n(moved by hand: ${body.id} -> ${r.error ?? `${r.piece.at}${r.issues?.length ? `  [${r.issues.join('; ')}]` : ''}`})`);
+      return send(res, 200, { ...r, scene: sceneJson(), room: roomJson() });
+    }
     if (req.method === 'POST' && url.pathname === '/api/clear') { scene.length = 0; console.log('\n(cleared from the headset)'); return send(res, 200, { scene: [], room: roomJson() }); }
     // the headset has read its room: the empty room to stand in VR, before anyone has said anything
     // (a new session: the app started, so its world's origin is where the person stands; the dictated room stands

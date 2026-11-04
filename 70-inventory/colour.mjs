@@ -7,12 +7,16 @@ import { inflateSync, deflateSync } from 'node:zlib';
 import { readGlb, writeGlb } from './ready.mjs';
 
 /** The parts a person can name, in the order a piece is usually meant by them ("the sofa" is its fabric). */
-export const ROLES = ['fabric', 'body', 'throw', 'pillows', 'mattress', 'wood', 'seat', 'handles'];
+export const ROLES = ['fabric', 'body', 'throw', 'pillows', 'mattress', 'wood', 'seat', 'handles', 'pot', 'leaves', 'frame', 'mat', 'rod', 'shade', 'base'];
+// Maison3D's own pieces name their parts' roles outright: `<part>:<role>`
+const NAMED_ROLES = new Set(['pot', 'leaves', 'frame', 'mat', 'rod', 'shade', 'base', 'fabric', 'wood']);
 
 /** The role a material plays, from its name (`<part>:<kind>:...`, as mojulo names them), or null. */
 export function roleOf(name = '') {
   const [part = '', kind = ''] = name.split(':');
+  if (NAMED_ROLES.has(kind) && kind !== 'fabric' && kind !== 'wood') return kind;
   if (kind === 'fabric' || kind === 'piping') return 'fabric';
+  if (kind === 'wood') return 'wood';
   if (part === 'mattress') return 'mattress';
   if (/^pillow/.test(part)) return 'pillows';
   if (part === 'throw') return 'throw';
@@ -78,7 +82,7 @@ function chunk(kind, data) {
   const crc = Buffer.alloc(4); crc.writeUInt32BE(crc32(Buffer.concat([head.subarray(4), data])), 0);
   return Buffer.concat([head, data, crc]);
 }
-function encodePng(w, h, rgba) {
+export function encodePng(w, h, rgba) {
   const raw = Buffer.alloc(h * (w * 4 + 1));
   for (let y = 0; y < h; y++) rgba.copy(raw, y * (w * 4 + 1) + 1, y * w * 4, (y + 1) * w * 4);
   const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(w, 0); ihdr.writeUInt32BE(h, 4); ihdr[8] = 8; ihdr[9] = 6;
