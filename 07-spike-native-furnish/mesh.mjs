@@ -154,3 +154,17 @@ export function dice(seed) {
   let a = seed >>> 0;
   return () => { a = (a + 0x6d2b79f5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 }
+
+const R = (v) => Math.round(v * 1000) / 1000;
+export function bounds(m) {
+  const lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity];
+  for (const g of m.mats.values()) for (let i = 0; i < g.pos.length; i += 3) for (let k = 0; k < 3; k++) { lo[k] = Math.min(lo[k], g.pos[i + k]); hi[k] = Math.max(hi[k], g.pos[i + k]); }
+  return { lo, hi };
+}
+/** Centres a mesh's footprint on the origin, its base on y = 0 (a wall piece keeps its back where it was built). */
+export function settle(m, { keepZ = false } = {}) {
+  const { lo, hi } = bounds(m), dx = (lo[0] + hi[0]) / 2, dz = keepZ ? 0 : (lo[2] + hi[2]) / 2, dy = lo[1];
+  for (const g of m.mats.values()) for (let i = 0; i < g.pos.length; i += 3) { g.pos[i] -= dx; g.pos[i + 1] -= dy; g.pos[i + 2] -= dz; }
+  return [R(hi[0] - lo[0]), R(hi[1] - lo[1]), R(hi[2] - lo[2])];
+}
+

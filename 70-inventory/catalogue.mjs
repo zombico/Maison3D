@@ -108,7 +108,7 @@ export const PIECES = [
   { id: 'DKC', name: 'Desk chair', room: 'office', job: 'work', source: 'roster', recipe: "furnishing 'desk-chair'", sizes: { std: [600, 600, 950] }, in: ALL },
   { id: 'UTL', name: 'Open shelving', room: 'office', job: 'display', source: 'roster', recipe: "furnishing 'utility-shelf'", sizes: { std: [900, 400, 1800] }, in: ['HIN', 'SAB'] },
   { id: 'CAB', name: 'Low cabinet', room: 'office', job: 'store', source: 'furniture', recipe: "piece 'casework', front 'doors-over-drawer'", sizes: { std: [800, 450, 750] }, in: ALL },
-  { id: 'KIT', name: 'Desk-top kit', room: 'office', job: 'work', source: 'roster', recipe: "furnishings 'monitor', 'keyboard', 'mouse', 'laptop', 'pencil-holder', 'notebook'", sizes: { set: [900, 400, 450] }, in: ['ALL'] },
+  { id: 'KIT', name: 'Desk-top kit', room: 'office', job: 'work', source: 'maison', mount: 'surface', recipe: "furnishings 'monitor', 'keyboard', 'mouse', 'laptop', 'pencil-holder', 'notebook'", sizes: { set: [900, 400, 450] }, in: ['ALL'] },
 
   // --- entry and hall ----------------------------------------------------------------------------------------
   { id: 'EBN', name: 'Entry bench', room: 'entry', job: 'drop', source: 'roster', recipe: "furnishing 'bench' (interior entry-bench)", sizes: { std: [1000, 380, 450] }, in: ALL },
@@ -129,15 +129,28 @@ export const PIECES = [
   { id: 'OLS', name: 'Outdoor lounge sofa', room: 'outdoor', job: 'converse', source: 'furniture', recipe: "piece 'sofa', arms 'none', canvas", sizes: { std: [1800, 850, 700] }, in: ['LIT', 'SAB'] },
 
   // --- lighting, rugs and decor (every room) -----------------------------------------------------------------
-  { id: 'FLP', name: 'Floor lamp', room: 'any', job: 'light-task', source: 'roster', recipe: "furnishing 'floor-lamp'", sizes: { std: [380, 380, 1600] }, in: ALL },
-  { id: 'SCN', name: 'Wall sconce', room: 'any', job: 'light-task', source: 'roster', recipe: "furnishing 'sconce'", sizes: { std: [150, 200, 300] }, in: ALL },
-  { id: 'TLP', name: 'Table lamp', room: 'any', job: 'light-task', source: 'workbench', recipe: 'lathes: a base, a stem and a shade (as the catalogue floor lamp)', sizes: { std: [300, 300, 550] }, in: ALL },
-  { id: 'RUG', name: 'Area rug', room: 'any', job: 'anchor', source: 'roster', recipe: "furnishing 'rug' / 'bordered-rug'", sizes: { '160x230': [1600, 2300, 10], '200x300': [2000, 3000, 10], '240x340': [2400, 3400, 10] }, in: ALL },
-  { id: 'RUN', name: 'Runner', room: 'any', job: 'anchor', source: 'roster', recipe: "furnishing 'runner'", sizes: { '80x240': [800, 2400, 10] }, in: ALL },
+  { id: 'FLP', name: 'Floor lamp', room: 'any', job: 'light-task', source: 'maison', recipe: 'objects.mjs: a base, a stem, a shade in the collection\'s lamp style', sizes: { std: [420, 420, 1600] }, in: ALL },
+  { id: 'SCN', name: 'Wall sconce', room: 'any', job: 'light-task', source: 'maison', mount: 'wall', hang: 1.7, recipe: 'objects.mjs: a back plate, an arm, a small shade', sizes: { std: [180, 300, 260] }, in: ALL },
+  { id: 'TLP', name: 'Table lamp', room: 'any', job: 'light-task', source: 'maison', mount: 'surface', recipe: 'objects.mjs: a ceramic base, a stem and a shade', sizes: { std: [340, 340, 560] }, in: ALL },
+  { id: 'PND', name: 'Pendant light', room: 'any', job: 'light-task', source: 'maison', mount: 'ceiling', recipe: 'objects.mjs: a canopy, a cord, a shade', sizes: { std: [420, 420, 900] }, in: ALL },
+  { id: 'RUG', name: 'Area rug', room: 'any', job: 'anchor', source: 'maison', mount: 'rug', recipe: "objects.mjs: a woven pattern in the collection's colours", sizes: { '160x230': [1600, 2300, 10], '200x300': [2000, 3000, 10], '240x340': [2400, 3400, 10] }, in: ALL },
+  { id: 'RUN', name: 'Runner', room: 'any', job: 'anchor', source: 'maison', mount: 'rug', recipe: "objects.mjs: a woven runner", sizes: { '80x240': [800, 2400, 10] }, in: ALL },
   { id: 'ART', name: 'Wall art', room: 'any', job: 'display', source: 'roster', recipe: "furnishing 'picture'", sizes: { small: [600, 30, 800], large: [900, 30, 1200] }, in: ALL },
   { id: 'MIR', name: 'Floor mirror', room: 'any', job: 'dress', source: 'roster', recipe: "furnishing 'mirror'", sizes: { std: [600, 40, 1700] }, in: ALL },
-  { id: 'VAS', name: 'Vase', room: 'any', job: 'display', source: 'roster', recipe: "furnishing 'vase'", sizes: { std: [140, 140, 430] }, in: ALL },
-  { id: 'TV', name: 'Television', room: 'any', job: 'media', source: 'roster', recipe: "furnishing 'tv' (tv: inches)", sizes: { '55in': [1230, 60, 710], '65in': [1450, 60, 830] }, in: ['ALL'] },
+  { id: 'VAS', name: 'Vase', room: 'any', job: 'display', source: 'maison', mount: 'surface', recipe: "objects.mjs: a turned vase in the collection's glaze", sizes: { std: [160, 160, 330], tall: [220, 220, 600] }, in: ALL },
+  { id: 'TV', name: 'Television', room: 'any', job: 'media', source: 'maison', mount: 'wall', hang: 1.25, recipe: 'objects.mjs: a thin panel', sizes: { '55in': [1230, 60, 710], '65in': [1450, 60, 830] }, in: ['ALL'] },
+  // --- objects and soft things (Maison3D's own builds, and mojulo's soft parts for the fabric ones) ------------
+  { id: 'BWL', name: 'Bowl', room: 'any', job: 'display', source: 'maison', mount: 'surface', recipe: 'objects.mjs: a turned bowl', sizes: { std: [300, 300, 110] }, in: ALL },
+  { id: 'CND', name: 'Candles', room: 'any', job: 'display', source: 'maison', mount: 'surface', recipe: 'objects.mjs: three pillar candles', sizes: { trio: [200, 90, 200] }, in: ALL },
+  { id: 'BKS', name: 'Stack of books', room: 'any', job: 'display', source: 'maison', mount: 'surface', recipe: 'objects.mjs: books lying in a stack', sizes: { std: [260, 200, 140] }, in: ALL },
+  { id: 'BKR', name: 'Row of books', room: 'any', job: 'display', source: 'maison', mount: 'surface', recipe: 'objects.mjs: books standing in a row', sizes: { std: [400, 220, 280] }, in: ALL },
+  { id: 'BSK', name: 'Basket', room: 'any', job: 'store', source: 'maison', recipe: 'objects.mjs: a woven basket', sizes: { std: [420, 420, 400] }, in: ALL },
+  { id: 'TRY', name: 'Tray', room: 'any', job: 'display', source: 'maison', mount: 'surface', recipe: 'objects.mjs: a shallow tray', sizes: { std: [450, 300, 50] }, in: ALL },
+  { id: 'CLK', name: 'Wall clock', room: 'any', job: 'display', source: 'maison', mount: 'wall', hang: 1.8, recipe: 'objects.mjs: a round face, a rim, two hands', sizes: { std: [400, 50, 400] }, in: ALL },
+  { id: 'CUS', name: 'Cushion', room: 'any', job: 'converse', source: 'workbench', mount: 'surface', recipe: "a soft pillow in the collection's accent fabric", sizes: { std: [450, 160, 450] }, in: ALL },
+  { id: 'LMB', name: 'Lumbar cushion', room: 'any', job: 'converse', source: 'workbench', mount: 'surface', recipe: "a long soft pillow in the collection's fabric", sizes: { std: [550, 150, 320] }, in: ALL },
+  { id: 'THR', name: 'Folded throw', room: 'any', job: 'converse', source: 'workbench', mount: 'surface', recipe: "a folded throw in the collection's accent fabric", sizes: { std: [500, 350, 60] }, in: ALL },
+  { id: 'POF', name: 'Pouf', room: 'any', job: 'converse', source: 'workbench', recipe: "a boxed pouf in the collection's fabric", sizes: { std: [450, 450, 400] }, in: ALL },
 ];
 
 // what the list wants and mojulo cannot make today

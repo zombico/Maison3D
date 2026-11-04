@@ -91,7 +91,9 @@ ${catalogIndex()}
 
 How pieces sit: on the floor; rugs under everything; wall pieces (pictures, mirrors) hang on a wall at a height
 (pictures centred about 1.45 m up, or 22 cm over the piece they are above); window pieces (curtains, blinds) are made
-to fit the window they are put at; surface pieces (small plants) go on top of a piece, or the floor.
+to fit the window they are put at; surface pieces (table lamps, vases, books, candles, cushions, small plants) go on
+top of a piece ("on": the sideboard, the sofa), or the floor; ceiling pieces (pendants) hang from the ceiling over the
+spot they are put at (over the dining table: at its x, z, or next_to it).
 
 Materials a part can be made of: ${Object.entries(MATERIALS).map(([k, v]) => `${k}: ${v.join(', ')}`).join('; ')}.
 
@@ -145,7 +147,9 @@ export function findPieces({ query = '', kind, mount, collection, room, max = 12
     if (mount && mountOf(c) !== mount) continue;
     if (collection && c.collection !== collection) continue;
     if (room && c.room && c.room !== room) continue;
-    const text = [c.id, c.name, c.note, c.kind, c.room, c.sizeName, ...(c.words ?? []), COLLECTIONS.find((x) => x.code === c.collection)?.name, ...Object.keys(c.parts ?? {}), ...Object.values(c.made ?? {})].filter(Boolean).join(' ').toLowerCase();
+    // a collection's style and its colours count too ("emerald velvet" finds Fête)
+    const col = COLLECTIONS.find((x) => x.code === c.collection), cm = col?.mojulo;
+    const text = [c.id, c.name, c.note, c.kind, c.room, c.sizeName, ...(c.words ?? []), col?.name, col?.card, cm?.fabric?.warp, cm?.accent?.warp, cm?.fabric?.preset, cm?.accent?.preset, cm?.timber, ...Object.keys(c.parts ?? {}), ...Object.values(c.made ?? {})].filter(Boolean).join(' ').toLowerCase();
     const score = words.reduce((s, w) => s + (text.includes(w) ? (w.length > 3 ? 2 : 1) : 0), 0);
     if (!words.length || score) hits.push([score, c]);
   }
@@ -418,7 +422,8 @@ export function apply(name, args, ctx) {
     if ((!to && end) || to?.id === p.item) return { ok: true, note: `it is already the ${end ?? to.sizeName} one; it comes in ${sizes.map((o) => o.sizeName).join(', ')}`, piece: describe(p) };
     if (!to) return { error: `no ${args.size} ${catalog[p.item].name.split(',')[0]}; it comes in ${sizes.map((o) => o.sizeName).join(', ')} and is ${catalog[p.item].sizeName}` };
     // the back stays where it was (against its wall): the centre moves by half the change in depth, along the facing
-    const dd = (to.size[2] - sizeOf(p, catalog)[2]) / 2;
+    // a floor piece keeps its back where it was (against its wall); a rug, a lamp, a picture keep their centre
+    const dd = mountOf(catalog[p.item]) === 'floor' ? (to.size[2] - sizeOf(p, catalog)[2]) / 2 : 0;
     if (mountOf(catalog[p.item]) === 'wall') p.at = [p.at[0], round3(p.at[1] + (sizeOf(p, catalog)[1] - to.size[1]) / 2), p.at[2]]; // a picture keeps its centre's height
     p.at = [p.at[0] + p.facing[0] * dd, p.at[1], p.at[2] + p.facing[2] * dd].map((v) => Math.round(v * 1000) / 1000);
     const was = p.id;

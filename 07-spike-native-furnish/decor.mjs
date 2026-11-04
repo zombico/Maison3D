@@ -2,7 +2,7 @@
 // curtains and blinds made to fit the window they hang at. Each is built here (mesh.mjs), the same from the same
 // recipe, readied like a catalogue piece: centred on its footprint, its base at y = 0, its front to +z. A wall piece's
 // back is at -z; a window piece is built to its window (`fit`), the one kind of piece sized when placed.
-import { Mesh, dice, norm, v3 } from './mesh.mjs';
+import { Mesh, dice, norm, v3, bounds, settle } from './mesh.mjs';
 import { paint } from './art.mjs';
 import { partsOf } from '../70-inventory/colour.mjs';
 
@@ -166,6 +166,7 @@ const MIRRORS = {
   round: { label: 'round mirror', size: [0.7, 0.7], frame: { colour: '#b8953d', metallic: 0.8, roughness: 0.3 }, outline: (w, h) => Array.from({ length: 40 }, (_, i) => { const a = (i / 40) * Math.PI * 2; return [Math.cos(a) * w / 2, h / 2 + Math.sin(a) * h / 2]; }) },
   arch: { label: 'arched mirror', size: [0.6, 1.0], frame: { colour: '#1d1d1d', roughness: 0.5 }, outline: (w, h) => [[w / 2, 0], ...Array.from({ length: 21 }, (_, i) => { const a = (i / 20) * Math.PI; return [Math.cos(a) * w / 2, h - w / 2 + Math.sin(a) * w / 2]; }), [-w / 2, 0]] },
   rectangular: { label: 'rectangular mirror', size: [0.7, 1.0], frame: { colour: '#b08d62' }, outline: (w, h) => [[w / 2, 0], [w / 2, h], [-w / 2, h], [-w / 2, 0]] },
+  floor: { label: 'floor mirror', size: [0.6, 1.7], mount: 'floor', frame: { colour: '#1d1d1d', roughness: 0.5 }, outline: (w, h) => [[w / 2, 0], [w / 2, h], [-w / 2, h], [-w / 2, 0]] },
   oval: { label: 'oval mirror', size: [0.55, 0.85], frame: { colour: '#b8953d', metallic: 0.8, roughness: 0.3 }, outline: (w, h) => Array.from({ length: 40 }, (_, i) => { const a = (i / 40) * Math.PI * 2; return [Math.cos(a) * w / 2, h / 2 + Math.sin(a) * h / 2]; }) },
 };
 function mirror(m, kind, [w, h], d = 0.03) {
@@ -265,18 +266,6 @@ const PLANT_CHOICE = {
 };
 const code = (s) => s.toUpperCase().replace(/[^A-Z]+/g, '-').replace(/^-|-$/g, '');
 
-function bounds(m) {
-  const lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity];
-  for (const g of m.mats.values()) for (let i = 0; i < g.pos.length; i += 3) for (let k = 0; k < 3; k++) { lo[k] = Math.min(lo[k], g.pos[i + k]); hi[k] = Math.max(hi[k], g.pos[i + k]); }
-  return { lo, hi };
-}
-/** Centres a mesh's footprint on the origin, its base on y = 0 (a wall piece keeps its back where it was built). */
-function settle(m, { keepZ = false } = {}) {
-  const { lo, hi } = bounds(m), dx = (lo[0] + hi[0]) / 2, dz = keepZ ? 0 : (lo[2] + hi[2]) / 2, dy = lo[1];
-  for (const g of m.mats.values()) for (let i = 0; i < g.pos.length; i += 3) { g.pos[i] -= dx; g.pos[i + 1] -= dy; g.pos[i + 2] -= dz; }
-  return [R(hi[0] - lo[0]), R(hi[1] - lo[1]), R(hi[2] - lo[2])];
-}
-
 function buildPlant(name, size) {
   const P = PLANTS[name], H = PLANT_SIZES[size] * (name === 'pothos' ? 0.6 : 1), m = new Mesh(), r = dice(name.length * 97 + H * 1000);
   const potR = Math.max(0.09, H * 0.13), potH = Math.max(0.12, H * 0.2);
@@ -296,7 +285,7 @@ ARTWORKS.forEach(([art, label, frame, shape, seed]) => {
     entries.push({ id: `ART-${code(label)}-${size}`, name: `${label} print, ${size}`, kind: 'art', mount: 'wall', hang: 1.45, sizeName: size, piece: `ART-${code(label)}`, words: [label.toLowerCase(), 'picture', 'frame', 'art'], note: `${frame === 'canvas' ? 'a stretched canvas' : `in a ${frame} frame`}, ${Math.round(w * 100)} x ${Math.round(h * 100)} cm`, build: (fit, { draft } = {}) => { const m = new Mesh(); picture(m, { art, seed, frame, w, h, draft }); return m; } });
   }
 });
-for (const [kind, M] of Object.entries(MIRRORS)) entries.push({ id: `MIR-${code(kind)}`, name: `${M.label[0].toUpperCase()}${M.label.slice(1)}`, kind: 'mirror', mount: 'wall', hang: 1.5, piece: `MIR-${code(kind)}`, words: [M.label, 'mirror'], note: `${Math.round(M.size[0] * 100)} x ${Math.round(M.size[1] * 100)} cm`, build: () => { const m = new Mesh(); mirror(m, kind, M.size); return m; } });
+for (const [kind, M] of Object.entries(MIRRORS)) entries.push({ id: `MIR-${code(kind)}`, name: `${M.label[0].toUpperCase()}${M.label.slice(1)}`, kind: 'mirror', mount: M.mount ?? 'wall', hang: 1.5, piece: `MIR-${code(kind)}`, words: [M.label, 'mirror'], note: `${Math.round(M.size[0] * 100)} x ${Math.round(M.size[1] * 100)} cm`, build: () => { const m = new Mesh(); mirror(m, kind, M.size); return m; } });
 for (const [id, C] of Object.entries(CURTAINS)) entries.push({ id, name: `${C.label[0].toUpperCase()}${C.label.slice(1)}`, kind: 'curtain', mount: 'window', piece: id, words: [C.label, C.blind ? 'blind' : 'curtains'], note: `${C.note}; made to fit the window it hangs at`, fitted: true, build: (fit) => { const m = new Mesh(); curtain(m, id, fit ?? { w: 1.7, top: 2.45, bottom: 0.012, open: 1 }); return m; } });
 
 const built = new Map();

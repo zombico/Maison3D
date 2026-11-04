@@ -6,6 +6,7 @@ import { COLLECTIONS, PIECES } from './catalogue.mjs';
 import { recipeFor, frontTurn, withMaterials, WOOD_TONE } from './recipes.mjs';
 import { ready } from './ready.mjs';
 import { partsOf, recolour } from './colour.mjs';
+import { settle } from '../07-spike-native-furnish/mesh.mjs';
 
 // mojulo's own sheet table and finishes, from the pinned source, to colour the sheet goods its lit export leaves white
 const { SHEETS, sheetColor } = await import('../.mojulo/src/control/lib/graph/construction/sheets.js');
@@ -25,7 +26,14 @@ const sheetRgbFor = (c) => (key) => {
 export async function makeSku(m, { sku, piece, collection, size }, materials = {}) {
   const p = PIECES.find((x) => x.id === piece);
   const col = COLLECTIONS.find((c) => c.code === collection);
-  const { kind, spec } = recipeFor(piece, collection, size, materials);
+  const recipe = recipeFor(piece, collection, size, materials);
+  const { kind, spec } = recipe;
+  if (kind === 'maison') {
+    // Maison3D's own object: built here, centred on its footprint, its base on y = 0
+    const sz = settle(recipe.mesh);
+    const glb = recipe.mesh.glb(sku);
+    return { glb, size: sz, triangles: recipe.mesh.triangles, parts: partsOf(glb), lost: [], mojulo: null };
+  }
   const tag = Object.entries(materials).map(([k, v]) => `${k}_${v}`).join('_');
   const ref = `sku_${sku.toLowerCase().replace(/[^a-z0-9]+/g, '_')}${tag ? `_${tag}` : ''}_${Date.now().toString(36)}`;
   const minted = await m.call('mint_solid', { kind, ref, title: `${col.name} ${p.name} (${size})${tag ? ` in ${Object.values(materials).join(', ')}` : ''}`, spec });
@@ -34,7 +42,7 @@ export async function makeSku(m, { sku, piece, collection, size }, materials = {
   // lit: real materials over unshaded colours, so the headset's own lights shade it (the default bakes mojulo's
   // studio light into the vertex colours, which then shades twice)
   const out = await m.call('export_model', { ref, format: 'glb', lit: true });
-  const readied = ready(readFileSync(out.path), sku, { turn: frontTurn(kind), sheetRgb: sheetRgbFor(withMaterials(col.mojulo, piece, materials)) });
+  const readied = ready(readFileSync(out.path), sku, { turn: frontTurn(kind), sheetRgb: sheetRgbFor(withMaterials(col.mojulo, piece, materials)), drop: recipe.drop ?? [] });
   // another wood is worn in its own tone, grain kept (WOOD_TONE: mojulo's flat colours barely tell the species apart)
   if (materials.wood && partsOf(readied.glb).wood) readied.glb = recolour(readied.glb, { wood: WOOD_TONE[materials.wood] });
   return { ...readied, parts: partsOf(readied.glb), lost, mojulo: { ref, kind, spec } };

@@ -1,6 +1,7 @@
 // Each SKU's mojulo recipe: the piece's own recipe, worn in its collection's finish, filled to its size exactly.
 // Returns the mint_solid call ({ kind, spec }) the build sends to mojulo.
 import { COLLECTIONS, PIECES } from './catalogue.mjs';
+import { objectMesh } from './objects.mjs';
 
 const byCode = Object.fromEntries(COLLECTIONS.map((c) => [c.code, c]));
 
@@ -64,6 +65,13 @@ export const frontTurn = (kind) => (kind === 'furniture' ? 180 : 0);
 export function recipeFor(pieceId, collectionCode, size, materials) {
   const p = PIECES.find((x) => x.id === pieceId);
   if (!p) throw new Error(`no piece ${pieceId}`);
+  // Maison3D's own objects (objects.mjs): built here, not minted
+  if (p.source === 'maison' && !['BED', 'PLT', 'KBD'].includes(pieceId)) {
+    const mm = p.sizes[size];
+    const mesh = mm && objectMesh(pieceId, collectionCode, size, mm);
+    if (!mesh) throw new Error(`no object build for ${pieceId}`);
+    return { kind: 'maison', mesh };
+  }
   if (!byCode[collectionCode]) throw new Error(`no collection ${collectionCode}`);
   const c = withMaterials(byCode[collectionCode].mojulo, pieceId, materials);
   const mm = p.sizes[size];
@@ -101,10 +109,55 @@ export function recipeFor(pieceId, collectionCode, size, materials) {
     case 'CAB': return furniture({ piece: 'casework', forms: { front: 'doors-over-drawer' }, finish: casework(c), size: mm });
     case 'BCH':
     case 'KCT': return furniture({ like: 'chest', finish: casework(c), size: mm });
-    case 'BED': return { kind: 'workbench', spec: bed({ size: mm, platform: false, c }) };
+    case 'BED':
+    case 'KBD': return { kind: 'workbench', spec: bed({ size: mm, platform: false, c }) };
+    // dining, office, kids, outdoor: mojulo's styles and kinds in the collection's finish
+    case 'PDR': return furniture({ like: 'painted-dresser', finish: casework(c), size: mm });
+    case 'DTB': return furniture({ like: 'dining-table', forms: { legs: c.legs }, finish: wooden(c), size: mm });
+    case 'FHT': return furniture({ like: 'farmhouse-table', finish: wooden(c), size: mm });
+    case 'MCT': return furniture({ like: 'mid-century-table', finish: wooden(c), size: mm });
+    case 'WSR': return furniture({ like: 'windsor-side-chair', finish: wooden(c), size: mm });
+    case 'YOK': return furniture({ like: 'chair', forms: { legs: 'tapered' }, finish: wooden(c), size: mm });
+    case 'DKC':
+    case 'KCH':
+    case 'OCH': return furniture({ like: 'chair', forms: { legs: c.legs }, finish: wooden(c), size: mm });
+    case 'BAR': return furniture({ like: 'counter', finish: casework(c), size: mm });
+    case 'UTL': return furniture({ like: 'shop-shelves', finish: casework(c), size: mm });
+    case 'STL':
+    case 'DSK':
+    case 'SDK':
+    case 'STT':
+    case 'KTB':
+    case 'OBT':
+    case 'OBN': return furniture({ piece: 'table', forms: { legs: c.legs }, finish: wooden(c), size: mm });
+    case 'OLS': return furniture({ piece: 'sofa', forms: { arms: 'none', back: 'loose', seat: 'loose', legs: c.legs }, finish: upholstered(c, { accent: true }), size: mm });
+    case 'LDK': return { kind: 'workbench', spec: lDesk({ size: mm, c }) };
+    // soft things: mojulo's soft parts in the collection's fabrics (a hidden block inside, as a frame needs one)
+    case 'CUS': return { kind: 'workbench', spec: soft({ size: mm, id: 'pillow', kind: 'pillow', fabric: c.accent }), drop: ['core'] };
+    case 'LMB': return { kind: 'workbench', spec: soft({ size: mm, id: 'pillow-lumbar', kind: 'pillow', fabric: c.fabric }), drop: ['core'] };
+    case 'THR': return { kind: 'workbench', spec: soft({ size: mm, id: 'throw', kind: 'cushion', style: 'boxed', fabric: c.accent }), drop: ['core'] };
+    case 'POF': return { kind: 'workbench', spec: soft({ size: mm, id: 'pillow-pouf', kind: 'cushion', style: 'boxed', fabric: c.fabric }), drop: ['core'] };
     case 'PLT': return { kind: 'workbench', spec: bed({ size: mm, platform: true, c }) };
     default: throw new Error(`no recipe yet for ${p.id} (${p.source})`);
   }
+}
+
+/** One soft thing (a cushion, a throw, a pouf) on its own, `size` [w, d, h] mm, drawn front to -y. */
+function soft({ size: [w, d, h], id, kind, style, fabric }) {
+  const part = { id, kind, ...(style ? { style } : {}), box: { min: [0, 0, 0], max: [w, d, h] }, fabric };
+  const core = { id: 'core', box: { min: [w / 2 - 10, d / 2 - 10, h / 2 - 10], max: [w / 2 + 10, d / 2 + 10, h / 2 + 10] }, species: 'oak' };
+  return { units: 'mm', frames: [{ id, unit: 'mm', detail: 'boxes', members: [core], soft: [part], softCell: kind === 'pillow' ? 18 : 22 }] };
+}
+
+/** A corner desk: two tops meeting in an L, on five legs, in the collection's timber; drawn x across, y back from the front. */
+function lDesk({ size: [w, d, h], c }) {
+  const top = 30, deep = 600, leg = 45, wood = { species: c.timber, finish: c.wood };
+  const members = [
+    { id: 'top-a', box: { min: [0, 0, h - top], max: [w, deep, h] }, ...wood },
+    { id: 'top-b', box: { min: [w - deep, deep, h - top], max: [w, d, h] }, ...wood },
+    ...[[0, 0], [w - leg, 0], [0, deep - leg], [w - deep, d - leg], [w - leg, d - leg]].map(([x, y], i) => ({ id: `leg-${i}`, box: { min: [x, y, 0], max: [x + leg, y + leg, h - top] }, ...wood })),
+  ];
+  return { units: 'mm', frames: [{ id: 'l-desk', unit: 'mm', detail: 'boxes', members, figure: 'coarse' }] };
 }
 
 /**

@@ -227,13 +227,26 @@ sofa forms) worn by one set of pieces, each piece in its listed sizes. `70-inven
 checked against the headset budgets (30,000 triangles, 1.5 MB) and its listed size (within 40 mm), and a soft part
 mojulo's grain lost is reported.
 
-The first slice is built: Hinoki (japandi) and Sable (modern-organic), living room and bedroom, 64 SKUs, all clean.
+The whole catalogue builds now: all seven collections, every room (living, bedroom, dining, office, entry, kids,
+outdoor) and the things for any room. Furniture is mojulo's (its furniture builds and styles, workbench frames for the
+beds and the corner desk, its soft parts for cushions, lumbar cushions, folded throws and poufs, in the collection's
+fabrics). The objects are Maison3D's own (`70-inventory/objects.mjs`, in each collection's palette: floor, table and
+pendant lamps and a wall sconce in the collection's lamp style, vases, a bowl, candles, books stacked and standing, a
+basket, a tray, a wall clock, rugs and a runner with a woven pattern, a television, a desk-top kit): mojulo's workbench
+could turn and extrude them too, but its export merges parts of one finish into one material, so a lamp's shade could
+not be recoloured apart from its base. Pictures and mirrors are the decor's (spike 07's `decor.mjs`).
+
+A build skips what it has already built (`--fresh` builds everything again). mojulo is started with its gallery
+thumbnails off (`MOJULO_DISABLE_SCENE_WARM`, `MOJULO_DISABLE_TURNTABLE_WARM`): it otherwise opens a headless browser
+per mint and keeps it, and a long build runs out of memory.
 The models are not committed (mojulo is deterministic, so a build gives the same pieces); on the laptop, once
 `npm run mojulo:setup` has run:
 
 ```bash
-npm run inventory:build -- --collections HIN,SAB --rooms living,bedroom
+npm run inventory:build
 ```
+
+(`-- --collections HIN,SAB --rooms living,bedroom` builds a part of it.)
 
 Then furnish with them: the inventory joins spike 07's six pieces, with the same Maison3D Furnish app.
 

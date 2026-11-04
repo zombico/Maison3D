@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+
 // mojulo's GLB export readied for the headset (spike 07's catalogue build, as a function): the studio's extras
 // dropped (the floor plate named 'static', the preset cameras), the piece moved so its footprint is centred on the
 // origin and its base sits at y = 0, front to +z. Returns the new GLB and the piece's size in metres (w, h, d).
@@ -61,14 +63,15 @@ function tintSheets(json, sheetRgb) {
  * `turn`: degrees about y to bring the piece's front to +z (some of mojulo's builds face -z). `sheetRgb`: the colour
  * of a sheet good from its tile key, for the faces mojulo's lit export leaves white (tintSheets).
  */
-export function ready(buf, name, { turn = 0, sheetRgb } = {}) {
+export function ready(buf, name, { turn = 0, sheetRgb, drop = [] } = {}) {
   const { json, bin } = readGlb(buf);
   if (sheetRgb) tintSheets(json, sheetRgb);
   const rootIndex = json.scenes[json.scene ?? 0].nodes.find((i) => json.nodes[i].name === 'mojulo');
   if (rootIndex === undefined) throw new Error(`${name}: no 'mojulo' root node`);
   const root = json.nodes[rootIndex];
   const s = root.scale?.[0] ?? 1;
-  const keep = (root.children ?? []).filter((i) => json.nodes[i].camera === undefined && json.nodes[i].name !== 'static');
+  // `drop`: parts by name, left out (a soft thing's hidden block)
+  const keep = (root.children ?? []).filter((i) => json.nodes[i].camera === undefined && json.nodes[i].name !== 'static' && !drop.some((d) => (json.nodes[i].name ?? '').startsWith(d)));
   const min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity];
   let triangles = 0;
   const visit = (i) => {
@@ -103,5 +106,41 @@ export function ready(buf, name, { turn = 0, sheetRgb } = {}) {
   json.scenes = [{ name, nodes: [0] }];
   json.scene = 0;
   delete json.cameras;
-  return { glb: writeGlb(json, bin), size, triangles: Math.round(triangles) };
+  const packed = dedupeImages(json, bin);
+  return { glb: writeGlb(json, packed), size, triangles: Math.round(triangles) };
+}
+
+/**
+ * mojulo writes a sheet good's texture once per part (a chest's drawers each carry the same board): keep each image
+ * once, point every texture at it, and drop the buffer views nothing uses any more. Returns the new binary chunk.
+ */
+function dedupeImages(json, bin) {
+  if (!json.images?.length) return bin;
+  const view = (v) => { const bv = json.bufferViews[v]; return bin.subarray(bv.byteOffset ?? 0, (bv.byteOffset ?? 0) + bv.byteLength); };
+  const seen = new Map(), canon = json.images.map((im, i) => {
+    if (im.bufferView === undefined) return i;
+    const k = createHash('sha1').update(view(im.bufferView)).digest('hex');
+    if (!seen.has(k)) seen.set(k, i);
+    return seen.get(k);
+  });
+  const keep = [...new Set(canon)], index = new Map(keep.map((i, n) => [i, n]));
+  for (const t of json.textures ?? []) t.source = index.get(canon[t.source]);
+  json.images = keep.map((i) => json.images[i]);
+  // the buffer views still in use: the accessors' and the kept images'
+  const used = new Set([...json.accessors.map((a) => a.bufferView), ...json.images.map((im) => im.bufferView)].filter((v) => v !== undefined));
+  const parts = [], moved = new Map();
+  let length = 0;
+  json.bufferViews = json.bufferViews.filter((bv, i) => {
+    if (!used.has(i)) return false;
+    const pad = (4 - (length % 4)) % 4;
+    if (pad) { parts.push(Buffer.alloc(pad)); length += pad; }
+    parts.push(view(i));
+    moved.set(i, moved.size);
+    bv.byteOffset = length; length += bv.byteLength;
+    return true;
+  });
+  for (const a of json.accessors) if (a.bufferView !== undefined) a.bufferView = moved.get(a.bufferView);
+  for (const im of json.images) if (im.bufferView !== undefined) im.bufferView = moved.get(im.bufferView);
+  json.buffers = [{ byteLength: length }];
+  return Buffer.concat(parts);
 }

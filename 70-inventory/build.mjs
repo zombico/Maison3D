@@ -23,7 +23,8 @@ const todo = skus().filter((s) =>
   (!collections || collections.includes(s.collection)) &&
   (!rooms || rooms.includes(piece(s.piece).room)) &&
   (!only || only.includes(s.sku)) &&
-  piece(s.piece).source !== 'gap');
+  piece(s.piece).source !== 'gap' &&
+  !['ART', 'MIR'].includes(s.piece)); // pictures and mirrors are Maison3D's decor (07-spike-native-furnish/decor.mjs)
 
 const modelsDir = join(here, 'models');
 mkdirSync(modelsDir, { recursive: true });
@@ -31,12 +32,19 @@ const catalogPath = join(here, 'catalog.json');
 const catalog = existsSync(catalogPath) ? JSON.parse(readFileSync(catalogPath, 'utf8')) : { catalog: [] };
 const byId = new Map(catalog.catalog.map((e) => [e.id, e]));
 
-const m = await connect();
+// mojulo opens a headless browser on each mint and keeps it, so a long build reconnects every so often (closing
+// mojulo closes them); a SKU already built by this build is skipped unless --fresh
+const fresh = process.argv.includes('--fresh');
+let m = await connect(), since = 0;
 console.log(`mojulo ${m.server.version}: ${todo.length} SKUs`);
 const problems = [];
+let skipped = 0;
 for (const s of todo) {
+  const had = byId.get(s.sku);
+  if (!fresh && had?.mount && !had.issues?.length && existsSync(join(here, had.file))) { skipped++; continue; }
+  if (++since > 20) { m.close(); await new Promise((r) => setTimeout(r, 1500)); m = await connect(); since = 0; }
   const p = piece(s.piece);
-  const col = COLLECTIONS.find((c) => c.code === s.collection);
+  const col = COLLECTIONS.find((c) => c.code === s.collection) ?? { name: 'Maison3D', card: 'any style' };
   const t0 = Date.now();
   try {
     const { glb, size, triangles, parts, lost, mojulo } = await makeSku(m, s);
@@ -47,10 +55,12 @@ for (const s of todo) {
     const issues = lost.map((id) => `soft part ${id} has no volume (missing from the model)`);
     if (triangles > BUDGET.triangles) issues.push(`${triangles} triangles (budget ${BUDGET.triangles})`);
     if (glb.length > BUDGET.bytes) issues.push(`${(glb.length / 1048576).toFixed(2)} MB (budget 1.5)`);
-    if (Math.max(...off) > BUDGET.sizeMm) issues.push(`size ${size.map((v) => Math.round(v * 1000)).join(' x ')} mm (w h d) against ${s.mm.join(' x ')} (w d h)`);
+    // Maison3D's objects are drawn to the listed size by eye (a lamp's shade, a vase's belly), so only furniture is held to it
+    if (Math.max(...off) > BUDGET.sizeMm && p.source !== 'maison') issues.push(`size ${size.map((v) => Math.round(v * 1000)).join(' x ')} mm (w h d) against ${s.mm.join(' x ')} (w d h)`);
     byId.set(s.sku, {
       id: s.sku, name: `${col.name} ${p.name.toLowerCase()}${Object.keys(p.sizes).length > 1 || s.size !== 'std' ? `, ${s.size}` : ''}`,
       kind: p.job === 'anchor' ? 'rug' : p.job, piece: p.id, collection: s.collection, room: p.room, job: p.job,
+      mount: p.mount ?? (p.job === 'anchor' ? 'rug' : 'floor'), ...(p.hang ? { hang: p.hang } : {}),
       // what the headset's model reads beside the name, and the words speech recognition is biased toward
       note: `${col.name} collection, ${col.card}, ${p.room}`, words: [col.name, p.name.toLowerCase()],
       size, sizeName: s.size, listed: s.mm, parts, triangles, bytes: glb.length, file, mojulo, issues,
@@ -65,5 +75,5 @@ for (const s of todo) {
   writeFileSync(catalogPath, JSON.stringify({ built: new Date().toISOString().slice(0, 10), mojulo: m.server.version, catalog: [...byId.values()].sort((a, b) => a.id.localeCompare(b.id)) }, null, 1) + '\n');
 }
 m.close();
-console.log(`\n${todo.length - problems.length} clean, ${problems.length} with issues`);
+console.log(`\n${todo.length - problems.length - skipped} built clean, ${skipped} already built, ${problems.length} with issues`);
 for (const [sku, issues] of problems) console.log(`  ${sku}: ${issues.join('; ')}`);
