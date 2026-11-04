@@ -188,15 +188,30 @@ const CURTAINS = {
   'CUR-VELVET': { label: 'velvet curtains', fabric: '#3e4a61', heading: 'pinch', roughness: 0.55, note: 'heavy velvet drapes' },
   'BLD-ROMAN': { label: 'roman blind', fabric: '#d8cfbd', blind: 'roman', roughness: 0.95, note: 'folds up in soft pleats, inside the window' },
   'BLD-ROLLER': { label: 'roller blind', fabric: '#ece9e2', blind: 'roller', roughness: 0.9, note: 'a flat blind on a roller' },
+  // drop down
+  'BLD-CELLULAR': { label: 'cellular shade', fabric: '#efe9dd', blind: 'cellular', roughness: 0.95, note: 'honeycomb pleats that drop down' },
+  'BLD-ZEBRA': { label: 'zebra shade', fabric: '#d9d3c7', blind: 'zebra', roughness: 0.9, tilts: true, note: 'two layers of sheer and solid bands that drop down and tilt between see-through and closed' },
+  // tiltable
+  'BLD-VENETIAN': { label: 'venetian blind', fabric: '#e8e8e4', blind: 'slats', slat: 0.025, metallic: 0.4, roughness: 0.4, tilts: true, note: 'aluminium slats, 25 mm, that raise and tilt' },
+  'BLD-WOOD': { label: 'wood slat blind', fabric: '#b8935f', blind: 'slats', slat: 0.05, roughness: 0.6, tilts: true, note: 'wooden slats, 50 mm, on tapes, that raise and tilt' },
+  'BLD-VERTICAL': { label: 'vertical blinds', fabric: '#e6e2d8', blind: 'vertical', roughness: 0.9, tilts: true, note: 'fabric vanes that draw to the side and tilt' },
+  // fixed, their louvres tilt
+  'SHT-PLANTATION': { label: 'plantation shutters', fabric: '#f2f0ea', blind: 'shutter', roughness: 0.5, tilts: true, fixed: true, note: 'fixed panels of wide louvres that tilt, inside the window' },
+  'SHT-CAFE': { label: 'café shutters', fabric: '#f2f0ea', blind: 'shutter', cafe: true, roughness: 0.5, tilts: true, fixed: true, note: 'shutters over the lower half of the window, their louvres tilt' },
 };
+export const TILTS = Object.keys(CURTAINS).filter((k) => CURTAINS[k].tilts);
 
 /** The fit of a window piece to its window: { w, top, bottom, open }, from the window's width, sill, top, the ceiling. */
-export function fitTo(id, win, { ceiling, high = false, drop = 'floor', open, inside } = {}) {
+export function fitTo(id, win, { ceiling, high = false, drop = 'floor', open, inside, tilt } = {}) {
   const C = CURTAINS[id], t = win.trim ?? 0.065, sd = win.sill_depth ?? 0.05, rc = win.recess ?? 0.1;
   if (C.blind) {
+    // a fixed shutter does not raise; a tiltable one starts with its slats open
+    const how = { open: C.fixed ? 1 : open ?? 0.7, ...(C.tilts ? { tilt: tilt ?? 1 } : {}) };
+    // café shutters cover the lower half
+    const top = (y) => (C.cafe ? R(win.bottom + (win.top - win.bottom) / 2) : y);
     // inside the recess when it is deep enough for one (and not asked otherwise): the window's own width and height
-    if ((inside ?? rc >= 0.06) && rc >= 0.04) return { w: R(win.width - 0.012), top: R(win.top - 0.005), bottom: R(win.bottom), open: open ?? 0.7, mount: 'inside' };
-    return { w: R(win.width + 2 * t + 0.06), top: R(Math.min(ceiling - 0.03, win.top + t + 0.04)), bottom: R(win.bottom), open: open ?? 0.7, mount: 'outside', proj: R(Math.max(0.04, Math.min(sd, 0.08) + 0.02)) };
+    if ((inside ?? rc >= 0.06) && rc >= 0.04) return { w: R(win.width - 0.012), top: top(R(win.top - 0.005)), bottom: R(win.bottom), ...how, mount: 'inside' };
+    return { w: R(win.width + 2 * t + 0.06), top: top(R(Math.min(ceiling - 0.03, win.top + t + 0.04))), bottom: R(win.bottom), ...how, mount: 'outside', proj: R(Math.max(0.04, Math.min(sd, 0.08) + 0.02)) };
   }
   // a rod over the casing, running 20 cm past it each side, its brackets clear of the sill
   const top = high ? ceiling - 0.08 : Math.min(ceiling - 0.05, win.top + t + 0.1);
@@ -204,14 +219,79 @@ export function fitTo(id, win, { ceiling, high = false, drop = 'floor', open, in
   return { w: R(win.width + 2 * t + 0.4), top: R(top), bottom: R(bottom), open: open ?? 1, proj: R(Math.max(0.1, sd + 0.07)) };
 }
 
-function curtain(m, id, { w, top, bottom, open, proj = 0.1 }) {
+/** Slats across, `pitch` apart, each `width` deep, turned by `tilt` (1 flat and open, 0 closed). */
+function slatRow(m, mat, w, yTop, yBottom, z, width, pitch, tilt) {
+  const th = (1 - tilt) * 1.35, dy = (Math.sin(th) * width) / 2, dz = (Math.cos(th) * width) / 2;
+  for (let y = yTop; y > yBottom; y -= pitch) m.quad(mat, [[-w / 2, y - dy, z - dz], [w / 2, y - dy, z - dz], [w / 2, y + dy, z + dz], [-w / 2, y + dy, z + dz]]);
+}
+
+/** The blinds and shutters beyond the roller and the roman blind: their own shapes, drops and tilts. */
+function blindKind(m, C, { w, H, open, tilt = 1, zb, fabric, rod }) {
+  const drop = H * (1 - open * 0.85), bottomY = H - drop;
+  if (C.blind === 'slats') {
+    const pitch = C.slat * 0.85, slat = { name: 'slat:body', colour: C.fabric, metallic: C.metallic, roughness: C.roughness };
+    slatRow(m, slat, w - 0.01, H - 0.05, bottomY + 0.02, zb, C.slat, pitch, tilt);
+    const raised = Math.max(0, Math.round((H - drop) / pitch) * 0 + Math.round((H * open * 0.85) / pitch));
+    if (raised) m.box(slat, [-w / 2 + 0.005, H - 0.04 - raised * 0.0035, zb - C.slat / 2], [w / 2 - 0.005, H - 0.04, zb + C.slat / 2]); // the slats drawn up
+    m.box(slat, [-w / 2 + 0.005, bottomY, zb - C.slat / 2], [w / 2 - 0.005, bottomY + 0.02, zb + C.slat / 2]); // the bottom rail
+    const tape = { name: 'tape:tape', colour: C.slat > 0.03 ? '#e8e2d4' : '#cfcfcb' };
+    for (const x of [-w / 3, w / 3]) m.box(tape, [x - (C.slat > 0.03 ? 0.018 : 0.0015), bottomY, zb - C.slat / 2 - 0.001], [x + (C.slat > 0.03 ? 0.018 : 0.0015), H - 0.04, zb - C.slat / 2]);
+  } else if (C.blind === 'vertical') {
+    // vanes hang from the track; drawn, they stack to the left, turned edge-on
+    const vane = 0.089, n = Math.max(3, Math.round((w - 0.02) / 0.08)), span = (w - 0.02) * (1 - open) + 0.12 * open, gapX = span / n;
+    for (let i = 0; i < n; i++) {
+      // th 0 is edge-on to the room (open), π/2 flat across the glass (shut); stacked vanes cannot turn wider than their gap
+      const x = -w / 2 + 0.01 + gapX * (i + 0.5), th = Math.min((1 - tilt) * 1.45, Math.asin(Math.min(1, gapX / vane)));
+      const dx = (Math.sin(th) * vane) / 2, dz = (Math.cos(th) * vane) / 2;
+      m.quad(fabric, [[x - dx, 0.01, zb - dz], [x + dx, 0.01, zb + dz], [x + dx, H - 0.05, zb + dz], [x - dx, H - 0.05, zb - dz]]);
+    }
+  } else if (C.blind === 'cellular') {
+    m.quad(fabric, [[-w / 2, bottomY, zb - 0.012], [w / 2, bottomY, zb - 0.012], [w / 2, H - 0.04, zb - 0.012], [-w / 2, H - 0.04, zb - 0.012]]);
+    for (let y = H - 0.055; y > bottomY + 0.015; y -= 0.032) m.tube(fabric, [[-w / 2, y, zb], [w / 2, y, zb]], 0.013, { sides: 6, closeEnds: true }); // the cells
+    m.box(rod, [-w / 2, bottomY, zb - 0.016], [w / 2, bottomY + 0.02, zb + 0.016]);
+  } else if (C.blind === 'zebra') {
+    // two layers of alternating solid and sheer bands; tilted shut, the back layer's solids fill the front's sheers
+    const band = 0.075, solid = { ...fabric, alpha: undefined, name: 'band:fabric' }, sheer = { name: 'sheer:fabric', colour: C.fabric, alpha: 0.3, roughness: 0.9 };
+    m.tube(rod, [[-w / 2, H - 0.06, zb], [w / 2, H - 0.06, zb]], 0.03, { sides: 12, closeEnds: true });
+    for (const [z, off] of [[zb + 0.03, 0], [zb + 0.02, band * (1 - tilt)]]) {
+      for (let y = H - 0.09, k = 0; y > bottomY; y -= band, k++) {
+        const y0 = Math.max(bottomY, y - band - off * (z < zb + 0.025 ? 1 : 0)), y1 = Math.min(H - 0.09, y - off);
+        if (y1 > y0) m.quad(k % 2 === 0 ? solid : sheer, [[-w / 2 + 0.01, y0, z], [w / 2 - 0.01, y0, z], [w / 2 - 0.01, y1, z], [-w / 2 + 0.01, y1, z]]);
+      }
+    }
+    m.box(rod, [-w / 2 + 0.01, bottomY - 0.02, zb + 0.015], [w / 2 - 0.01, bottomY, zb + 0.04]);
+  } else if (C.blind === 'shutter') {
+    // panels of a frame (stiles and rails) and louvres between, a tilt rod down the middle of each
+    const paint = { name: 'louvre:body', colour: C.fabric, roughness: C.roughness }, panels = w > 1.3 ? 4 : w > 0.7 ? 2 : 1, pw = w / panels, st = 0.05, rail = 0.08;
+    const mid = !C.cafe && H > 1.4 ? H / 2 : null;
+    for (let i = 0; i < panels; i++) {
+      const x0 = -w / 2 + i * pw, x1 = x0 + pw - 0.003;
+      m.box(paint, [x0, 0, zb - 0.015], [x0 + st, H, zb + 0.015]); m.box(paint, [x1 - st, 0, zb - 0.015], [x1, H, zb + 0.015]);
+      m.box(paint, [x0, 0, zb - 0.015], [x1, rail, zb + 0.015]); m.box(paint, [x0, H - rail, zb - 0.015], [x1, H, zb + 0.015]);
+      if (mid) m.box(paint, [x0, mid - rail / 2, zb - 0.015], [x1, mid + rail / 2, zb + 0.015]);
+      const lw = pw - 2 * st;
+      const rows = mid ? [[H - rail, mid + rail / 2], [mid - rail / 2, rail]] : [[H - rail, rail]];
+      for (const [a, b] of rows) {
+        // the louvres, centred in the panel
+        const g = new Mesh();
+        slatRow(g, paint, lw, a - 0.04, b + 0.02, zb, 0.089, 0.08, tilt);
+        for (const gr of g.mats.values()) for (let k = 0; k < gr.pos.length; k += 3) gr.pos[k] += (x0 + x1) / 2;
+        for (const gr of g.mats.values()) { const base = m.mat(paint).pos.length / 3; const tgt = m.mat(paint); tgt.pos.push(...gr.pos); tgt.nrm.push(...gr.nrm); tgt.uv.push(...gr.uv); tgt.idx.push(...gr.idx.map((v) => v + base)); }
+        m.box(paint, [(x0 + x1) / 2 - 0.006, b + 0.02, zb + 0.045], [(x0 + x1) / 2 + 0.006, a - 0.02, zb + 0.055]); // the tilt rod
+      }
+    }
+  }
+}
+
+function curtain(m, id, { w, top, bottom, open, proj = 0.1, tilt }) {
   // the piece's depth: from the wall to just in front of the rod (or the blind)
   const C = CURTAINS[id], H = top - bottom, z0 = -(proj + 0.06) / 2;
   const fabric = { name: 'panel:fabric', colour: C.fabric, roughness: C.roughness, alpha: C.alpha };
   const rod = { name: 'rod:rod', colour: '#2b2a28', metallic: 0.7, roughness: 0.35 };
   if (C.blind) {
     const zb = z0 + Math.max(0.03, proj - 0.03), drop = H * (1 - open * 0.85);
-    m.box(rod, [-w / 2, H - 0.04, z0], [w / 2, H, zb + 0.02]); // head rail
+    if (C.blind !== 'shutter') m.box(rod, [-w / 2, H - 0.04, z0], [w / 2, H, zb + 0.02]); // head rail
+    if (!['roller', 'roman'].includes(C.blind)) { blindKind(m, C, { w, H, open, tilt, zb, fabric, rod }); return; }
     if (C.blind === 'roller') {
       m.tube(rod, [[-w / 2, H - 0.06, zb], [w / 2, H - 0.06, zb]], 0.028, { sides: 12, closeEnds: true });
       m.quad(fabric, [[-w / 2 + 0.02, H - drop, zb + 0.028], [w / 2 - 0.02, H - drop, zb + 0.028], [w / 2 - 0.02, H - 0.06, zb + 0.028], [-w / 2 + 0.02, H - 0.06, zb + 0.028]]);
@@ -306,7 +386,7 @@ for (const [id, label, canvas] of [['ART-FRAME', 'Framed print, any size', false
     build: (fit, { draft } = {}) => { const f = customFit(fit ?? {}, canvas), m = new Mesh(); picture(m, { art: f.style, seed: f.seed, frame: f.frame, w: f.w, h: f.h, palette: f.palette, draft }); return m; } });
 }
 for (const [kind, M] of Object.entries(MIRRORS)) entries.push({ id: `MIR-${code(kind)}`, name: `${M.label[0].toUpperCase()}${M.label.slice(1)}`, kind: 'mirror', mount: M.mount ?? 'wall', hang: 1.5, piece: `MIR-${code(kind)}`, words: [M.label, 'mirror'], note: `${Math.round(M.size[0] * 100)} x ${Math.round(M.size[1] * 100)} cm`, build: () => { const m = new Mesh(); mirror(m, kind, M.size); return m; } });
-for (const [id, C] of Object.entries(CURTAINS)) entries.push({ id, name: `${C.label[0].toUpperCase()}${C.label.slice(1)}`, kind: 'curtain', mount: 'window', piece: id, words: [C.label, C.blind ? 'blind' : 'curtains'], note: `${C.note}; made to fit the window it hangs at`, fitted: true, build: (fit) => { const m = new Mesh(); curtain(m, id, fit ?? { w: 1.7, top: 2.45, bottom: 0.012, open: 1 }); return m; } });
+for (const [id, C] of Object.entries(CURTAINS)) entries.push({ id, name: `${C.label[0].toUpperCase()}${C.label.slice(1)}`, kind: 'curtain', mount: 'window', piece: id, ...(C.tilts ? { tilts: true } : {}), words: [C.label, C.blind === 'shutter' ? 'shutters' : C.blind ? 'blind' : 'curtains', ...(C.tilts ? ['tilt', 'slats', 'louvres'] : [])], note: `${C.note}; made to fit the window it hangs at`, fitted: true, build: (fit) => { const m = new Mesh(); curtain(m, id, fit ?? { w: 1.7, top: 2.45, bottom: 0.012, open: 1 }); return m; } });
 
 // appliances and fixtures (appliances.mjs): built the same way, a finish their fit
 entries.push(...applianceEntries);

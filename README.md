@@ -288,6 +288,12 @@ fields, Bauhaus, line drawing, hills, arches, a pencil grid, waves, leaves, a su
 (pinch-pleat, ripple-fold, grommet, sheer, velvet) and blinds (roman, roller) made to fit the window they hang at. Their
 parts recolour like any piece's (a planter's pot, a frame, the curtain fabric).
 
+More blinds and shutters, each in its own way of moving: shades that drop down (roller, roman, cellular, zebra), slatted
+blinds that raise and tilt (venetian, wood slat) or draw aside and tilt (vertical), and fixed shutters whose louvres
+tilt (plantation, with a mid rail on tall windows, and café over the lower half). A blind sits inside the window's
+recess when it is deep enough for one, otherwise over the casing. Muse's `open` tool takes `amount` (1 raised or drawn,
+0 down or shut) and `tilt` (1 slats open, 0 shut): "lower the blinds", "close the louvres", "tilt the slats halfway".
+
 Pictures can be made to any size: "a frame here that's 80 by 120", "a canvas over the bed, 1.5 by 1". `ART-FRAME` (a
 framed print) and `ART-CANVAS` (a stretched canvas) are built to the width and height asked for, with an abstract painted
 to fit in the picture's own proportions (`art.mjs`: blobs, blocks, gradient, strokes, terrazzo, rings, cut-outs, horizon,

@@ -107,7 +107,9 @@ recoloured (the sofa's fabric, a table's wood, a dresser's body): pick the colou
 for what they said ("sage green", "darker wood", "white"), and say it in words, never as a hex. A part can also be
 made of another material (linen to velvet, oak to walnut); that rebuilds the piece and takes a few seconds to appear.
 A smaller or larger one is the same piece in its next size (resize), keeping its colours and materials.
-Curtains open and close (open: 1 drawn back, 0 closed); hung "high and wide" they start near the ceiling.
+Curtains open and close (open: 1 drawn back, 0 closed); hung "high and wide" they start near the ceiling. Blinds: roller,
+roman, cellular and zebra drop down; venetian, wood slat and vertical blinds raise (or draw) and tilt; plantation and
+café shutters are fixed and their louvres tilt ("tilt the slats", "close the louvres": open with tilt).
 Appliances and fixtures (fridges, ranges, dishwashers, hoods, washers and dryers, toilets, vanities, tubs, showers,
 radiators, fans, a fireplace) come in their US sizes; an appliance's finish changes with material (stainless, white,
 black, or panel-<collection> to match that collection's cabinets).
@@ -184,6 +186,7 @@ const WHERE = {
   drop: { type: 'string', enum: ['floor', 'sill'], description: 'curtains to the floor (default) or to the sill' },
   open: { type: 'number', description: 'curtains: 1 drawn back (default), 0 closed; blinds: 1 raised, 0 down' },
   inside: { type: 'boolean', description: 'a blind inside the window recess (true) or over its casing (false); default inside when the recess is deep enough' },
+  tilt: { type: 'number', description: 'slats, vanes and louvres: 1 open (flat), 0 closed' },
   width: { type: 'number', description: 'ART-FRAME or ART-CANVAS: its width in metres' },
   height: { type: 'number', description: 'ART-FRAME or ART-CANVAS: its height in metres' },
   style: { type: 'string', enum: CUSTOM_ART.styles, description: "ART-FRAME or ART-CANVAS: the abstract's style" },
@@ -195,7 +198,7 @@ const TOOLS = [
   { type: 'function', function: { name: 'find', description: 'Search the catalogue by words (a kind, a style, a colour, a size, a collection): the best matches with their ids, sizes and how they sit.', parameters: { type: 'object', properties: { query: { type: 'string' }, mount: { type: 'string', enum: ['floor', 'rug', 'wall', 'window', 'ceiling', 'surface'] }, max: { type: 'number' } }, required: ['query'], additionalProperties: false } } },
   { type: 'function', function: { name: 'place', description: 'Add a catalogue piece to the room, by its id.', parameters: { type: 'object', properties: { item: { type: 'string' }, ...WHERE }, required: ['item'], additionalProperties: false } } },
   { type: 'function', function: { name: 'picture', description: 'Change a placed ART-FRAME or ART-CANVAS: another picture (another: true), its style, palette or frame, or its size (it keeps its centre).', parameters: { type: 'object', properties: { id: { type: 'string' }, another: { type: 'boolean' }, style: { type: 'string', enum: CUSTOM_ART.styles }, palette: { type: 'string', enum: CUSTOM_ART.palettes }, frame: { type: 'string', enum: CUSTOM_ART.frames }, width: { type: 'number' }, height: { type: 'number' } }, required: ['id'], additionalProperties: false } } },
-  { type: 'function', function: { name: 'open', description: 'Open or close placed curtains or blinds: 1 drawn back or raised, 0 closed or down, or in between.', parameters: { type: 'object', properties: { id: { type: 'string', description: 'a curtain or blind id, or "all"' }, amount: { type: 'number' } }, required: ['id', 'amount'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'open', description: 'Open or close placed curtains or blinds (amount: 1 drawn back or raised, 0 closed or down), and tilt slats, vanes and louvres (tilt: 1 open, 0 closed). Shutters are fixed: they only tilt.', parameters: { type: 'object', properties: { id: { type: 'string', description: 'a curtain, blind or shutter id, or "all"' }, amount: { type: 'number' }, tilt: { type: 'number' } }, required: ['id'], additionalProperties: false } } },
   { type: 'function', function: { name: 'move', description: 'Move or turn a placed piece. Give only `face` or `turn` to turn it where it stands.', parameters: { type: 'object', properties: { id: { type: 'string' }, ...WHERE }, required: ['id'], additionalProperties: false } } },
   { type: 'function', function: { name: 'swap', description: 'Replace a placed piece with another catalogue item, keeping its place and facing.', parameters: { type: 'object', properties: { id: { type: 'string' }, item: { type: 'string' } }, required: ['id', 'item'], additionalProperties: false } } },
   { type: 'function', function: { name: 'recolour', description: "Change the colour of one part of a placed piece (its catalogue entry lists its parts and their colours now). Without `part`, the piece's first part (the sofa's fabric, the dresser's body).", parameters: { type: 'object', properties: { id: { type: 'string' }, part: { type: 'string', description: 'fabric, wood, body, seat, handles, throw, pillows or mattress, as the piece lists' }, colour: { type: 'string', description: '#rrggbb, or "original" to go back to the catalogue colour' } }, required: ['id', 'colour'], additionalProperties: false } } },
@@ -283,7 +286,7 @@ function hang(p, room) {
   const win = windowsOf(room).find((w) => w.id === p.window);
   if (!win) return false;
   const entry = catalog[p.item];
-  p.fit = fitTo(entry.id, win, { ceiling: ceilingOf(room) - floorOf(room), high: p.hangHigh, drop: p.drop, open: p.fit?.open, inside: p.inside });
+  p.fit = fitTo(entry.id, win, { ceiling: ceilingOf(room) - floorOf(room), high: p.hangHigh, drop: p.drop, open: p.fit?.open, inside: p.inside, tilt: p.fit?.tilt });
   p.size = decorModel(entry, p.fit).size;
   // out from the wall's face; a blind inside the window stands in the recess, just in front of the glass
   const d = p.fit.mount === 'inside' ? -win.recess + p.size[2] / 2 + 0.06 : p.size[2] / 2 + 0.003;
@@ -341,7 +344,13 @@ export function apply(name, args, ctx) {
     const ps = args.id === 'all' ? scene.filter((p) => p.window) : scene.filter((p) => p.id === args.id);
     if (!ps.length) return { error: args.id === 'all' ? 'no curtains or blinds are up' : `no piece ${args.id}` };
     if (ps.some((p) => !p.window)) return { error: `${args.id} is not a curtain or blind` };
-    for (const p of ps) { p.fit = { ...p.fit, open: Math.max(0, Math.min(1, Number(args.amount))) }; hang(p, ctx.room); }
+    if (args.amount === undefined && args.tilt === undefined) return { error: 'give amount (open or closed) or tilt' };
+    if (args.tilt !== undefined && args.id !== 'all' && !catalog[ps[0].item].tilts) return { error: `${ps[0].id} does not tilt` };
+    for (const p of ps) {
+      if (args.amount !== undefined) p.fit = { ...p.fit, open: Math.max(0, Math.min(1, Number(args.amount))) };
+      if (args.tilt !== undefined && catalog[p.item].tilts) p.fit = { ...p.fit, tilt: Math.max(0, Math.min(1, Number(args.tilt))) };
+      hang(p, ctx.room);
+    }
     return { ok: true, pieces: ps.map(describe) };
   }
   if (name === 'rescan_room') {
@@ -508,8 +517,9 @@ export function apply(name, args, ctx) {
     if (args.high !== undefined) piece.hangHigh = args.high;
     if (args.drop !== undefined) piece.drop = args.drop;
     if (args.inside !== undefined) piece.inside = args.inside;
-    piece.fit = { ...piece.fit, open: args.open !== undefined ? Math.max(0, Math.min(1, args.open)) : piece.fit?.open };
+    piece.fit = { ...piece.fit, open: args.open !== undefined ? Math.max(0, Math.min(1, args.open)) : piece.fit?.open, tilt: args.tilt !== undefined ? Math.max(0, Math.min(1, args.tilt)) : piece.fit?.tilt };
     if (piece.fit.open === undefined) delete piece.fit.open;
+    if (piece.fit.tilt === undefined) delete piece.fit.tilt;
     hang(piece, ctx.room);
     if (!current) scene.push(piece);
     return { ok: true, piece: describe(piece) };
