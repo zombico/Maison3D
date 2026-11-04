@@ -251,6 +251,18 @@ recoloured model on the first request (well under a second, then cached), at a p
 headset reloads just that piece. A swap keeps the colours of the parts the new piece shares. Recolouring needs this
 Maison3D Furnish build or newer.
 
+Parts can be made of other materials too: "make the sofa velvet", "walnut legs", "a tartan throw". The fabrics are
+mojulo's (linen, canvas, twill, herringbone, houndstooth, gingham, tartan, ticking, velvet, bouclé), the woods its
+timbers, the casework its boards. That is a real rebuild: the server has the pinned mojulo make the SKU again with
+the change (a second or so, the first one a few more while mojulo starts), keeps it in `70-inventory/models/variants/`,
+and puts any colours over it. A cloth of one colour keeps the part's colour; a patterned one brings its own. Another
+wood is worn in that timber's tone (`WOOD_TONE` in `recipes.mjs`), since mojulo's flat-drawn parts barely tell the
+species apart. A bed's bedding is drawn without textures, so a pattern there shows as its colour, not its pattern.
+
+Sizes are related: each piece knows its other sizes in its collection, smallest first (the loveseat is the sofa's
+smallest, then 2-, 3- and 4-seat; double, queen, king), and Muse's `resize` tool takes "smaller", "larger" or a size
+by name. The resized piece keeps its back where it was and keeps its colours and materials.
+
 Two things mojulo's lit export gets wrong are fixed in `ready.mjs` and `recipes.mjs`: sheet goods (plywood and MDF
 casework) come out white, so their board colour is put back from mojulo's own sheet table; and mojulo's furniture
 builds face away from you, so they are turned to face +z like everything else.

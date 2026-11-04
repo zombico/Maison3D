@@ -8,9 +8,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { connect } from '../mojulo/client.mjs';
 import { COLLECTIONS, PIECES, skus } from './catalogue.mjs';
-import { recipeFor, frontTurn } from './recipes.mjs';
-import { ready } from './ready.mjs';
-import { partsOf } from './colour.mjs';
+import { makeSku } from './make.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const arg = (k) => { const i = process.argv.indexOf(`--${k}`); return i >= 0 ? process.argv[i + 1] : undefined; };
@@ -33,16 +31,6 @@ const catalogPath = join(here, 'catalog.json');
 const catalog = existsSync(catalogPath) ? JSON.parse(readFileSync(catalogPath, 'utf8')) : { catalog: [] };
 const byId = new Map(catalog.catalog.map((e) => [e.id, e]));
 
-// mojulo's own sheet table and finishes, from the pinned source, to colour the sheet goods its lit export leaves white
-const { SHEETS, sheetColor } = await import('../.mojulo/src/control/lib/graph/construction/sheets.js');
-const BOARD_OF = { ply: 'plywood', mdf: 'mdf', particle: 'particleboard', osb: 'osb' };
-const sheetRgbFor = (c) => (key) => {
-  const material = key.m === 'ply' || key.m === 'mdf' ? BOARD_OF[key.m] : Object.keys(SHEETS).find((k) => SHEETS[k].figure === key.m);
-  if (!material) return null;
-  const { face } = sheetColor(material, { finish: c.paint ? { paint: c.paint } : c.wood });
-  return face.mode === 'figure' ? face.rgb : null;
-};
-
 const m = await connect();
 console.log(`mojulo ${m.server.version}: ${todo.length} SKUs`);
 const problems = [];
@@ -51,15 +39,7 @@ for (const s of todo) {
   const col = COLLECTIONS.find((c) => c.code === s.collection);
   const t0 = Date.now();
   try {
-    const { kind, spec } = recipeFor(s.piece, s.collection, s.size);
-    const ref = `sku_${s.sku.toLowerCase().replace(/[^a-z0-9]+/g, '_')}_${Date.now().toString(36)}`;
-    const minted = await m.call('mint_solid', { kind, ref, title: `${col.name} ${p.name} (${s.size})`, spec });
-    // a soft part mojulo's grain could not catch comes back with no volume and is missing from the model
-    const lost = JSON.stringify(minted).match(/"id":"[^"]+","kind":"(?:cushion|pillow|bolster|pad)"[^}]*?"volumeL":0[,}]/g)?.map((x) => x.match(/"id":"([^"]+)"/)[1]) ?? [];
-    // lit: real materials over unshaded colours, so the headset's own lights shade it (the default bakes mojulo's
-    // studio light into the vertex colours, which then shades twice)
-    const out = await m.call('export_model', { ref, format: 'glb', lit: true });
-    const { glb, size, triangles } = ready(readFileSync(out.path), s.sku, { turn: frontTurn(kind), sheetRgb: sheetRgbFor(col.mojulo) });
+    const { glb, size, triangles, parts, lost, mojulo } = await makeSku(m, s);
     const file = `models/${s.sku}.glb`;
     writeFileSync(join(here, file), glb);
     // listed size is w x d x h (mm); readied size is w x h x d (m)
@@ -73,7 +53,7 @@ for (const s of todo) {
       kind: p.job === 'anchor' ? 'rug' : p.job, piece: p.id, collection: s.collection, room: p.room, job: p.job,
       // what the headset's model reads beside the name, and the words speech recognition is biased toward
       note: `${col.name} collection, ${col.card}, ${p.room}`, words: [col.name, p.name.toLowerCase()],
-      size, listed: s.mm, parts: partsOf(glb), triangles, bytes: glb.length, file, mojulo: { ref, kind, spec }, issues,
+      size, sizeName: s.size, listed: s.mm, parts, triangles, bytes: glb.length, file, mojulo, issues,
     });
     console.log(`  ${s.sku.padEnd(22)} ${String(triangles).padStart(6)} tris ${(glb.length / 1048576).toFixed(2)} MB  ${size.map((v) => v.toFixed(2)).join(' x ')} m  ${Date.now() - t0} ms${issues.length ? `  ! ${issues.join('; ')}` : ''}`);
     if (issues.length) problems.push([s.sku, issues]);

@@ -51,7 +51,8 @@
    "parts": {
     "wood": "#a57e4e",
     "seat": "#c29f69"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "HIN-ARM-std",
@@ -109,7 +110,8 @@
    "parts": {
     "fabric": "#c0baaa",
     "wood": "#b19672"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "HIN-BCH-std",
@@ -157,7 +159,8 @@
    "parts": {
     "body": "#bb9863",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "HIN-BEB-std",
@@ -207,7 +210,8 @@
    ],
    "parts": {
     "wood": "#a57e4e"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "HIN-BED-double",
@@ -487,7 +491,8 @@
     "pillows": "#c5b89c",
     "mattress": "#bdb8ac",
     "wood": "#a57e4e"
-   }
+   },
+   "sizeName": "double"
   },
   {
    "id": "HIN-BED-king",
@@ -767,7 +772,8 @@
     "pillows": "#c5b89c",
     "mattress": "#bdb8ac",
     "wood": "#a57e4e"
-   }
+   },
+   "sizeName": "king"
   },
   {
    "id": "HIN-BED-queen",
@@ -1047,7 +1053,8 @@
     "pillows": "#c5b89c",
     "mattress": "#bdb8ac",
     "wood": "#a57e4e"
-   }
+   },
+   "sizeName": "queen"
   },
   {
    "id": "HIN-BEN-std",
@@ -1097,7 +1104,8 @@
    ],
    "parts": {
     "wood": "#a57e4e"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "HIN-BKC-std",
@@ -1144,7 +1152,8 @@
    ],
    "parts": {
     "body": "#bf9c67"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "HIN-BKC-tall",
@@ -1191,7 +1200,8 @@
    ],
    "parts": {
     "body": "#c09c67"
-   }
+   },
+   "sizeName": "tall"
   },
   {
    "id": "HIN-CHT-tall",
@@ -1242,7 +1252,8 @@
    "parts": {
     "body": "#bb9863",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "tall"
   },
   {
    "id": "HIN-COF-long",
@@ -1292,7 +1303,8 @@
    ],
    "parts": {
     "wood": "#a57e4e"
-   }
+   },
+   "sizeName": "long"
   },
   {
    "id": "HIN-COF-std",
@@ -1342,7 +1354,8 @@
    ],
    "parts": {
     "wood": "#a57e4e"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "HIN-DRS-std",
@@ -1352,21 +1365,31 @@
    "collection": "HIN",
    "room": "bedroom",
    "job": "dress",
+   "note": "Hinoki collection, japandi, bedroom",
+   "words": [
+    "Hinoki",
+    "dresser"
+   ],
    "size": [
     1.2,
     0.8,
     0.527
    ],
+   "sizeName": "std",
    "listed": [
     1200,
     500,
     800
    ],
+   "parts": {
+    "body": "#bb9863",
+    "handles": "#34363a"
+   },
    "triangles": 408,
    "bytes": 615168,
    "file": "models/HIN-DRS-std.glb",
    "mojulo": {
-    "ref": "sku_hin_drs_std_mw1nhpfb",
+    "ref": "sku_hin_drs_std_mw1odpij",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -1384,16 +1407,7 @@
      ]
     }
    },
-   "issues": [],
-   "note": "Hinoki collection, japandi, bedroom",
-   "words": [
-    "Hinoki",
-    "dresser"
-   ],
-   "parts": {
-    "body": "#bb9863",
-    "handles": "#34363a"
-   }
+   "issues": []
   },
   {
    "id": "HIN-DRS-wide",
@@ -1444,7 +1458,8 @@
    "parts": {
     "body": "#bb9863",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "wide"
   },
   {
    "id": "HIN-LNG-std",
@@ -1499,7 +1514,8 @@
    "parts": {
     "fabric": "#c0baa9",
     "wood": "#b19672"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "HIN-LOV-std",
@@ -1554,7 +1570,8 @@
    "parts": {
     "fabric": "#b4a88f",
     "wood": "#b19672"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "HIN-MDU-std",
@@ -1605,7 +1622,8 @@
    "parts": {
     "body": "#be9b66",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "HIN-MED-long",
@@ -1653,7 +1671,8 @@
    "parts": {
     "body": "#be9b66",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "long"
   },
   {
    "id": "HIN-MED-short",
@@ -1701,7 +1720,8 @@
    "parts": {
     "body": "#be9b66",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "short"
   },
   {
    "id": "HIN-MED-std",
@@ -1749,7 +1769,8 @@
    "parts": {
     "body": "#be9b66",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "HIN-NST-std",
@@ -1797,7 +1818,8 @@
    "parts": {
     "body": "#bb9863",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "HIN-PLT-king",
@@ -2026,7 +2048,8 @@
     "pillows": "#c5b89c",
     "mattress": "#bdb8ac",
     "wood": "#a57e4e"
-   }
+   },
+   "sizeName": "king"
   },
   {
    "id": "HIN-PLT-queen",
@@ -2255,7 +2278,8 @@
     "pillows": "#c5b89c",
     "mattress": "#bdb8ac",
     "wood": "#a57e4e"
-   }
+   },
+   "sizeName": "queen"
   },
   {
    "id": "HIN-SDB-long",
@@ -2303,7 +2327,8 @@
    "parts": {
     "body": "#bd9a65",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "long"
   },
   {
    "id": "HIN-SDB-std",
@@ -2351,7 +2376,8 @@
    "parts": {
     "body": "#bd9a65",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "HIN-SID-std",
@@ -2401,7 +2427,8 @@
    ],
    "parts": {
     "wood": "#a57e4e"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "HIN-SOF-2-seat",
@@ -2459,7 +2486,8 @@
    "parts": {
     "fabric": "#b4a88f",
     "wood": "#b19672"
-   }
+   },
+   "sizeName": "2-seat"
   },
   {
    "id": "HIN-SOF-3-seat",
@@ -2517,7 +2545,8 @@
    "parts": {
     "fabric": "#b4a88f",
     "wood": "#b19672"
-   }
+   },
+   "sizeName": "3-seat"
   },
   {
    "id": "HIN-SOF-4-seat",
@@ -2575,7 +2604,8 @@
    "parts": {
     "fabric": "#b4a88f",
     "wood": "#b19672"
-   }
+   },
+   "sizeName": "4-seat"
   },
   {
    "id": "HIN-WRD-double",
@@ -2626,7 +2656,8 @@
    "parts": {
     "body": "#be9b66",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "double"
   },
   {
    "id": "HIN-WRD-single",
@@ -2677,7 +2708,8 @@
    "parts": {
     "body": "#be9b66",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "single"
   },
   {
    "id": "SAB-ACC-std",
@@ -2728,7 +2760,8 @@
    "parts": {
     "wood": "#ccab7b",
     "seat": "#cab084"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "SAB-ARM-std",
@@ -2786,7 +2819,8 @@
    "parts": {
     "fabric": "#894325",
     "wood": "#d6bc94"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "SAB-BEB-std",
@@ -2836,7 +2870,8 @@
    ],
    "parts": {
     "wood": "#cead7c"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "SAB-BED-double",
@@ -3116,7 +3151,8 @@
     "pillows": "#b9a681",
     "mattress": "#bdb8ac",
     "wood": "#ac8c61"
-   }
+   },
+   "sizeName": "double"
   },
   {
    "id": "SAB-BED-king",
@@ -3136,16 +3172,23 @@
     1.1,
     2.13
    ],
+   "sizeName": "king",
    "listed": [
     1930,
     2130,
     1100
    ],
+   "parts": {
+    "throw": "#974a28",
+    "pillows": "#b9a681",
+    "mattress": "#bdb8ac",
+    "wood": "#ac8c61"
+   },
    "triangles": 11920,
    "bytes": 742952,
    "file": "models/SAB-BED-king.glb",
    "mojulo": {
-    "ref": "sku_sab_bed_king_mw1nnipo",
+    "ref": "sku_sab_bed_king_mw1oe37e",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -3390,13 +3433,7 @@
      ]
     }
    },
-   "issues": [],
-   "parts": {
-    "throw": "#974a28",
-    "pillows": "#b9a681",
-    "mattress": "#bdb8ac",
-    "wood": "#ac8c61"
-   }
+   "issues": []
   },
   {
    "id": "SAB-BED-queen",
@@ -3676,7 +3713,8 @@
     "pillows": "#b9a681",
     "mattress": "#bdb8ac",
     "wood": "#ac8c61"
-   }
+   },
+   "sizeName": "queen"
   },
   {
    "id": "SAB-BEN-std",
@@ -3726,7 +3764,8 @@
    ],
    "parts": {
     "wood": "#cead7c"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "SAB-BKC-std",
@@ -3773,7 +3812,8 @@
    ],
    "parts": {
     "body": "#c8ad81"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "SAB-BKC-tall",
@@ -3820,7 +3860,8 @@
    ],
    "parts": {
     "body": "#c8ad81"
-   }
+   },
+   "sizeName": "tall"
   },
   {
    "id": "SAB-CHT-tall",
@@ -3871,7 +3912,8 @@
    "parts": {
     "body": "#c3a87d",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "tall"
   },
   {
    "id": "SAB-COF-long",
@@ -3921,7 +3963,8 @@
    ],
    "parts": {
     "wood": "#cead7c"
-   }
+   },
+   "sizeName": "long"
   },
   {
    "id": "SAB-COF-std",
@@ -3971,7 +4014,8 @@
    ],
    "parts": {
     "wood": "#cead7c"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "SAB-DRS-std",
@@ -4022,7 +4066,8 @@
    "parts": {
     "body": "#c3a87d",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "SAB-DRS-wide",
@@ -4073,7 +4118,8 @@
    "parts": {
     "body": "#c3a87d",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "wide"
   },
   {
    "id": "SAB-LNG-std",
@@ -4128,7 +4174,8 @@
    "parts": {
     "fabric": "#894325",
     "wood": "#d6bc94"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "SAB-LOV-std",
@@ -4183,7 +4230,8 @@
    "parts": {
     "fabric": "#a49372",
     "wood": "#d6bc94"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "SAB-MCS-3-seat",
@@ -4235,7 +4283,8 @@
    "parts": {
     "fabric": "#a49272",
     "wood": "#d6bc94"
-   }
+   },
+   "sizeName": "3-seat"
   },
   {
    "id": "SAB-MDU-std",
@@ -4286,7 +4335,8 @@
    "parts": {
     "body": "#c6ab80",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "SAB-MED-long",
@@ -4334,7 +4384,8 @@
    "parts": {
     "body": "#c6ab80",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "long"
   },
   {
    "id": "SAB-MED-short",
@@ -4382,7 +4433,8 @@
    "parts": {
     "body": "#c6ab80",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "short"
   },
   {
    "id": "SAB-MED-std",
@@ -4430,7 +4482,8 @@
    "parts": {
     "body": "#c6ab80",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "SAB-NST-std",
@@ -4478,7 +4531,8 @@
    "parts": {
     "body": "#c3a87d",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "SAB-PLT-king",
@@ -4707,7 +4761,8 @@
     "pillows": "#b9a681",
     "mattress": "#bdb8ac",
     "wood": "#ac8c61"
-   }
+   },
+   "sizeName": "king"
   },
   {
    "id": "SAB-PLT-queen",
@@ -4936,7 +4991,8 @@
     "pillows": "#b9a681",
     "mattress": "#bdb8ac",
     "wood": "#ac8c61"
-   }
+   },
+   "sizeName": "queen"
   },
   {
    "id": "SAB-SDB-long",
@@ -4984,7 +5040,8 @@
    "parts": {
     "body": "#c6aa7f",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "long"
   },
   {
    "id": "SAB-SDB-std",
@@ -5032,7 +5089,8 @@
    "parts": {
     "body": "#c6aa7f",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "SAB-SID-std",
@@ -5082,7 +5140,8 @@
    ],
    "parts": {
     "wood": "#cead7c"
-   }
+   },
+   "sizeName": "std"
   },
   {
    "id": "SAB-SOF-2-seat",
@@ -5140,7 +5199,8 @@
    "parts": {
     "fabric": "#a59373",
     "wood": "#d6bc94"
-   }
+   },
+   "sizeName": "2-seat"
   },
   {
    "id": "SAB-SOF-3-seat",
@@ -5150,21 +5210,31 @@
    "collection": "SAB",
    "room": "living",
    "job": "converse",
+   "note": "Sable collection, modern-organic, living",
+   "words": [
+    "Sable",
+    "sofa"
+   ],
    "size": [
     2.1,
     0.78,
     0.92
    ],
+   "sizeName": "3-seat",
    "listed": [
     2100,
     920,
     780
    ],
+   "parts": {
+    "fabric": "#a59373",
+    "wood": "#d6bc94"
+   },
    "triangles": 13492,
    "bytes": 874152,
    "file": "models/SAB-SOF-3-seat.glb",
    "mojulo": {
-    "ref": "sku_sab_sof_3_seat_mw1n684b",
+    "ref": "sku_sab_sof_3_seat_mw1ododv",
     "kind": "furniture",
     "spec": {
      "like": "sofa",
@@ -5189,16 +5259,7 @@
      ]
     }
    },
-   "issues": [],
-   "note": "Sable collection, modern-organic, living",
-   "words": [
-    "Sable",
-    "sofa"
-   ],
-   "parts": {
-    "fabric": "#a59373",
-    "wood": "#d6bc94"
-   }
+   "issues": []
   },
   {
    "id": "SAB-SOF-4-seat",
@@ -5256,7 +5317,8 @@
    "parts": {
     "fabric": "#a59373",
     "wood": "#d6bc94"
-   }
+   },
+   "sizeName": "4-seat"
   },
   {
    "id": "SAB-WRD-double",
@@ -5307,7 +5369,8 @@
    "parts": {
     "body": "#c6ab80",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "double"
   },
   {
    "id": "SAB-WRD-single",
@@ -5358,7 +5421,8 @@
    "parts": {
     "body": "#c6ab80",
     "handles": "#34363a"
-   }
+   },
+   "sizeName": "single"
   }
  ]
 }
