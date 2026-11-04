@@ -6,6 +6,7 @@
 import { createHash } from 'node:crypto';
 import { walls } from './place.mjs';
 import { writeGlb } from '../70-inventory/ready.mjs';
+import { surfaceTexture } from './surfaces.mjs';
 
 export const FINISH = { wall: '#ece8e1', floor: '#b08d62', ceiling: '#f5f4f0', trim: '#f3f1ec', hall: '#d6d1c8', glass: '#e6f0f7', ghost: '#7fd4ff' };
 /** The labels a room is made of; everything else the scan found is furniture, left out of an empty room. */
@@ -106,10 +107,22 @@ function triangulate(poly) {
 // --- the model ----------------------------------------------------------------------------------------------------
 class Model {
   constructor() { this.groups = new Map(); }
-  group(colour, unlit) { const k = `${colour}${unlit ? ':unlit' : ''}`; if (!this.groups.has(k)) this.groups.set(k, { colour, unlit, pos: [], nrm: [], idx: [] }); return this.groups.get(k); }
+  /** A material's group: a colour, or { colour, tex } for a textured surface (surfaces.mjs), mapped by the metre. */
+  group(colour, unlit) {
+    const tex = typeof colour === 'object' ? colour.tex : null, k = tex ? `tex:${tex.id}` : `${colour}${unlit ? ':unlit' : ''}`;
+    if (!this.groups.has(k)) this.groups.set(k, { colour: tex ? colour.colour : colour, tex, unlit, pos: [], nrm: [], uv: [], idx: [] });
+    return this.groups.get(k);
+  }
+  /** A textured point's uv: a floor or ceiling by its x and z, a wall by its run along and its height. */
+  uvOf(g, p, n) {
+    const [pu, pv] = g.tex.period;
+    if (Math.abs(n[1]) > 0.5) return [p[0] / pu, p[2] / pv];
+    const l = Math.hypot(n[0], n[2]) || 1;
+    return [(p[0] * -n[2] + p[2] * n[0]) / l / pu, -p[1] / pv];
+  }
   quad(colour, corners, n, unlit = false) {
     const g = this.group(colour, unlit), base = g.pos.length / 3;
-    for (const c of corners) { g.pos.push(...c); g.nrm.push(...n); }
+    for (const c of corners) { g.pos.push(...c); g.nrm.push(...n); if (g.tex) g.uv.push(...this.uvOf(g, c, n)); }
     g.idx.push(base, base + 1, base + 2, base, base + 2, base + 3);
   }
   /** A box from `o` along three axes (unit vectors a, b, c) by lengths la, lb, lc. */
@@ -130,13 +143,17 @@ class Model {
   }
   polygon(colour, pts, y, up) {
     const g = this.group(colour, false), base = g.pos.length / 3;
-    for (const p of pts) { g.pos.push(p[0], y, p[1]); g.nrm.push(0, up ? 1 : -1, 0); }
+    for (const p of pts) { g.pos.push(p[0], y, p[1]); g.nrm.push(0, up ? 1 : -1, 0); if (g.tex) g.uv.push(...this.uvOf(g, [p[0], y, p[1]], [0, 1, 0])); }
     for (const t of triangulate(pts)) g.idx.push(base + t[0], base + t[1], base + t[2]);
   }
   glb(name) {
     const json = { asset: { version: '2.0', generator: 'Maison3D shell' }, scene: 0, scenes: [{ name, nodes: [0] }], nodes: [{ name, mesh: 0 }], meshes: [{ name, primitives: [] }], materials: [], accessors: [], bufferViews: [], buffers: [] };
     const chunks = []; let length = 0;
-    const view = (buf, target) => { chunks.push(buf); json.bufferViews.push({ buffer: 0, byteOffset: length, byteLength: buf.length, target }); length += buf.length; return json.bufferViews.length - 1; };
+    const view = (buf, target) => {
+      chunks.push(buf); json.bufferViews.push({ buffer: 0, byteOffset: length, byteLength: buf.length, target }); length += buf.length;
+      const pad = (4 - (length % 4)) % 4; if (pad) { chunks.push(Buffer.alloc(pad)); length += pad; } // a PNG's odd length leaves the next view aligned
+      return json.bufferViews.length - 1;
+    };
     let unlit = false;
     for (const g of this.groups.values()) {
       if (!g.idx.length) continue;
@@ -147,9 +164,19 @@ class Model {
       json.accessors.push({ bufferView: view(Buffer.from(idx.buffer), 34963), componentType: 5125, count: idx.length, type: 'SCALAR' });
       const n = json.accessors.length;
       const lin = hexLinear(g.colour);
-      json.materials.push({ name: g.colour, doubleSided: true, pbrMetallicRoughness: { baseColorFactor: [...lin, 1], metallicFactor: 0, roughnessFactor: 0.9 }, ...(g.unlit ? { extensions: { KHR_materials_unlit: {} } } : {}) });
+      const pbr = { baseColorFactor: [...lin, 1], metallicFactor: 0, roughnessFactor: 0.9 }, attributes = { POSITION: n - 3, NORMAL: n - 2 };
+      if (g.tex) {
+        // the texture carries the colour; it repeats over the surface
+        json.accessors.push({ bufferView: view(Buffer.from(new Float32Array(g.uv).buffer), 34962), componentType: 5126, count: g.uv.length / 2, type: 'VEC2' });
+        attributes.TEXCOORD_0 = json.accessors.length - 1;
+        json.images ??= []; json.textures ??= []; json.samplers ??= [{ magFilter: 9729, minFilter: 9987, wrapS: 10497, wrapT: 10497 }];
+        json.images.push({ bufferView: view(g.tex.png), mimeType: 'image/png' });
+        json.textures.push({ source: json.images.length - 1, sampler: 0 });
+        pbr.baseColorFactor = [1, 1, 1, 1]; pbr.baseColorTexture = { index: json.textures.length - 1 };
+      }
+      json.materials.push({ name: g.tex ? `surface ${json.materials.length}` : g.colour, doubleSided: true, pbrMetallicRoughness: pbr, ...(g.unlit ? { extensions: { KHR_materials_unlit: {} } } : {}) });
       if (g.unlit) unlit = true;
-      json.meshes[0].primitives.push({ attributes: { POSITION: n - 3, NORMAL: n - 2 }, indices: n - 1, material: json.materials.length - 1 });
+      json.meshes[0].primitives.push({ attributes, indices: n - 1, material: json.materials.length - 1 });
     }
     if (unlit) json.extensionsUsed = ['KHR_materials_unlit'];
     json.buffers.push({ byteLength: length });
@@ -160,7 +187,8 @@ const hexLinear = (hex) => { const n = parseInt(hex.slice(1), 16); return [(n >>
 
 /**
  * The empty room as a GLB. `finish` gives its colours: { wall (every wall), walls: { wallId }, floor, ceiling }, over
- * FINISH.
+ * FINISH; and `finish.surfaces` what they are made of beyond paint (surfaces.mjs): { floor, ceiling, wall, walls: {
+ * wallId } }, each { kind, colour2?, size? } ('none' for a wall that stays plain when the rest are not).
  */
 export function shellGlb(room, finish = {}) {
   const fs = walls(room).map(frame);
@@ -169,11 +197,13 @@ export function shellGlb(room, finish = {}) {
   const F = { ...FINISH, ...Object.fromEntries(Object.entries(finish).filter(([, v]) => typeof v === 'string')) };
   const floorY = room.floorY ?? Math.min(...fs.map((f) => f.y0));
   const top = Math.max(...fs.map((f) => f.y1));
-  const ring = outline(room, fs);
-  m.polygon(F.floor, ring, floorY, true);
-  m.polygon(F.ceiling, ring, top, false);
+  const ring = outline(room, fs), S = finish.surfaces ?? {};
+  // a surface made of something: its colour and the texture that repeats over it
+  const made = (surface, style, colour) => (style && style !== 'none' ? { colour, tex: surfaceTexture(surface, style, colour) } : colour);
+  m.polygon(made('floor', S.floor, F.floor), ring, floorY, true);
+  m.polygon(made('ceiling', S.ceiling, F.ceiling), ring, top, false);
   for (const f of fs) {
-    const colour = finish.walls?.[f.id] ?? F.wall;
+    const colour = made('wall', S.walls?.[f.id] ?? S.wall, finish.walls?.[f.id] ?? F.wall);
     const ops = openings(f, room);
     // the wall, its ends run on by its thickness so the corners close
     for (const [u0, u1, y0, y1] of panels(f, ops.map((o) => [o.u0, o.u1, o.y0, o.y1]), f.half + T)) {

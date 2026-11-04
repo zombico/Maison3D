@@ -8,6 +8,9 @@ import { resolve, check, pointedPiece, walls, sizeOf, mountOf, ceilingOf, floorO
 import { decorCatalog, decorModel, fitTo, customFit, CUSTOM_ART } from './decor.mjs';
 import { FINISHES } from './appliances.mjs';
 import { MEDIA_FINISHES, holdsWidth } from './media.mjs';
+import { rugFit, RUG_DESIGNS, RUG_PALETTES } from './rugs.mjs';
+import { TRIMS } from './lights.mjs';
+import { SURFACES, SURFACE_KINDS } from './surfaces.mjs';
 import { PIECES as INVENTORY_PIECES, COLLECTIONS } from '../70-inventory/catalogue.mjs';
 import * as rooms from './rooms.mjs';
 import { resolve as resolvePath } from 'node:path';
@@ -119,6 +122,13 @@ round the TV (MWC cabinets, MWL library shelves), sized for a TV. Pick a console
 30 cm wider. Media furniture takes a finish with material (oak, walnut, white, black, or a collection code to match
 that collection). Soundbars go on the console or the wall under the TV; speakers come one at a time (place two, either
 side); a projector hangs from the ceiling and its pull-down screen opens and closes like a blind (open: 1 up, 0 down).
+Rugs (RUGM rectangles 5x8 to 9x12 ft, RUGN runners, RUGR rounds 4 to 8 ft, RUGO an oval) are woven in a design
+(${RUG_DESIGNS.join(', ')}) and a colourway (${Object.keys(RUG_PALETTES).join(', ')}): place one with design and
+palette, change it with rug; a bigger one is resize, a round one is swap. Under a sofa group a rug reaches under the
+front legs; under a dining table it runs 60 cm past the chairs. The floor, walls and ceiling can be made of something
+(surface): tiles, checkerboard, hexagons, planks, herringbone, marble, terrazzo, concrete or carpet underfoot; stucco,
+limewash, brick, subway tile, shiplap or concrete walls; a stucco or planked ceiling; paint still colours them. Pot
+lights (potlights): a grid over the room, or a line over the island or the dining table; each is a piece afterwards.
 Appliances and fixtures (fridges, ranges, dishwashers, hoods, washers and dryers, toilets, vanities, tubs, showers,
 radiators, fans, a fireplace) come in their US sizes; an appliance's finish changes with material (stainless, white,
 black, or panel-<collection> to match that collection's cabinets).
@@ -200,7 +210,8 @@ const WHERE = {
   width: { type: 'number', description: 'ART-FRAME or ART-CANVAS: its width in metres' },
   height: { type: 'number', description: 'ART-FRAME or ART-CANVAS: its height in metres' },
   style: { type: 'string', enum: CUSTOM_ART.styles, description: "ART-FRAME or ART-CANVAS: the abstract's style" },
-  palette: { type: 'string', enum: CUSTOM_ART.palettes, description: "ART-FRAME or ART-CANVAS: the abstract's colours" },
+  palette: { type: 'string', enum: [...new Set([...CUSTOM_ART.palettes, ...Object.keys(RUG_PALETTES)])], description: `ART-FRAME or ART-CANVAS: the abstract's colours (${CUSTOM_ART.palettes.join(', ')}); a rug: its colourway (${Object.keys(RUG_PALETTES).join(', ')})` },
+  design: { type: 'string', enum: RUG_DESIGNS, description: "a rug's design" },
   frame: { type: 'string', enum: CUSTOM_ART.frames, description: 'ART-FRAME: the frame' },
 };
 
@@ -212,8 +223,11 @@ const TOOLS = [
   { type: 'function', function: { name: 'move', description: 'Move or turn a placed piece. Give only `face` or `turn` to turn it where it stands.', parameters: { type: 'object', properties: { id: { type: 'string' }, ...WHERE }, required: ['id'], additionalProperties: false } } },
   { type: 'function', function: { name: 'swap', description: 'Replace a placed piece with another catalogue item, keeping its place and facing.', parameters: { type: 'object', properties: { id: { type: 'string' }, item: { type: 'string' } }, required: ['id', 'item'], additionalProperties: false } } },
   { type: 'function', function: { name: 'recolour', description: "Change the colour of one part of a placed piece (its catalogue entry lists its parts and their colours now). Without `part`, the piece's first part (the sofa's fabric, the dresser's body).", parameters: { type: 'object', properties: { id: { type: 'string' }, part: { type: 'string', description: 'fabric, wood, body, seat, handles, throw, pillows or mattress, as the piece lists' }, colour: { type: 'string', description: '#rrggbb, or "original" to go back to the catalogue colour' } }, required: ['id', 'colour'], additionalProperties: false } } },
-  { type: 'function', function: { name: 'material', description: "Make one part of a placed piece in another material (velvet instead of linen, walnut instead of oak). Without `part`, the piece's first part. A cloth of one colour keeps the part's colour; a patterned one (tartan, gingham, houndstooth, ticking) brings its own.", parameters: { type: 'object', properties: { id: { type: 'string' }, part: { type: 'string', enum: Object.keys(MATERIALS) }, material: { type: 'string', enum: [...new Set([...Object.values(MATERIALS).flat(), ...Object.keys(FINISHES), ...Object.keys(MEDIA_FINISHES), 'original'])], description: 'an appliance takes a finish (stainless, white, black, panel-<collection> to match its cabinets); media furniture and the easel TV stand take oak, walnut, white, black or a collection code (HIN, ATL…) to match it; "original" goes back to the catalogue material' } }, required: ['id', 'material'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'material', description: "Make one part of a placed piece in another material (velvet instead of linen, walnut instead of oak). Without `part`, the piece's first part. A cloth of one colour keeps the part's colour; a patterned one (tartan, gingham, houndstooth, ticking) brings its own.", parameters: { type: 'object', properties: { id: { type: 'string' }, part: { type: 'string', enum: Object.keys(MATERIALS) }, material: { type: 'string', enum: [...new Set([...Object.values(MATERIALS).flat(), ...Object.keys(FINISHES), ...Object.keys(MEDIA_FINISHES), ...Object.keys(TRIMS), 'original'])], description: 'an appliance takes a finish (stainless, white, black, panel-<collection> to match its cabinets); media furniture and the easel TV stand take oak, walnut, white, black or a collection code (HIN, ATL…) to match it; the trim of a pot light is white, black, brass or nickel; "original" goes back to the catalogue material' } }, required: ['id', 'material'], additionalProperties: false } } },
   { type: 'function', function: { name: 'resize', description: 'Make a placed piece the same piece in another size (a smaller sofa, a king bed), back where its back was, keeping its colours and materials.', parameters: { type: 'object', properties: { id: { type: 'string' }, size: { type: 'string', description: '"smaller", "larger", "smallest", "largest", or a size by name (queen, 2-seat, tall)' } }, required: ['id', 'size'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'rug', description: 'Change a placed rug: its design, its colourway, or another of the same (another: true). A different shape or size is swap or resize.', parameters: { type: 'object', properties: { id: { type: 'string' }, design: { type: 'string', enum: RUG_DESIGNS }, palette: { type: 'string', enum: Object.keys(RUG_PALETTES) }, another: { type: 'boolean' } }, required: ['id'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'surface', description: `What a surface is made of beyond paint: the floor (${Object.keys(SURFACES.floor).join(', ')}), a wall or every wall ("all": ${Object.keys(SURFACES.wall).join(', ')}), the ceiling (${Object.keys(SURFACES.ceiling).join(', ')}). "none" goes back to plain paint. colour is its main colour, colour2 the grout, mortar or second tile (checkerboard), size a tile's, brick's or board's width in metres.`, parameters: { type: 'object', properties: { surface: { type: 'string', description: 'a wall id, "all", "floor" or "ceiling"' }, finish: { type: 'string', enum: [...SURFACE_KINDS, 'none'] }, colour: { type: 'string', description: '#rrggbb' }, colour2: { type: 'string', description: '#rrggbb' }, size: { type: 'number' } }, required: ['surface', 'finish'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'potlights', description: 'Pot lights in the ceiling, laid out evenly: over the whole room (a grid, spaced about half the ceiling height apart and half that from the walls), or in a line over a piece (over: the island, the dining table). remove takes them all out.', parameters: { type: 'object', properties: { action: { type: 'string', enum: ['grid', 'remove'] }, item: { type: 'string', enum: ['PTL-4in', 'PTL-6in', 'PTS-4in', 'PTG-4in'] }, over: { type: 'string', description: 'a piece or room item id: a line of them over it' }, count: { type: 'number', description: 'how many over a piece; or rows x columns are worked out from spacing' }, spacing: { type: 'number', description: 'metres between them' }, trim: { type: 'string', enum: Object.keys(TRIMS) } }, required: ['action'], additionalProperties: false } } },
   { type: 'function', function: { name: 'paint', description: 'Paint a wall of the room, every wall ("all"), the floor or the ceiling. Colour "none" goes back to how it started.', parameters: { type: 'object', properties: { wall: { type: 'string', description: 'a wall id (wall2), "all", "floor" or "ceiling"' }, colour: { type: 'string', description: '#rrggbb, or "none"' } }, required: ['wall', 'colour'], additionalProperties: false } } },
   { type: 'function', function: { name: 'room_size', description: 'Set the dictated room\'s size in metres: width (wall-left to wall-right), depth (wall-front to wall-back), height. Give only what changes.', parameters: { type: 'object', properties: { width: { type: 'number' }, depth: { type: 'number' }, height: { type: 'number' } }, additionalProperties: false } } },
   { type: 'function', function: { name: 'opening', description: 'Add, move (to another wall or along its own) or remove a door or window of the dictated room.', parameters: { type: 'object', properties: { action: { type: 'string', enum: ['add', 'move', 'remove'] }, id: { type: 'string', description: 'with move or remove: door1, window2…' }, kind: { type: 'string', enum: ['door', 'window'], description: 'with add' }, wall: { type: 'string', enum: ['wall-front', 'wall-right', 'wall-back', 'wall-left'] }, at: { type: 'string', description: '"centre", "left" or "right" as seen facing that wall from inside, or metres right of its centre ("0.8", "-1.2")' }, width: { type: 'number' }, height: { type: 'number' }, sill: { type: 'number', description: 'a window\'s height off the floor' }, at_pointing: { type: 'boolean', description: 'add or move it where the person points on a wall ("this should be a window"), centred on the point' }, sill_depth: { type: 'number', description: "a window: how far its sill stands out into the room, metres" }, recess: { type: 'number', description: 'a window: how deep the glass sits in the wall, metres (a blind can go inside)' }, trim: { type: 'number', description: "a window: the casing's width round it, metres (0: none)" }, panes: { type: 'string', enum: ['single', 'two', 'sash', 'grid'] }, frame: { type: 'string', enum: ['white', 'black', 'wood'] } }, required: ['action'], additionalProperties: false } } },
@@ -233,6 +247,8 @@ export const scene = [];
 
 /** The room's colours: { wall (every wall), walls: { wallId }, floor, ceiling }, over shell.mjs's FINISH. */
 export const finish = { walls: {} };
+/** A surface's finish for the scene: 'paint', or its kind and colours. */
+const madeOf = (s) => (s && s !== 'none' ? { finish: s.kind, ...(s.colour2 ? { colour2: s.colour2 } : {}), ...(s.size ? { size: s.size } : {}) } : 'paint');
 /** How the design is shown: the real furniture's outlines on or off. */
 export const settings = { outlines: true };
 
@@ -245,7 +261,7 @@ function newId(item) {
 const describe = (p) => {
   const c = catalog[p.item];
   const parts = c.parts && Object.fromEntries(Object.keys(c.parts).map((k) => [k, [p.materials?.[k] ?? c.made?.[k], p.colours?.[k] ?? (p.materials?.[k] ? (PATTERNED.has(p.materials[k]) ? 'in its pattern' : null) : c.parts[k])].filter(Boolean).join(' ')]));
-  return { id: p.id, item: p.item, at: p.at, facing: p.facing, size: sizeOf(p, catalog), mount: mountOf(c), ...(p.window ? { window: p.window, open: p.fit.open } : {}), ...(c.custom ? { picture: { style: p.fit.style, palette: p.fit.palette, frame: p.fit.frame } } : {}), ...(c.finishes ? { finish: p.fit?.finish ?? 'as built' } : {}), ...(parts ? { parts } : {}), ...(c.sizeName ? { sizes: sizesOf(p.item).map((o) => o.sizeName + (o.piece !== c.piece ? ` (${o.name})` : '')) } : {}) };
+  return { id: p.id, item: p.item, at: p.at, facing: p.facing, size: sizeOf(p, catalog), mount: mountOf(c), ...(p.window ? { window: p.window, open: p.fit.open } : {}), ...(c.custom ? { picture: { style: p.fit.style, palette: p.fit.palette, frame: p.fit.frame } } : {}), ...(c.finishes ? { finish: p.fit?.finish ?? 'as built' } : {}), ...(c.rug ? { rug: { design: p.fit?.design ?? c.rugDefault.design, palette: p.fit?.palette ?? c.rugDefault.palette } } : {}), ...(parts ? { parts } : {}), ...(c.sizeName ? { sizes: sizesOf(p.item).map((o) => o.sizeName + (o.piece !== c.piece ? ` (${o.name})` : '')) } : {}) };
 };
 
 /**
@@ -391,6 +407,76 @@ export function apply(name, args, ctx) {
     else p.colours = { ...p.colours, [part]: args.colour.toLowerCase().replace(/^#?/, '#') };
     return { ok: true, piece: describe(p) };
   }
+  if (name === 'rug') {
+    const p = scene.find((x) => x.id === args.id);
+    if (!p) return { error: `no piece ${args.id}` };
+    if (!catalog[p.item].rug) return { error: `${p.id} is not one of the designed rugs (RUGM, RUGN, RUGR, RUGO): swap it for one` };
+    p.fit = rugFit({ ...p.fit, ...(args.design ? { design: args.design } : {}), ...(args.palette ? { palette: args.palette } : {}), seed: (p.fit?.seed ?? 1) + (args.another ? 1 : 0) }, catalog[p.item]);
+    return { ok: true, piece: describe(p) };
+  }
+  if (name === 'surface') {
+    const ws = walls(ctx.room).map((w) => w.id), what = args.surface;
+    if (!['all', 'floor', 'ceiling', ...ws].includes(what)) return { error: `no surface ${what}; the walls are ${ws.join(', ')}, or all, floor, ceiling` };
+    const kind = what === 'floor' || what === 'ceiling' ? what : 'wall';
+    const S = finish.surfaces ??= { walls: {} };
+    const paintTo = (c) => { if (what === 'all') { finish.wall = c; finish.walls = {}; } else if (kind !== 'wall') finish[what] = c; else if (c) finish.walls[what] = c; else delete finish.walls[what]; };
+    const styleOf = () => (what === 'all' ? S.wall : kind !== 'wall' ? S[what] : S.walls[what] ?? S.wall);
+    if (args.finish === 'none') {
+      // back to plain paint, and the finish's own colour goes with it
+      if (styleOf()?.ownColour) paintTo(undefined);
+      if (what === 'all') { delete S.wall; S.walls = {}; } else if (kind !== 'wall') delete S[what]; else if (S.wall) S.walls[what] = 'none'; else delete S.walls[what];
+      return { ok: true, surface: what, finish: 'paint' };
+    }
+    const M = SURFACES[kind][args.finish];
+    if (!M) return { error: `${kind === 'wall' ? 'a wall' : `the ${kind}`} can be ${Object.keys(SURFACES[kind]).join(', ')}` };
+    for (const k of ['colour', 'colour2']) if (args[k] !== undefined && !linearOf(args[k])) return { error: `${args[k]} is not a colour: give #rrggbb` };
+    const hex = (c) => c.toLowerCase().replace(/^#?/, '#');
+    // its colour: asked for; else a stucco or carpet keeps the paint, and brick, tile or wood bring their own
+    const colour = args.colour ? hex(args.colour) : M.keepsPaint ? undefined : M.colour;
+    const style = { kind: args.finish, ...(args.colour2 ? { colour2: hex(args.colour2) } : {}), ...(args.size ? { size: Math.max(0.03, Math.min(2, Number(args.size))) } : {}), ...(colour && !args.colour ? { ownColour: true } : {}) };
+    if (what === 'all') { S.wall = style; S.walls = {}; } else if (kind !== 'wall') S[what] = style; else S.walls[what] = style;
+    if (colour) paintTo(colour);
+    return { ok: true, surface: what, finish: M.label, ...(colour ? { colour } : {}), ...(style.size ? { size: style.size } : {}) };
+  }
+  if (name === 'potlights') {
+    const pots = () => scene.filter((p) => catalog[p.item].potlight);
+    if (args.action === 'remove') { const n = pots().length; for (let i = scene.length - 1; i >= 0; i--) if (catalog[scene[i].item].potlight) scene.splice(i, 1); return { ok: true, removed: n }; }
+    const item = args.item ?? 'PTL-4in', ws = walls(ctx.room);
+    if (!ws.length) return { error: 'the room has no walls yet' };
+    const ceil = ceilingOf(ctx.room) - floorOf(ctx.room), spacing = Math.max(0.5, Math.min(3, args.spacing ?? Math.max(1.2, Math.min(1.8, ceil / 2))));
+    let spots = [], layout;
+    if (args.over) {
+      // a line of them over a piece (or a room item), along its width
+      const p = scene.find((x) => x.id.toLowerCase() === String(args.over).toLowerCase()), it = (ctx.room?.items ?? []).find((x) => x.id.toLowerCase() === String(args.over).toLowerCase());
+      if (!p && !it) return { error: `nothing called ${args.over}` };
+      const c = p ? [p.at[0], p.at[2]] : [it.center[0], it.center[2]], f = p ? [p.facing[0], p.facing[2]] : [0, 1], along = [-f[1], f[0]];
+      const w = p ? sizeOf(p, catalog)[0] : Math.max(it.size[0], it.size[2]), n = Math.max(1, Math.round(args.count ?? Math.max(1, Math.round(w / 0.9))));
+      spots = Array.from({ length: n }, (_, i) => { const s = -w / 2 + (w * (i + 0.5)) / n; return [c[0] + along[0] * s, c[1] + along[1] * s]; });
+      layout = `${n} over ${args.over}`;
+    } else {
+      // a grid over the whole room, square to its walls: half a spacing in from them
+      const a = ws[0].n, b = [-a[1], a[0]], dot2 = (p, q) => p[0] * q[0] + p[1] * q[1];
+      const ends = ws.flatMap((w) => { const al = [-w.n[1], w.n[0]]; return [-1, 1].map((s) => [w.center[0] + (al[0] * s * w.length) / 2, w.center[2] + (al[1] * s * w.length) / 2]); });
+      const ra = [Math.min(...ends.map((e) => dot2(e, a))), Math.max(...ends.map((e) => dot2(e, a)))], rb = [Math.min(...ends.map((e) => dot2(e, b))), Math.max(...ends.map((e) => dot2(e, b)))];
+      const na = Math.max(1, Math.round((ra[1] - ra[0]) / spacing)), nb = Math.max(1, Math.round((rb[1] - rb[0]) / spacing));
+      for (let i = 0; i < na; i++) for (let j = 0; j < nb; j++) {
+        const pa = ra[0] + ((ra[1] - ra[0]) * (i + 0.5)) / na, pb = rb[0] + ((rb[1] - rb[0]) * (j + 0.5)) / nb;
+        spots.push([a[0] * pa + b[0] * pb, a[1] * pa + b[1] * pb]);
+      }
+      // a grid replaces the pot lights already up
+      for (let i = scene.length - 1; i >= 0; i--) if (catalog[scene[i].item].potlight) scene.splice(i, 1);
+      layout = `${na} by ${nb}, ${round3(Math.min((ra[1] - ra[0]) / na, (rb[1] - rb[0]) / nb))} m apart`;
+    }
+    const ids = [];
+    for (const [x, z] of spots) {
+      const r = apply('place', { item, at: [round3(x), round3(z)] }, ctx);
+      if (r.error) return r;
+      const p = scene.find((q) => q.id === r.piece.id);
+      if (args.trim) p.fit = { finish: args.trim };
+      ids.push(p.id);
+    }
+    return { ok: true, placed: ids.length, layout, item, ids };
+  }
   if (name === 'paint') {
     const ws = walls(ctx.room).map((w) => w.id), what = args.wall;
     if (!ws.length) return { error: 'the room has no walls yet: rescan it' };
@@ -513,6 +599,8 @@ export function apply(name, args, ctx) {
     if (!!p.window !== toWindow) return { error: p.window ? `${p.id} hangs at a window: swap it for other curtains or a blind` : `${args.item} hangs at a window: place it at one` };
     carry(p, args.item); // colours and materials carry over to the parts the new piece also has
     p.id = newId(args.item); // the id says what it is: armchair1 swapped for a sofa becomes sofa1
+    // a rug keeps its design and colourway into another rug; anything else leaves a rug's behind
+    if (catalog[args.item].rug) p.fit = rugFit(p.fit?.design ? p.fit : {}, catalog[args.item]); else if (p.fit?.design) delete p.fit;
     if (p.window) hang(p, ctx.room); else delete p.size;
     const issues = check(p, sizeOf(p, catalog), env);
     return { ok: true, replaced: was, piece: describe(p), issues };
@@ -542,6 +630,8 @@ export function apply(name, args, ctx) {
   }
   const where = { ...args };
   let entry = current?.size ? { ...catalog[item], size: current.size } : catalog[item], fit = current?.fit;
+  // a rug in the design and colourway asked for
+  if (catalog[item].rug && !current) fit = rugFit({ design: args.design, palette: args.palette }, catalog[item]);
   if (catalog[item].custom && !current) {
     // a picture made to the size asked for: one number given keeps a 3:4 portrait's proportion
     const w = args.width ?? (args.height ? args.height * 0.75 : 0.6), h = args.height ?? w / 0.75;
@@ -552,7 +642,7 @@ export function apply(name, args, ctx) {
   const placed = ['on', 'against', 'corner', 'next_to', 'at_pointing', 'in_front', 'at'].some((k) => where[k] !== undefined && where[k] !== false);
   const pose = placed || !current ? resolve(where, entry, { ...env, current }) : resolve({ ...where, at: current.at }, entry, { ...env, current });
   if (pose.error) return pose;
-  const piece = current ?? { id: newId(item), item, ...(fit ? { fit, size: entry.size } : {}) };
+  const piece = current ?? { id: newId(item), item, ...(fit ? { fit, ...(catalog[item].custom ? { size: entry.size } : {}) } : {}) };
   piece.at = pose.at;
   piece.facing = pose.facing;
   // a tall picture is not hung through the ceiling
@@ -616,7 +706,7 @@ export async function runTurn({ said, pointing, room }) {
     said,
     pointing: pointing ? { ...pointing, ray: undefined, piece: pointed } : null,
     viewer: room?.viewer ?? null,
-    room: { ...rooms.describeSpec(), floorY: room?.floorY, items: (room?.items ?? []).map(({ outline, ...i }) => i), walls: walls(room).map((w) => ({ id: w.id, faces: w.n.map((v) => Math.round(v * 100) / 100), colour: finish.walls[w.id] ?? finish.wall ?? 'as it started' })), floor: finish.floor ?? 'as it started', ceiling: finish.ceiling ?? 'as it started' },
+    room: { ...rooms.describeSpec(), floorY: room?.floorY, items: (room?.items ?? []).map(({ outline, ...i }) => i), walls: walls(room).map((w) => ({ id: w.id, faces: w.n.map((v) => Math.round(v * 100) / 100), colour: finish.walls[w.id] ?? finish.wall ?? 'as it started', made: madeOf(finish.surfaces?.walls?.[w.id] ?? finish.surfaces?.wall) })), floor: finish.floor ?? 'as it started', floorMade: madeOf(finish.surfaces?.floor), ceiling: finish.ceiling ?? 'as it started', ceilingMade: madeOf(finish.surfaces?.ceiling) },
     pieces: scene.map(describe),
   };
   const messages = [{ role: 'system', content: SYSTEM }, ...history, { role: 'user', content: JSON.stringify(context) }];

@@ -328,6 +328,28 @@ Media and entertainment, the ways a TV stands in a room (`media.mjs`):
 
 Each piece matches a collection's cabinets and legs, or is oak, walnut, white or black. Muse's `material` changes it. A TV wider than its console gets a note to size one of them up; a console about 30 cm wider than the TV looks right. The old two-size inventory TV is gone, and the inventory's "media wall unit" (a closed cabinet) is now the tall media cabinet.
 
+Rugs (`rugs.mjs`):
+- Shapes, at US sizes:
+  - rectangles: 5x8, 6x9, 8x10 and 9x12 ft;
+  - runners: 2.5x8 and 2.5x12 ft;
+  - rounds: 4, 6 and 8 ft;
+  - an oval: 5x8 ft.
+- Each is woven in a design and a colourway, its fit, like a picture's style.
+- Designs: solid, bordered, stripes, diamond, kilim, persian, vintage, moroccan, checker, abstract, jute (braided when round) and shag. Persian, vintage and kilim have a fringe.
+- Colourways: ivory, sand, charcoal, navy, rust, sage, blush, persian, ocean, mono.
+- Muse places a rug with `design` and `palette` and changes it with `rug`. A rug keeps its design through a resize, and through a swap to another shape.
+
+Room surfaces (`surfaces.mjs`), set with Muse's `surface`:
+- Floors: square tiles, checkerboard, hexagons, planks, herringbone, marble, terrazzo, polished concrete or carpet.
+- Walls: stucco, limewash, brick, subway tile, shiplap or concrete, on one wall or all of them.
+- Ceilings: stucco (popcorn) or planks.
+- Each is a texture painted on the laptop that repeats by the metre over the room shell. It has its colour (paint still sets it), a second colour (grout, mortar, the other tile) and a size (a tile's, a brick's, a board's).
+
+Pot lights (`lights.mjs`):
+- Types: 4 in and 6 in round, 4 in square, and a 4 in gimbal, in a white, black, brass or nickel trim.
+- Muse's `potlights` lays them out as a grid over the room, spaced half the ceiling height apart and half that from the walls, or as a line over a piece (the island, the dining table).
+- Each one is then a piece of its own.
+
 Windows and doors where you point: point the laser at a wall and say "this should be a window" (or "a door", or "move
 this door here"); Muse's `opening` takes `at_pointing` and centres it on the point (a window 4 ft wide, 1.4 m high,
 unless sized).

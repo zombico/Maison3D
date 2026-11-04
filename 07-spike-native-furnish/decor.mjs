@@ -7,6 +7,8 @@ import { paint, ABSTRACT_STYLES, PALETTES } from './art.mjs';
 import { partsOf } from '../70-inventory/colour.mjs';
 import { applianceEntries } from './appliances.mjs';
 import { mediaEntries } from './media.mjs';
+import { rugEntries } from './rugs.mjs';
+import { lightEntries } from './lights.mjs';
 
 const R = (v) => Math.round(v * 1000) / 1000;
 
@@ -393,6 +395,8 @@ for (const [id, C] of Object.entries(CURTAINS)) entries.push({ id, name: `${C.la
 entries.push(...applianceEntries);
 // media and entertainment (media.mjs): consoles, entertainment centres, TVs and their stands, speakers, a projector
 entries.push(...mediaEntries);
+// rugs in shapes, designs and colourways (rugs.mjs); pot lights (lights.mjs)
+entries.push(...rugEntries, ...lightEntries);
 
 const built = new Map();
 /** A decor entry's model: { glb, size [w, h, d], triangles }; a window piece's for its fit. Built once each. */
