@@ -12,6 +12,8 @@ The repo holds the product only:
 - `mojulo/`: the pinned mojulo the library is made with (`npm run mojulo:setup`), and the `maison-furniture` MCP
   server for agents working in this repo (`.mcp.json`).
 
+How this becomes a submitted app: [`docs/packaging-proposal.md`](docs/packaging-proposal.md).
+
 Quick start: `npm start` on the laptop (the API key in `.env` at the root), the Maison3D Furnish APK from the
 `native` workflow on the headset, `adb reverse tcp:8091 tcp:8091`.
 
