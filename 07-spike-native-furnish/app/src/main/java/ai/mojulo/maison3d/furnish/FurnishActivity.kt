@@ -24,6 +24,7 @@ import com.meta.spatial.runtime.LayerConfig
 import com.meta.spatial.runtime.ReferenceSpace
 import com.meta.spatial.toolkit.AppSystemActivity
 import com.meta.spatial.toolkit.AvatarBody
+import com.meta.spatial.toolkit.Box
 import com.meta.spatial.toolkit.Controller
 import com.meta.spatial.toolkit.Grabbable
 import com.meta.spatial.toolkit.Material
@@ -66,6 +67,10 @@ class FurnishActivity : AppSystemActivity() {
   // A new scene arrives on a network thread and is applied on the frame loop.
   private lateinit var server: String
   private val incoming = java.util.concurrent.atomic.AtomicReference<List<Piece>?>(null)
+  // the painted walls, as the server cut them to the room: [{ wall, colour, facing, panels: [{ at, size }] }]
+  private val incomingPaint = java.util.concurrent.atomic.AtomicReference<org.json.JSONArray?>(null)
+  private val paintShown = mutableListOf<Entity>()
+  private var paintKey = ""
   private val shown = mutableMapOf<String, Pair<String, Entity>>() // piece id -> (model path, entity)
 
   private var saidView: TextView? = null
@@ -125,7 +130,7 @@ class FurnishActivity : AppSystemActivity() {
     )
     panel = Entity.create(listOf(Panel(R.layout.furnish_panel), Transform(), Visible(false), Grabbable()))
     // what the server already holds, if it was furnishing before this launch
-    turns.scene { r -> r.onSuccess { runCatching { incoming.set(parseScene(it)) } } }
+    turns.scene { r -> r.onSuccess { runCatching { incoming.set(parseScene(it)); it.optJSONArray("paint")?.let { a -> incomingPaint.set(a) } } } }
   }
 
   override fun onSpatialShutdown() {
@@ -172,7 +177,7 @@ class FurnishActivity : AppSystemActivity() {
 
   private fun clearScene() {
     turns.clear { r ->
-      r.onSuccess { incoming.set(parseScene(it)) }
+      r.onSuccess { incoming.set(parseScene(it)); it.optJSONArray("paint")?.let { a -> incomingPaint.set(a) } }
       r.onFailure { log("clearing failed: ${it.message}") }
     }
   }
@@ -232,6 +237,7 @@ class FurnishActivity : AppSystemActivity() {
         else if (text.isNotEmpty()) speaker.say(text)
         try {
           answer.optJSONArray("scene")?.let { incoming.set(parseScene(JSONObject().put("scene", it))) }
+          answer.optJSONArray("paint")?.let { incomingPaint.set(it) }
         } catch (e: Exception) {
           Log.e(TAG, "the scene did not parse", e)
           log("the scene did not parse: ${e.message}")
@@ -286,6 +292,39 @@ class FurnishActivity : AppSystemActivity() {
     log("scene: " + scene.joinToString(", ") { it.id }.ifEmpty { "empty" })
   }
 
+  /**
+   * Shows the painted walls: each a few thin lit panels standing just in front of the scanned wall, with its doors,
+   * windows and the real furniture against it left out (the server cuts them). Redone only when the paint changes.
+   */
+  private fun applyPaint(paint: org.json.JSONArray) {
+    val key = paint.toString()
+    if (key == paintKey) return
+    paintKey = key
+    paintShown.forEach { it.destroy() }
+    paintShown.clear()
+    for (i in 0 until paint.length()) {
+      val wall = paint.getJSONObject(i)
+      val c = android.graphics.Color.parseColor(wall.getString("colour"))
+      val colour = Color4(android.graphics.Color.red(c) / 255f, android.graphics.Color.green(c) / 255f, android.graphics.Color.blue(c) / 255f, 1f)
+      val facing = vec3(wall.getJSONArray("facing"))
+      val panels = wall.getJSONArray("panels")
+      for (k in 0 until panels.length()) {
+        val p = panels.getJSONObject(k)
+        val size = vec3(p.getJSONArray("size"))
+        paintShown +=
+            Entity.create(
+                listOf(
+                    Mesh(Uri.parse("mesh://box")).apply { hittable = MeshCollision.NoCollision },
+                    Box(Vector3(-size.x / 2, -size.y / 2, -size.z / 2), Vector3(size.x / 2, size.y / 2, size.z / 2)),
+                    Material().apply { baseColor = colour },
+                    Transform(Pose(vec3(p.getJSONArray("at")), Quaternion.lookRotation(facing))),
+                ),
+            )
+      }
+    }
+    log("paint: " + (0 until paint.length()).joinToString(", ") { paint.getJSONObject(it).getString("wall") }.ifEmpty { "none" })
+  }
+
   /** Where you are and which way you face, so "in front of me" has an answer. */
   private fun viewerJson(head: Pose): JSONObject {
     val f = head.q.times(Vector3(0f, 0f, 1f))
@@ -297,6 +336,14 @@ class FurnishActivity : AppSystemActivity() {
   private inner class FurnishSystem : SystemBase() {
     override fun execute() {
       val now = System.nanoTime()
+      incomingPaint.getAndSet(null)?.let { paint ->
+        try {
+          applyPaint(paint)
+        } catch (e: Exception) {
+          Log.e(TAG, "painting failed", e)
+          log("painting failed: ${e.javaClass.simpleName}: ${e.message}")
+        }
+      }
       incoming.getAndSet(null)?.let { scene ->
         try {
           applyScene(scene)

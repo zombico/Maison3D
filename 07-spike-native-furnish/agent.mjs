@@ -87,6 +87,9 @@ recoloured (the sofa's fabric, a table's wood, a dresser's body): pick the colou
 for what they said ("sage green", "darker wood", "white"), and say it in words, never as a hex. A part can also be
 made of another material (linen to velvet, oak to walnut); that rebuilds the piece and takes a few seconds to appear.
 A smaller or larger one is the same piece in its next size (resize), keeping its colours and materials.
+The room's real walls can be painted (paint), one by id or all of them; "this wall" is usually the pointed one, and
+"the wall behind the sofa" the wall it stands against. Doors, windows and the real furniture against a wall stay
+unpainted.
 
 Answer in one short spoken sentence: it is read aloud in the headset. No markdown, no lists. When you call tools,
 write that sentence in the same message as the calls, saying what you did.`;
@@ -110,6 +113,7 @@ const TOOLS = [
   { type: 'function', function: { name: 'recolour', description: "Change the colour of one part of a placed piece (its catalogue entry lists its parts and their colours now). Without `part`, the piece's first part (the sofa's fabric, the dresser's body).", parameters: { type: 'object', properties: { id: { type: 'string' }, part: { type: 'string', description: 'fabric, wood, body, seat, handles, throw, pillows or mattress, as the piece lists' }, colour: { type: 'string', description: '#rrggbb, or "original" to go back to the catalogue colour' } }, required: ['id', 'colour'], additionalProperties: false } } },
   { type: 'function', function: { name: 'material', description: "Make one part of a placed piece in another material (velvet instead of linen, walnut instead of oak). Without `part`, the piece's first part. A cloth of one colour keeps the part's colour; a patterned one (tartan, gingham, houndstooth, ticking) brings its own.", parameters: { type: 'object', properties: { id: { type: 'string' }, part: { type: 'string', enum: Object.keys(MATERIALS) }, material: { type: 'string', enum: [...new Set([...Object.values(MATERIALS).flat(), 'original'])], description: '"original" goes back to the catalogue material' } }, required: ['id', 'material'], additionalProperties: false } } },
   { type: 'function', function: { name: 'resize', description: 'Make a placed piece the same piece in another size (a smaller sofa, a king bed), back where its back was, keeping its colours and materials.', parameters: { type: 'object', properties: { id: { type: 'string' }, size: { type: 'string', description: '"smaller", "larger", "smallest", "largest", or a size by name (queen, 2-seat, tall)' } }, required: ['id', 'size'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'paint', description: 'Paint a wall of the real room, or every wall with "all". Colour "none" takes the paint off.', parameters: { type: 'object', properties: { wall: { type: 'string', description: 'a wall id (wall2), or "all"' }, colour: { type: 'string', description: '#rrggbb, or "none"' } }, required: ['wall', 'colour'], additionalProperties: false } } },
   { type: 'function', function: { name: 'rescan_room', description: "Have the headset rescan the room (Meta's Space Setup), when the person asks or the room looks wrong: walls missing, furniture not found.", parameters: { type: 'object', properties: {}, additionalProperties: false } } },
   { type: 'function', function: { name: 'remove', description: 'Take a placed piece away, or every piece with id "all".', parameters: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'], additionalProperties: false } } },
 ];
@@ -119,6 +123,9 @@ const TOOLS = [
  * ({ fabric: '#5f7a5a' }), `materials` the parts made of something else ({ fabric: 'velvet' }).
  */
 export const scene = [];
+
+/** The painted walls: { wallId: '#rrggbb' } (paint.mjs turns them into panels for the headset). */
+export const paint = {};
 
 function newId(item) {
   let n = 1;
@@ -182,6 +189,16 @@ export function apply(name, args, ctx) {
     else if (!linearOf(args.colour)) return { error: `${args.colour} is not a colour: give #rrggbb` };
     else p.colours = { ...p.colours, [part]: args.colour.toLowerCase().replace(/^#?/, '#') };
     return { ok: true, piece: describe(p) };
+  }
+  if (name === 'paint') {
+    const ws = walls(ctx.room).map((w) => w.id);
+    if (!ws.length) return { error: 'the room has no walls yet: rescan it' };
+    const which = args.wall === 'all' ? ws : [args.wall];
+    if (!ws.includes(which[0])) return { error: `no wall ${args.wall}; the walls are ${ws.join(', ')}` };
+    if (args.colour === 'none') { for (const w of which) delete paint[w]; return { ok: true, unpainted: which }; }
+    if (!linearOf(args.colour)) return { error: `${args.colour} is not a colour: give #rrggbb` };
+    for (const w of which) paint[w] = args.colour.toLowerCase().replace(/^#?/, '#');
+    return { ok: true, painted: which, colour: paint[which[0]], note: 'doors, windows and the real furniture against it stay unpainted' };
   }
   if (name === 'material') {
     const p = scene.find((x) => x.id === args.id);
@@ -292,7 +309,7 @@ export async function runTurn({ said, pointing, room }) {
     said,
     pointing: pointing ? { ...pointing, ray: undefined, piece: pointed } : null,
     viewer: room?.viewer ?? null,
-    room: { floorY: room?.floorY, items: (room?.items ?? []).filter((i) => i.label !== 'global mesh'), walls: walls(room).map((w) => ({ id: w.id, faces: w.n.map((v) => Math.round(v * 100) / 100) })) },
+    room: { floorY: room?.floorY, items: (room?.items ?? []).filter((i) => i.label !== 'global mesh'), walls: walls(room).map((w) => ({ id: w.id, faces: w.n.map((v) => Math.round(v * 100) / 100), ...(paint[w.id] ? { painted: paint[w.id] } : {}) })) },
     pieces: scene.map(describe),
   };
   const messages = [{ role: 'system', content: SYSTEM }, ...history, { role: 'user', content: JSON.stringify(context) }];

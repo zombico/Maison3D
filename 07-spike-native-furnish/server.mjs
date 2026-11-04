@@ -7,7 +7,8 @@ import { readFile } from 'node:fs/promises';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { config, runTurn, scene, catalog, catalogList, modelPath, parseModel } from './agent.mjs';
+import { config, runTurn, scene, catalog, catalogList, modelPath, parseModel, paint } from './agent.mjs';
+import { paintPanels } from './paint.mjs';
 import { recolour } from '../70-inventory/colour.mjs';
 import { connect as connectMojulo } from '../mojulo/client.mjs';
 import { transcribe, sttStatus } from './stt.mjs';
@@ -16,6 +17,9 @@ import { speak, voiceStatus } from './voice.mjs';
 const PORT = Number(process.env.PORT) || 8091;
 const CATALOG = join(dirname(fileURLToPath(import.meta.url)), 'catalog');
 const sceneJson = () => scene.map((p) => ({ id: p.id, item: p.item, at: p.at, facing: p.facing, model: modelPath(p) }));
+// the painted walls as panels, worked out against the room the headset last described
+let lastRoom = null;
+const paintJson = () => (lastRoom ? paintPanels(lastRoom, paint) : []);
 
 // Models made on first request. The name says it all (materials, then colours), so the headset's cache never serves
 // a stale one. Another material is a mojulo rebuild of the SKU (a second or a few), kept on disk beside the catalogue
@@ -83,26 +87,27 @@ function readJson(req) {
 async function turn(req, res) {
   const body = await readJson(req);
   const t0 = Date.now();
+  if (body.room?.items?.length) lastRoom = body.room; // the paint is cut to the room as it is now
   // typed text (for trying it without speaking) skips transcription
   // bias the words toward this room and this catalogue: table, storage, sofa, armchair, rug…
   const keywords = [...new Set([...catalogList.flatMap((c) => c.words ?? [c.id.replace('-', ' '), c.name]), ...(body.room?.items ?? []).map((i) => i.label)])];
   const said = typeof body.text === 'string' && body.text.trim() ? body.text.trim() : await transcribe(Buffer.from(body.audio ?? '', 'base64'), keywords);
   const heardMs = Date.now() - t0;
-  if (!said) return send(res, 200, { said: '', reply: '', scene: sceneJson(), note: 'heard nothing' });
+  if (!said) return send(res, 200, { said: '', reply: '', scene: sceneJson(), paint: paintJson(), note: 'heard nothing' });
   const { reply, calls, actions } = await runTurn({ said, pointing: body.pointing, room: body.room });
   console.log(`\n> ${said}${body.pointing ? `   (pointing at ${body.pointing.id ?? body.pointing.target})` : ''}`);
   for (const c of calls) console.log(`  ${c.name} ${JSON.stringify(c.args)} -> ${c.result.error ?? (c.result.piece ? `${c.result.piece.id} at ${c.result.piece.at}` : 'ok')}${c.result.issues?.length ? `  [${c.result.issues.join('; ')}]` : ''}`);
   console.log(`< ${reply}   [${heardMs} ms to hear, ${Date.now() - t0 - heardMs} ms to answer]`);
   warm(); // a piece in another material starts on mojulo now, while the reply is spoken
   const voice = body.voice ? await speak(reply) : null;
-  send(res, 200, { said, reply, scene: sceneJson(), actions, ...(voice ? { voice: voice.toString('base64') } : {}) });
+  send(res, 200, { said, reply, scene: sceneJson(), paint: paintJson(), actions, ...(voice ? { voice: voice.toString('base64') } : {}) });
 }
 
 const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://localhost');
     if (req.method === 'GET' && url.pathname === '/api/health') return send(res, 200, { ok: true, model: config.model, key: config.hasKey, stt: sttStatus(), voice: voiceStatus(), catalog: catalogList.map((c) => c.id) });
-    if (req.method === 'GET' && url.pathname === '/api/scene') return send(res, 200, { scene: sceneJson() });
+    if (req.method === 'GET' && url.pathname === '/api/scene') return send(res, 200, { scene: sceneJson(), paint: paintJson() });
     if (req.method === 'POST' && url.pathname === '/api/clear') { scene.length = 0; console.log('\n(cleared from the headset)'); return send(res, 200, { scene: [] }); }
     if (req.method === 'GET' && url.pathname.startsWith('/catalog/')) {
       const id = decodeURIComponent(url.pathname.slice('/catalog/'.length)).replace(/\.glb$/, '');
