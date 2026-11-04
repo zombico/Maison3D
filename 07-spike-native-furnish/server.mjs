@@ -6,13 +6,29 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { config, runTurn, scene, catalog, catalogList } from './agent.mjs';
+import { config, runTurn, scene, catalog, catalogList, modelPath, parseModel } from './agent.mjs';
+import { recolour } from '../70-inventory/colour.mjs';
 import { transcribe, sttStatus } from './stt.mjs';
 import { speak, voiceStatus } from './voice.mjs';
 
 const PORT = Number(process.env.PORT) || 8091;
 const CATALOG = join(dirname(fileURLToPath(import.meta.url)), 'catalog');
-const sceneJson = () => scene.map((p) => ({ id: p.id, item: p.item, at: p.at, facing: p.facing }));
+const sceneJson = () => scene.map((p) => ({ id: p.id, item: p.item, at: p.at, facing: p.facing, model: modelPath(p) }));
+
+// recoloured models, made on first request: the name says the colours, so the headset's cache never serves a stale one
+const recoloured = new Map();
+async function modelFile(name) {
+  const { item, colours } = parseModel(name);
+  if (!catalog[item]) return null;
+  const glb = await readFile(join(catalog[item].dir ?? CATALOG, catalog[item].file));
+  if (!Object.keys(colours).length) return glb;
+  if (!recoloured.has(name)) {
+    const t0 = Date.now();
+    recoloured.set(name, recolour(glb, colours));
+    console.log(`  (recoloured ${name} in ${Date.now() - t0} ms)`);
+  }
+  return recoloured.get(name);
+}
 const MAX_BODY = 16 * 1024 * 1024;
 
 function send(res, status, body) {
@@ -61,8 +77,8 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'POST' && url.pathname === '/api/clear') { scene.length = 0; console.log('\n(cleared from the headset)'); return send(res, 200, { scene: [] }); }
     if (req.method === 'GET' && url.pathname.startsWith('/catalog/')) {
       const id = decodeURIComponent(url.pathname.slice('/catalog/'.length)).replace(/\.glb$/, '');
-      if (!catalog[id]) return send(res, 404, { error: `no catalogue item ${id}` });
-      const glb = await readFile(join(catalog[id].dir ?? CATALOG, catalog[id].file));
+      const glb = await modelFile(id);
+      if (!glb) return send(res, 404, { error: `no catalogue item ${id}` });
       res.writeHead(200, { 'content-type': 'model/gltf-binary', 'content-length': glb.length, 'cache-control': 'max-age=3600', connection: 'close' });
       return res.end(glb);
     }

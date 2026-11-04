@@ -10,6 +10,7 @@ import { connect } from '../mojulo/client.mjs';
 import { COLLECTIONS, PIECES, skus } from './catalogue.mjs';
 import { recipeFor, frontTurn } from './recipes.mjs';
 import { ready } from './ready.mjs';
+import { partsOf } from './colour.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const arg = (k) => { const i = process.argv.indexOf(`--${k}`); return i >= 0 ? process.argv[i + 1] : undefined; };
@@ -72,7 +73,7 @@ for (const s of todo) {
       kind: p.job === 'anchor' ? 'rug' : p.job, piece: p.id, collection: s.collection, room: p.room, job: p.job,
       // what the headset's model reads beside the name, and the words speech recognition is biased toward
       note: `${col.name} collection, ${col.card}, ${p.room}`, words: [col.name, p.name.toLowerCase()],
-      size, listed: s.mm, triangles, bytes: glb.length, file, mojulo: { ref, kind, spec }, issues,
+      size, listed: s.mm, parts: partsOf(glb), triangles, bytes: glb.length, file, mojulo: { ref, kind, spec }, issues,
     });
     console.log(`  ${s.sku.padEnd(22)} ${String(triangles).padStart(6)} tris ${(glb.length / 1048576).toFixed(2)} MB  ${size.map((v) => v.toFixed(2)).join(' x ')} m  ${Date.now() - t0} ms${issues.length ? `  ! ${issues.join('; ')}` : ''}`);
     if (issues.length) problems.push([s.sku, issues]);

@@ -66,7 +66,7 @@ class FurnishActivity : AppSystemActivity() {
   // A new scene arrives on a network thread and is applied on the frame loop.
   private lateinit var server: String
   private val incoming = java.util.concurrent.atomic.AtomicReference<List<Piece>?>(null)
-  private val shown = mutableMapOf<String, Pair<String, Entity>>() // piece id -> (item, entity)
+  private val shown = mutableMapOf<String, Pair<String, Entity>>() // piece id -> (model path, entity)
 
   private var saidView: TextView? = null
   private var replyView: TextView? = null
@@ -76,7 +76,8 @@ class FurnishActivity : AppSystemActivity() {
   private var reply = ""
 
   /** One piece of furniture: `at` is the centre of its base, `facing` the way its front points (level). */
-  data class Piece(val id: String, val item: String, val at: Vector3, val facing: Vector3)
+  /** `model`: the path the server serves it at, which names its colours when recoloured (a new path, a reload). */
+  data class Piece(val id: String, val item: String, val at: Vector3, val facing: Vector3, val model: String)
 
   override fun registerFeatures(): List<SpatialFeature> {
     mruk = MRUKFeature(this, systemManager)
@@ -251,13 +252,14 @@ class FurnishActivity : AppSystemActivity() {
     val list = j.optJSONArray("scene") ?: return emptyList()
     return (0 until list.length()).map { i ->
       val p = list.getJSONObject(i)
-      Piece(p.getString("id"), p.getString("item"), vec3(p.getJSONArray("at")), vec3(p.getJSONArray("facing")))
+      val item = p.getString("item")
+      Piece(p.getString("id"), item, vec3(p.getJSONArray("at")), vec3(p.getJSONArray("facing")), p.optString("model", "/catalog/$item.glb"))
     }
   }
 
   private fun vec3(a: org.json.JSONArray) = Vector3(a.getDouble(0).toFloat(), a.getDouble(1).toFloat(), a.getDouble(2).toFloat())
 
-  /** Makes the shown furniture match `scene`: new pieces loaded, moved ones moved, swapped or removed ones gone. */
+  /** Makes the shown furniture match `scene`: new pieces loaded, moved ones moved, swapped, recoloured or removed ones redone or gone. */
   private fun applyScene(scene: List<Piece>) {
     val ids = scene.map { it.id }.toSet()
     for (id in shown.keys.toList().filter { it !in ids }) shown.remove(id)?.second?.destroy()
@@ -265,12 +267,12 @@ class FurnishActivity : AppSystemActivity() {
       Log.i(TAG, "piece ${p.id}: ${p.item} at ${p.at} facing ${p.facing}")
       val pose = Pose(p.at, Quaternion.lookRotation(p.facing))
       val have = shown[p.id]
-      if (have != null && have.first == p.item) {
+      if (have != null && have.first == p.model) {
         have.second.setComponent(Transform(pose))
         continue
       }
       have?.second?.destroy()
-      val url = "${server.trimEnd('/')}/catalog/${p.item}.glb"
+      val url = server.trimEnd('/') + p.model
       Log.i(TAG, "loading $url")
       val e =
           Entity.create(
@@ -279,7 +281,7 @@ class FurnishActivity : AppSystemActivity() {
                   Transform(pose),
               ),
           )
-      shown[p.id] = p.item to e
+      shown[p.id] = p.model to e
     }
     log("scene: " + scene.joinToString(", ") { it.id }.ifEmpty { "empty" })
   }

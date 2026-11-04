@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { resolve, check, pointedPiece, walls } from './place.mjs';
 import { resolve as resolvePath } from 'node:path';
 import { frameOf, toWorld, dirToWorld, FT } from '../08-spike-mojulo-furnish/toMojulo.mjs';
+import { linearOf } from '../70-inventory/colour.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -57,13 +58,15 @@ with ids such as table1 or wall2, label, centre, size, top; walls carry the way 
 placed (ids such as sofa1).
 
 Catalogue (width x height x depth in metres; fronts face the way they are turned):
-${catalogList.map((c) => `- ${c.id}: ${c.name}, ${c.size.join(' x ')}${c.note ? ` (${c.note})` : ''}`).join('\n')}
+${catalogList.map((c) => `- ${c.id}: ${c.name}, ${c.size.join(' x ')}${c.note ? ` (${c.note})` : ''}${c.parts && Object.keys(c.parts).length ? `; parts ${Object.entries(c.parts).map(([k, v]) => `${k} ${v}`).join(', ')}` : ''}`).join('\n')}
 
 Change the scene only with the tools. Say where a piece goes the way the person would: on an item, against a wall,
 next to something (left, right, front, behind as the person sees it), where they pointed, in front of them, or as
 x, z coordinates when nothing else fits. "This" or "that" usually means the pointed piece. A tool's result says
 where the piece ended up and anything it runs into; if it overlaps real furniture, move it or say so. Pieces only
-come from the catalogue; if asked for something it does not have, say what is closest.
+come from the catalogue; if asked for something it does not have, say what is closest. A piece's listed parts can be
+recoloured (the sofa's fabric, a table's wood, a dresser's body): pick the colour as a hex the person would recognise
+for what they said ("sage green", "darker wood", "white"), and say it in words, never as a hex.
 
 Answer in one short spoken sentence: it is read aloud in the headset. No markdown, no lists. When you call tools,
 write that sentence in the same message as the calls, saying what you did.`;
@@ -84,11 +87,12 @@ const TOOLS = [
   { type: 'function', function: { name: 'place', description: 'Add a catalogue piece to the room.', parameters: { type: 'object', properties: { item: { type: 'string', enum: catalogList.map((c) => c.id) }, ...WHERE }, required: ['item'], additionalProperties: false } } },
   { type: 'function', function: { name: 'move', description: 'Move or turn a placed piece. Give only `face` or `turn` to turn it where it stands.', parameters: { type: 'object', properties: { id: { type: 'string' }, ...WHERE }, required: ['id'], additionalProperties: false } } },
   { type: 'function', function: { name: 'swap', description: 'Replace a placed piece with another catalogue item, keeping its place and facing.', parameters: { type: 'object', properties: { id: { type: 'string' }, item: { type: 'string', enum: catalogList.map((c) => c.id) } }, required: ['id', 'item'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'recolour', description: "Change the colour of one part of a placed piece (its catalogue entry lists its parts and their colours now). Without `part`, the piece's first part (the sofa's fabric, the dresser's body).", parameters: { type: 'object', properties: { id: { type: 'string' }, part: { type: 'string', description: 'fabric, wood, body, seat, handles, throw, pillows or mattress, as the piece lists' }, colour: { type: 'string', description: '#rrggbb, or "original" to go back to the catalogue colour' } }, required: ['id', 'colour'], additionalProperties: false } } },
   { type: 'function', function: { name: 'rescan_room', description: "Have the headset rescan the room (Meta's Space Setup), when the person asks or the room looks wrong: walls missing, furniture not found.", parameters: { type: 'object', properties: {}, additionalProperties: false } } },
   { type: 'function', function: { name: 'remove', description: 'Take a placed piece away, or every piece with id "all".', parameters: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'], additionalProperties: false } } },
 ];
 
-/** The furnished scene: [{ id, item, at, facing }]. */
+/** The furnished scene: [{ id, item, at, facing, colours? }]; `colours` are the parts recoloured ({ fabric: '#5f7a5a' }). */
 export const scene = [];
 
 function newId(item) {
@@ -97,7 +101,19 @@ function newId(item) {
   return `${item}${n}`;
 }
 
-const describe = (p) => ({ id: p.id, item: p.item, at: p.at, facing: p.facing, size: catalog[p.item].size });
+const describe = (p) => ({ id: p.id, item: p.item, at: p.at, facing: p.facing, size: catalog[p.item].size, ...(catalog[p.item].parts ? { parts: { ...catalog[p.item].parts, ...p.colours } } : {}) });
+
+/** The model the headset loads for a piece: the catalogue's, or the same in the piece's colours (server.mjs makes it). */
+export function modelPath(p) {
+  const c = Object.entries(p.colours ?? {}).sort(([a], [b]) => a.localeCompare(b));
+  return `/catalog/${encodeURIComponent(p.item)}${c.map(([k, v]) => `~${k}-${v.slice(1).toLowerCase()}`).join('')}.glb`;
+}
+
+/** `item~fabric-5f7a5a~wood-222222` -> { item, colours }, as modelPath writes it. */
+export function parseModel(name) {
+  const [item, ...rest] = name.split('~');
+  return { item, colours: Object.fromEntries(rest.map((r) => { const [k, v] = r.split('-'); return [k, `#${v}`]; })) };
+}
 
 /** Runs one tool call against the scene; returns what the model reads back. */
 export function apply(name, args, ctx) {
@@ -113,12 +129,25 @@ export function apply(name, args, ctx) {
     scene.splice(i, 1);
     return { ok: true, removed: args.id };
   }
+  if (name === 'recolour') {
+    const p = scene.find((x) => x.id === args.id);
+    if (!p) return { error: `no piece ${args.id}; pieces are ${scene.map((x) => x.id).join(', ') || 'none'}` };
+    const parts = catalog[p.item].parts ?? {};
+    const part = args.part ?? Object.keys(parts)[0];
+    if (!part || !parts[part]) return { error: Object.keys(parts).length ? `${p.id} has no ${args.part}; its parts are ${Object.keys(parts).join(', ')}` : `${p.id} cannot be recoloured` };
+    if (args.colour === 'original') { if (p.colours) delete p.colours[part]; }
+    else if (!linearOf(args.colour)) return { error: `${args.colour} is not a colour: give #rrggbb` };
+    else p.colours = { ...p.colours, [part]: args.colour.toLowerCase().replace(/^#?/, '#') };
+    return { ok: true, piece: describe(p) };
+  }
   if (name === 'swap') {
     const p = scene.find((x) => x.id === args.id);
     if (!p) return { error: `no piece ${args.id}` };
     if (!catalog[args.item]) return { error: `no catalogue item ${args.item}` };
     const was = p.id;
     p.item = args.item;
+    // colours carry over to the parts the new piece also has
+    if (p.colours) p.colours = Object.fromEntries(Object.entries(p.colours).filter(([k]) => catalog[p.item].parts?.[k]));
     p.id = newId(args.item); // the id says what it is: armchair1 swapped for a sofa becomes sofa1
     const issues = check(p, catalog[p.item].size, env);
     return { ok: true, replaced: was, piece: describe(p), issues };

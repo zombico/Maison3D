@@ -243,6 +243,14 @@ MAISON_CATALOG=70-inventory/catalog.json npm run spike:furnish
 
 Pieces are named by collection, so "a Sable sofa against that wall" or "swap the armchair for the Hinoki one" work.
 
+Their colours change too: "make the sofa sage green", "black legs", "paint the dresser white", "a blue throw on the
+bed". Each piece lists its parts in `catalog.json` (fabric, wood, body, seat, handles, and a bed's mattress, pillows and
+throw) with the colour each wears now, and Muse's `recolour` tool changes one. `70-inventory/colour.mjs` keeps a part's
+detail (weave, grain, a cushion's shading) as shades of grey and puts the new colour over it; the server makes the
+recoloured model on the first request (well under a second, then cached), at a path that names its colours, so the
+headset reloads just that piece. A swap keeps the colours of the parts the new piece shares. Recolouring needs this
+Maison3D Furnish build or newer.
+
 Two things mojulo's lit export gets wrong are fixed in `ready.mjs` and `recipes.mjs`: sheet goods (plywood and MDF
 casework) come out white, so their board colour is put back from mojulo's own sheet table; and mojulo's furniture
 builds face away from you, so they are turned to face +z like everything else.

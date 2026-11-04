@@ -47,7 +47,11 @@
    "words": [
     "Hinoki",
     "accent chair"
-   ]
+   ],
+   "parts": {
+    "wood": "#a57e4e",
+    "seat": "#c29f69"
+   }
   },
   {
    "id": "HIN-ARM-std",
@@ -101,7 +105,11 @@
    "words": [
     "Hinoki",
     "armchair"
-   ]
+   ],
+   "parts": {
+    "fabric": "#c0baaa",
+    "wood": "#b19672"
+   }
   },
   {
    "id": "HIN-BCH-std",
@@ -145,7 +153,11 @@
    "words": [
     "Hinoki",
     "blanket chest"
-   ]
+   ],
+   "parts": {
+    "body": "#bb9863",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "HIN-BEB-std",
@@ -192,7 +204,10 @@
    "words": [
     "Hinoki",
     "bed-end bench"
-   ]
+   ],
+   "parts": {
+    "wood": "#a57e4e"
+   }
   },
   {
    "id": "HIN-BED-double",
@@ -466,7 +481,13 @@
      ]
     }
    },
-   "issues": []
+   "issues": [],
+   "parts": {
+    "throw": "#d9d2bf",
+    "pillows": "#c5b89c",
+    "mattress": "#bdb8ac",
+    "wood": "#a57e4e"
+   }
   },
   {
    "id": "HIN-BED-king",
@@ -740,7 +761,13 @@
      ]
     }
    },
-   "issues": []
+   "issues": [],
+   "parts": {
+    "throw": "#d9d2bf",
+    "pillows": "#c5b89c",
+    "mattress": "#bdb8ac",
+    "wood": "#a57e4e"
+   }
   },
   {
    "id": "HIN-BED-queen",
@@ -1014,7 +1041,13 @@
      ]
     }
    },
-   "issues": []
+   "issues": [],
+   "parts": {
+    "throw": "#d9d2bf",
+    "pillows": "#c5b89c",
+    "mattress": "#bdb8ac",
+    "wood": "#a57e4e"
+   }
   },
   {
    "id": "HIN-BEN-std",
@@ -1061,7 +1094,10 @@
    "words": [
     "Hinoki",
     "low bench"
-   ]
+   ],
+   "parts": {
+    "wood": "#a57e4e"
+   }
   },
   {
    "id": "HIN-BKC-std",
@@ -1105,7 +1141,10 @@
    "words": [
     "Hinoki",
     "bookcase"
-   ]
+   ],
+   "parts": {
+    "body": "#bf9c67"
+   }
   },
   {
    "id": "HIN-BKC-tall",
@@ -1149,7 +1188,10 @@
    "words": [
     "Hinoki",
     "bookcase"
-   ]
+   ],
+   "parts": {
+    "body": "#c09c67"
+   }
   },
   {
    "id": "HIN-CHT-tall",
@@ -1196,7 +1238,11 @@
    "words": [
     "Hinoki",
     "chest of drawers"
-   ]
+   ],
+   "parts": {
+    "body": "#bb9863",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "HIN-COF-long",
@@ -1243,7 +1289,10 @@
    "words": [
     "Hinoki",
     "coffee table"
-   ]
+   ],
+   "parts": {
+    "wood": "#a57e4e"
+   }
   },
   {
    "id": "HIN-COF-std",
@@ -1290,7 +1339,10 @@
    "words": [
     "Hinoki",
     "coffee table"
-   ]
+   ],
+   "parts": {
+    "wood": "#a57e4e"
+   }
   },
   {
    "id": "HIN-DRS-std",
@@ -1337,7 +1389,11 @@
    "words": [
     "Hinoki",
     "dresser"
-   ]
+   ],
+   "parts": {
+    "body": "#bb9863",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "HIN-DRS-wide",
@@ -1384,7 +1440,11 @@
    "words": [
     "Hinoki",
     "dresser"
-   ]
+   ],
+   "parts": {
+    "body": "#bb9863",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "HIN-LNG-std",
@@ -1435,7 +1495,11 @@
    "words": [
     "Hinoki",
     "lounge chair"
-   ]
+   ],
+   "parts": {
+    "fabric": "#c0baa9",
+    "wood": "#b19672"
+   }
   },
   {
    "id": "HIN-LOV-std",
@@ -1486,7 +1550,11 @@
    "words": [
     "Hinoki",
     "loveseat"
-   ]
+   ],
+   "parts": {
+    "fabric": "#b4a88f",
+    "wood": "#b19672"
+   }
   },
   {
    "id": "HIN-MDU-std",
@@ -1533,7 +1601,11 @@
    "words": [
     "Hinoki",
     "media wall unit"
-   ]
+   ],
+   "parts": {
+    "body": "#be9b66",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "HIN-MED-long",
@@ -1577,7 +1649,11 @@
    "words": [
     "Hinoki",
     "media console"
-   ]
+   ],
+   "parts": {
+    "body": "#be9b66",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "HIN-MED-short",
@@ -1621,7 +1697,11 @@
    "words": [
     "Hinoki",
     "media console"
-   ]
+   ],
+   "parts": {
+    "body": "#be9b66",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "HIN-MED-std",
@@ -1665,7 +1745,11 @@
    "words": [
     "Hinoki",
     "media console"
-   ]
+   ],
+   "parts": {
+    "body": "#be9b66",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "HIN-NST-std",
@@ -1709,7 +1793,11 @@
    "words": [
     "Hinoki",
     "nightstand"
-   ]
+   ],
+   "parts": {
+    "body": "#bb9863",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "HIN-PLT-king",
@@ -1932,7 +2020,13 @@
      ]
     }
    },
-   "issues": []
+   "issues": [],
+   "parts": {
+    "throw": "#d9d2bf",
+    "pillows": "#c5b89c",
+    "mattress": "#bdb8ac",
+    "wood": "#a57e4e"
+   }
   },
   {
    "id": "HIN-PLT-queen",
@@ -2155,7 +2249,13 @@
      ]
     }
    },
-   "issues": []
+   "issues": [],
+   "parts": {
+    "throw": "#d9d2bf",
+    "pillows": "#c5b89c",
+    "mattress": "#bdb8ac",
+    "wood": "#a57e4e"
+   }
   },
   {
    "id": "HIN-SDB-long",
@@ -2199,7 +2299,11 @@
    "words": [
     "Hinoki",
     "sideboard"
-   ]
+   ],
+   "parts": {
+    "body": "#bd9a65",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "HIN-SDB-std",
@@ -2243,7 +2347,11 @@
    "words": [
     "Hinoki",
     "sideboard"
-   ]
+   ],
+   "parts": {
+    "body": "#bd9a65",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "HIN-SID-std",
@@ -2290,7 +2398,10 @@
    "words": [
     "Hinoki",
     "side table"
-   ]
+   ],
+   "parts": {
+    "wood": "#a57e4e"
+   }
   },
   {
    "id": "HIN-SOF-2-seat",
@@ -2344,7 +2455,11 @@
    "words": [
     "Hinoki",
     "sofa"
-   ]
+   ],
+   "parts": {
+    "fabric": "#b4a88f",
+    "wood": "#b19672"
+   }
   },
   {
    "id": "HIN-SOF-3-seat",
@@ -2398,7 +2513,11 @@
    "words": [
     "Hinoki",
     "sofa"
-   ]
+   ],
+   "parts": {
+    "fabric": "#b4a88f",
+    "wood": "#b19672"
+   }
   },
   {
    "id": "HIN-SOF-4-seat",
@@ -2452,7 +2571,11 @@
    "words": [
     "Hinoki",
     "sofa"
-   ]
+   ],
+   "parts": {
+    "fabric": "#b4a88f",
+    "wood": "#b19672"
+   }
   },
   {
    "id": "HIN-WRD-double",
@@ -2499,7 +2622,11 @@
    "words": [
     "Hinoki",
     "wardrobe"
-   ]
+   ],
+   "parts": {
+    "body": "#be9b66",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "HIN-WRD-single",
@@ -2546,7 +2673,11 @@
    "words": [
     "Hinoki",
     "wardrobe"
-   ]
+   ],
+   "parts": {
+    "body": "#be9b66",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "SAB-ACC-std",
@@ -2593,7 +2724,11 @@
    "words": [
     "Sable",
     "accent chair"
-   ]
+   ],
+   "parts": {
+    "wood": "#ccab7b",
+    "seat": "#cab084"
+   }
   },
   {
    "id": "SAB-ARM-std",
@@ -2647,7 +2782,11 @@
    "words": [
     "Sable",
     "armchair"
-   ]
+   ],
+   "parts": {
+    "fabric": "#894325",
+    "wood": "#d6bc94"
+   }
   },
   {
    "id": "SAB-BEB-std",
@@ -2694,7 +2833,10 @@
    "words": [
     "Sable",
     "bed-end bench"
-   ]
+   ],
+   "parts": {
+    "wood": "#cead7c"
+   }
   },
   {
    "id": "SAB-BED-double",
@@ -2968,7 +3110,13 @@
      ]
     }
    },
-   "issues": []
+   "issues": [],
+   "parts": {
+    "throw": "#974a28",
+    "pillows": "#b9a681",
+    "mattress": "#bdb8ac",
+    "wood": "#ac8c61"
+   }
   },
   {
    "id": "SAB-BED-king",
@@ -3242,7 +3390,13 @@
      ]
     }
    },
-   "issues": []
+   "issues": [],
+   "parts": {
+    "throw": "#974a28",
+    "pillows": "#b9a681",
+    "mattress": "#bdb8ac",
+    "wood": "#ac8c61"
+   }
   },
   {
    "id": "SAB-BED-queen",
@@ -3516,7 +3670,13 @@
      ]
     }
    },
-   "issues": []
+   "issues": [],
+   "parts": {
+    "throw": "#974a28",
+    "pillows": "#b9a681",
+    "mattress": "#bdb8ac",
+    "wood": "#ac8c61"
+   }
   },
   {
    "id": "SAB-BEN-std",
@@ -3563,7 +3723,10 @@
    "words": [
     "Sable",
     "low bench"
-   ]
+   ],
+   "parts": {
+    "wood": "#cead7c"
+   }
   },
   {
    "id": "SAB-BKC-std",
@@ -3607,7 +3770,10 @@
    "words": [
     "Sable",
     "bookcase"
-   ]
+   ],
+   "parts": {
+    "body": "#c8ad81"
+   }
   },
   {
    "id": "SAB-BKC-tall",
@@ -3651,7 +3817,10 @@
    "words": [
     "Sable",
     "bookcase"
-   ]
+   ],
+   "parts": {
+    "body": "#c8ad81"
+   }
   },
   {
    "id": "SAB-CHT-tall",
@@ -3698,7 +3867,11 @@
    "words": [
     "Sable",
     "chest of drawers"
-   ]
+   ],
+   "parts": {
+    "body": "#c3a87d",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "SAB-COF-long",
@@ -3745,7 +3918,10 @@
    "words": [
     "Sable",
     "coffee table"
-   ]
+   ],
+   "parts": {
+    "wood": "#cead7c"
+   }
   },
   {
    "id": "SAB-COF-std",
@@ -3792,7 +3968,10 @@
    "words": [
     "Sable",
     "coffee table"
-   ]
+   ],
+   "parts": {
+    "wood": "#cead7c"
+   }
   },
   {
    "id": "SAB-DRS-std",
@@ -3839,7 +4018,11 @@
    "words": [
     "Sable",
     "dresser"
-   ]
+   ],
+   "parts": {
+    "body": "#c3a87d",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "SAB-DRS-wide",
@@ -3886,7 +4069,11 @@
    "words": [
     "Sable",
     "dresser"
-   ]
+   ],
+   "parts": {
+    "body": "#c3a87d",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "SAB-LNG-std",
@@ -3937,7 +4124,11 @@
    "words": [
     "Sable",
     "lounge chair"
-   ]
+   ],
+   "parts": {
+    "fabric": "#894325",
+    "wood": "#d6bc94"
+   }
   },
   {
    "id": "SAB-LOV-std",
@@ -3988,7 +4179,11 @@
    "words": [
     "Sable",
     "loveseat"
-   ]
+   ],
+   "parts": {
+    "fabric": "#a49372",
+    "wood": "#d6bc94"
+   }
   },
   {
    "id": "SAB-MCS-3-seat",
@@ -4036,7 +4231,11 @@
    "words": [
     "Sable",
     "mid-century sofa"
-   ]
+   ],
+   "parts": {
+    "fabric": "#a49272",
+    "wood": "#d6bc94"
+   }
   },
   {
    "id": "SAB-MDU-std",
@@ -4083,7 +4282,11 @@
    "words": [
     "Sable",
     "media wall unit"
-   ]
+   ],
+   "parts": {
+    "body": "#c6ab80",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "SAB-MED-long",
@@ -4127,7 +4330,11 @@
    "words": [
     "Sable",
     "media console"
-   ]
+   ],
+   "parts": {
+    "body": "#c6ab80",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "SAB-MED-short",
@@ -4171,7 +4378,11 @@
    "words": [
     "Sable",
     "media console"
-   ]
+   ],
+   "parts": {
+    "body": "#c6ab80",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "SAB-MED-std",
@@ -4215,7 +4426,11 @@
    "words": [
     "Sable",
     "media console"
-   ]
+   ],
+   "parts": {
+    "body": "#c6ab80",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "SAB-NST-std",
@@ -4259,7 +4474,11 @@
    "words": [
     "Sable",
     "nightstand"
-   ]
+   ],
+   "parts": {
+    "body": "#c3a87d",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "SAB-PLT-king",
@@ -4482,7 +4701,13 @@
      ]
     }
    },
-   "issues": []
+   "issues": [],
+   "parts": {
+    "throw": "#974a28",
+    "pillows": "#b9a681",
+    "mattress": "#bdb8ac",
+    "wood": "#ac8c61"
+   }
   },
   {
    "id": "SAB-PLT-queen",
@@ -4705,7 +4930,13 @@
      ]
     }
    },
-   "issues": []
+   "issues": [],
+   "parts": {
+    "throw": "#974a28",
+    "pillows": "#b9a681",
+    "mattress": "#bdb8ac",
+    "wood": "#ac8c61"
+   }
   },
   {
    "id": "SAB-SDB-long",
@@ -4749,7 +4980,11 @@
    "words": [
     "Sable",
     "sideboard"
-   ]
+   ],
+   "parts": {
+    "body": "#c6aa7f",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "SAB-SDB-std",
@@ -4793,7 +5028,11 @@
    "words": [
     "Sable",
     "sideboard"
-   ]
+   ],
+   "parts": {
+    "body": "#c6aa7f",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "SAB-SID-std",
@@ -4840,7 +5079,10 @@
    "words": [
     "Sable",
     "side table"
-   ]
+   ],
+   "parts": {
+    "wood": "#cead7c"
+   }
   },
   {
    "id": "SAB-SOF-2-seat",
@@ -4894,7 +5136,11 @@
    "words": [
     "Sable",
     "sofa"
-   ]
+   ],
+   "parts": {
+    "fabric": "#a59373",
+    "wood": "#d6bc94"
+   }
   },
   {
    "id": "SAB-SOF-3-seat",
@@ -4948,7 +5194,11 @@
    "words": [
     "Sable",
     "sofa"
-   ]
+   ],
+   "parts": {
+    "fabric": "#a59373",
+    "wood": "#d6bc94"
+   }
   },
   {
    "id": "SAB-SOF-4-seat",
@@ -5002,7 +5252,11 @@
    "words": [
     "Sable",
     "sofa"
-   ]
+   ],
+   "parts": {
+    "fabric": "#a59373",
+    "wood": "#d6bc94"
+   }
   },
   {
    "id": "SAB-WRD-double",
@@ -5049,7 +5303,11 @@
    "words": [
     "Sable",
     "wardrobe"
-   ]
+   ],
+   "parts": {
+    "body": "#c6ab80",
+    "handles": "#34363a"
+   }
   },
   {
    "id": "SAB-WRD-single",
@@ -5096,7 +5354,11 @@
    "words": [
     "Sable",
     "wardrobe"
-   ]
+   ],
+   "parts": {
+    "body": "#c6ab80",
+    "handles": "#34363a"
+   }
   }
  ]
 }
