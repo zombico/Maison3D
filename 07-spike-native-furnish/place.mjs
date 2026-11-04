@@ -233,7 +233,7 @@ function doorZones(room) {
     const wall = ws.map((w) => ({ w, off: Math.abs(dot([d.center[0] - w.center[0], d.center[2] - w.center[2]], w.n)) })).sort((a, b) => a.off - b.off)[0]?.w;
     if (!wall) continue;
     const along = [-wall.n[1], wall.n[0]];
-    const width = Math.min(d.size[0] / Math.max(Math.abs(along[0]), 0.2), d.size[2] / Math.max(Math.abs(along[1]), 0.2), Math.hypot(d.size[0], d.size[2]));
+    const width = d.size[0] * Math.abs(along[0]) + d.size[2] * Math.abs(along[1]); // its level box, along the wall
     const c = [d.center[0] + wall.n[0] * DOOR_CLEAR / 2, d.center[2] + wall.n[1] * DOOR_CLEAR / 2];
     out.push({ id: d.id, c, u: along, v: wall.n, hu: width / 2, hv: DOOR_CLEAR / 2, y0: floorOf(room), y1: floorOf(room) + 2 });
   }

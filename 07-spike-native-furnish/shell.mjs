@@ -32,7 +32,7 @@ export function openings(f, room) {
     const d = [i.center[0] - f.c[0], i.center[2] - f.c[1]];
     if (Math.abs(dot(d, f.n)) > 0.15) continue;
     // a frame's level box spans its width along the wall (and a little of its depth)
-    const u = dot(d, f.along), w = Math.min(i.size[0] / Math.max(Math.abs(f.along[0]), 0.2), i.size[2] / Math.max(Math.abs(f.along[1]), 0.2), Math.hypot(i.size[0], i.size[2]));
+    const u = dot(d, f.along), w = i.size[0] * Math.abs(f.along[0]) + i.size[2] * Math.abs(f.along[1]);
     if (Math.abs(u) > f.half + w / 2) continue;
     const y0 = i.label === 'door frame' ? f.y0 : Math.max(f.y0, i.center[1] - i.size[1] / 2);
     out.push({ kind: i.label === 'door frame' ? 'door' : 'window', u0: Math.max(-f.half, u - w / 2), u1: Math.min(f.half, u + w / 2), y0, y1: Math.min(f.y1 - 0.02, i.center[1] + i.size[1] / 2) });
@@ -185,7 +185,6 @@ export function shellGlb(room, finish = {}) {
       if (o.kind === 'window') {
         m.wallBox(F.glass, f, o.u0, o.u1, o.y0, o.y1, -T - 0.002, -T, true); // the glass, bright, at the wall's back face
         m.wallBox(F.trim, f, o.u0 - w, o.u1 + w, o.y0 - 0.03, o.y0, -T, 0.12); // the sill
-        m.wallBox(F.trim, f, o.u0, o.u1, o.y0, o.y1, -T, -T + 0.01); // reveal behind
       } else {
         // a short hall behind the door: its floor, two sides, an end and a ceiling, in a quieter colour
         m.wallBox(F.floor, f, o.u0, o.u1, floorY - 0.021, floorY - 0.001, -T - HALL, 0.01); // runs under the wall to the room's floor

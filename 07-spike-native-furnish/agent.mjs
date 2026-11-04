@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { resolve, check, pointedPiece, walls } from './place.mjs';
-import { emptyRoom, shellHit, SHELL } from './shell.mjs';
+import * as rooms from './rooms.mjs';
 import { resolve as resolvePath } from 'node:path';
 import { frameOf, toWorld, dirToWorld, FT } from '../08-spike-mojulo-furnish/toMojulo.mjs';
 import { linearOf } from '../70-inventory/colour.mjs';
@@ -68,12 +68,16 @@ if (process.env.MAISON_LAYOUT) {
   pendingLayout = layout;
 }
 
-const SYSTEM = `You design a person's real room with them, in VR in a Quest headset: they stand in their own room,
-scanned and shown empty at true size (its walls, doors, windows, floor and ceiling; their real furniture taken out),
-and furnish it with pieces from a catalogue. Each turn tells you what the person said, what their right controller
-pointed at when they let go of the button (a wall or the floor, and the placed piece it hit if any), where they stand,
-the room (walls, door and window frames and the floor, with ids such as wall2 or doorframe1, label, centre, size, top;
-walls carry the way they face and their colour) and the pieces already placed (ids such as sofa1).
+const SYSTEM = `You design a room with a person, in VR in a Quest headset: they stand in it at true size and furnish
+it with pieces from a catalogue. The room is dictated by default: a rectangle whose size, height, doors and windows
+the person says ("make it 4 by 5 metres", "ceiling 2.7", "a door on the wall behind me", "a window on the left wall");
+its walls are wall-front, wall-right, wall-back and wall-left, named as the person saw them when the room appeared
+(standing in the middle, facing wall-front). Take sizes in feet and inches too, and give the tools metres. It can be
+the headset's scan of their real room instead, emptied of its furniture (use_room). Each turn tells you what the
+person said, what their right controller pointed at when they let go of the button (a wall or the floor, and the
+placed piece it hit if any), where they stand and which way they face, the room (its size and openings, and its walls,
+door and window frames and floor with ids, centre, size, top; walls carry the way they face and their colour) and the
+pieces already placed (ids such as sofa1). "Behind me", "on my left" and the like are from where they stand now.
 
 Catalogue (width x height x depth in metres; fronts face the way they are turned):
 ${catalogList.map((c) => `- ${c.id}: ${c.name}, ${c.size.join(' x ')}${c.note ? ` (${c.note})` : ''}${c.parts && Object.keys(c.parts).length ? `; parts ${Object.entries(c.parts).map(([k, v]) => `${k}${c.made?.[k] ? ` ${c.made[k]}` : ''} ${v}`).join(', ')}` : ''}`).join('\n')}
@@ -90,9 +94,10 @@ for what they said ("sage green", "darker wood", "white"), and say it in words, 
 made of another material (linen to velvet, oak to walnut); that rebuilds the piece and takes a few seconds to appear.
 A smaller or larger one is the same piece in its next size (resize), keeping its colours and materials.
 The room can be painted (paint): a wall by id, every wall ("all"), the floor or the ceiling; "this wall" is usually
-the pointed one, and "the wall behind the sofa" the wall it stands against. The person can look at their real room
-again and come back to the design (view), and show or hide the outlines of their real furniture (outlines), which stay
-in the room so nobody walks into them.
+the pointed one, and "the wall behind the sofa" the wall it stands against. Change the room itself with room_size and
+opening; pieces stay where they are, so after shrinking the room check what now runs into a wall. go_to takes the
+person to stand somewhere ("take me to the window"). They can look at their real room again and come back to the
+design (view), and in a scanned room show or hide the outlines of their real furniture (outlines).
 
 Answer in one short spoken sentence: it is read aloud in the headset. No markdown, no lists. When you call tools,
 write that sentence in the same message as the calls, saying what you did.`;
@@ -117,6 +122,10 @@ const TOOLS = [
   { type: 'function', function: { name: 'material', description: "Make one part of a placed piece in another material (velvet instead of linen, walnut instead of oak). Without `part`, the piece's first part. A cloth of one colour keeps the part's colour; a patterned one (tartan, gingham, houndstooth, ticking) brings its own.", parameters: { type: 'object', properties: { id: { type: 'string' }, part: { type: 'string', enum: Object.keys(MATERIALS) }, material: { type: 'string', enum: [...new Set([...Object.values(MATERIALS).flat(), 'original'])], description: '"original" goes back to the catalogue material' } }, required: ['id', 'material'], additionalProperties: false } } },
   { type: 'function', function: { name: 'resize', description: 'Make a placed piece the same piece in another size (a smaller sofa, a king bed), back where its back was, keeping its colours and materials.', parameters: { type: 'object', properties: { id: { type: 'string' }, size: { type: 'string', description: '"smaller", "larger", "smallest", "largest", or a size by name (queen, 2-seat, tall)' } }, required: ['id', 'size'], additionalProperties: false } } },
   { type: 'function', function: { name: 'paint', description: 'Paint a wall of the room, every wall ("all"), the floor or the ceiling. Colour "none" goes back to how it started.', parameters: { type: 'object', properties: { wall: { type: 'string', description: 'a wall id (wall2), "all", "floor" or "ceiling"' }, colour: { type: 'string', description: '#rrggbb, or "none"' } }, required: ['wall', 'colour'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'room_size', description: 'Set the dictated room\'s size in metres: width (wall-left to wall-right), depth (wall-front to wall-back), height. Give only what changes.', parameters: { type: 'object', properties: { width: { type: 'number' }, depth: { type: 'number' }, height: { type: 'number' } }, additionalProperties: false } } },
+  { type: 'function', function: { name: 'opening', description: 'Add, move (to another wall or along its own) or remove a door or window of the dictated room.', parameters: { type: 'object', properties: { action: { type: 'string', enum: ['add', 'move', 'remove'] }, id: { type: 'string', description: 'with move or remove: door1, window2…' }, kind: { type: 'string', enum: ['door', 'window'], description: 'with add' }, wall: { type: 'string', enum: ['wall-front', 'wall-right', 'wall-back', 'wall-left'] }, at: { type: 'string', description: '"centre", "left" or "right" as seen facing that wall from inside, or metres right of its centre ("0.8", "-1.2")' }, width: { type: 'number' }, height: { type: 'number' }, sill: { type: 'number', description: 'a window\'s height off the floor' } }, required: ['action'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'use_room', description: 'Design in the dictated room, or in the headset\'s scan of the real room (emptied of its furniture).', parameters: { type: 'object', properties: { source: { type: 'string', enum: ['dictated', 'scan'] } }, required: ['source'], additionalProperties: false } } },
+  { type: 'function', function: { name: 'go_to', description: 'Take the person to stand a step into the room from a wall, door, window or placed piece, facing it, or in the middle ("middle").', parameters: { type: 'object', properties: { to: { type: 'string' } }, required: ['to'], additionalProperties: false } } },
   { type: 'function', function: { name: 'view', description: 'Show the real room (the headset camera, the design over it) or go back to the design in VR.', parameters: { type: 'object', properties: { real: { type: 'boolean', description: 'true: the real room; false: the design' } }, required: ['real'], additionalProperties: false } } },
   { type: 'function', function: { name: 'outlines', description: "Show or hide the outlines of the person's real furniture in the design.", parameters: { type: 'object', properties: { show: { type: 'boolean' } }, required: ['show'], additionalProperties: false } } },
   { type: 'function', function: { name: 'rescan_room', description: "Have the headset rescan the room (Meta's Space Setup), when the person asks or the room looks wrong: walls missing, furniture not found.", parameters: { type: 'object', properties: {}, additionalProperties: false } } },
@@ -210,6 +219,44 @@ export function apply(name, args, ctx) {
     else finish.walls[what] = c;
     return { ok: true, [none ? 'reset' : 'painted']: what, ...(c ? { colour: c } : {}) };
   }
+  if (name === 'room_size' || name === 'opening' || name === 'use_room') {
+    try {
+      if (name === 'use_room') {
+        if (args.source === 'scan' && !rooms.state.scanned) return { error: 'the headset has no scan of the room: rescan it first' };
+        rooms.state.source = args.source;
+        return { ok: true, room: rooms.describeSpec(), note: 'the pieces stay where they were: check what now runs into a wall' };
+      }
+      if (rooms.state.source !== 'dictated') return { error: 'this is the scanned room: its size comes from the scan (use_room dictated to change size)' };
+      const out = name === 'room_size' ? { room: rooms.setSize(args) } : rooms.changeOpening(args);
+      // every piece checked against the changed room: one a wall now runs through is pushed back inside
+      const changed = rooms.designRoom(ctx.room?.viewer);
+      const pieces = scene.map((p) => ({ id: p.id, issues: check(p, catalog[p.item].size, { ...ctx, room: changed, scene, catalog }) })).filter((p) => p.issues.length);
+      return { ok: true, ...out, ...(pieces.length ? { pieces } : {}) };
+    } catch (e) {
+      return { error: e.message };
+    }
+  }
+  if (name === 'go_to') {
+    const to = String(args.to ?? '').toLowerCase();
+    let target = null;
+    if (to !== 'middle' && to !== 'centre' && to !== 'center') {
+      const piece = scene.find((p) => p.id.toLowerCase() === to);
+      const item = (ctx.room?.items ?? []).find((i) => i.id.toLowerCase() === to);
+      const wall = item && walls(ctx.room).find((w) => w.id === item.id);
+      if (piece) {
+        const d = catalog[piece.item].size[2] / 2;
+        target = { point: [piece.at[0] + piece.facing[0] * d, piece.at[2] + piece.facing[2] * d], inward: [piece.facing[0], piece.facing[2]], step: 1.4 };
+      } else if (wall) target = { point: [wall.center[0], wall.center[2]], inward: wall.n };
+      else if (item?.normal) {
+        // a door or window: the way into the room is its wall's
+        const w = walls(ctx.room).sort((a, b) => Math.abs((item.center[0] - a.center[0]) * a.n[0] + (item.center[2] - a.center[2]) * a.n[1]) - Math.abs((item.center[0] - b.center[0]) * b.n[0] + (item.center[2] - b.center[2]) * b.n[1]))[0];
+        target = { point: [item.center[0], item.center[2]], inward: w?.n ?? [item.normal[0], item.normal[2]] };
+      } else return { error: `nothing called ${args.to}; walls, doors, windows and pieces have ids, or say middle` };
+    }
+    const stand = rooms.standingFor(ctx.room, target);
+    ctx.actions?.push({ teleport: stand });
+    return { ok: true, standing: stand };
+  }
   if (name === 'view') {
     ctx.actions?.push(args.real ? 'real' : 'design');
     return { ok: true, showing: args.real ? 'the real room, with the design over it' : 'the design' };
@@ -301,14 +348,6 @@ function remember(said, reply) {
   while (history.length > 20) history.shift();
 }
 
-/** `pointing` as if the real furniture were not there: a hit on it goes on along the ray to the room behind. */
-function throughFurniture(pointing, scanned) {
-  if (!pointing?.id || !pointing.ray) return pointing;
-  const hit = (scanned?.items ?? []).find((i) => i.id === pointing.id);
-  if (!hit || SHELL.has(hit.label)) return pointing;
-  return { ...pointing, ...(shellHit(pointing.ray, emptyRoom(scanned)) ?? { target: 'nothing', id: null }) };
-}
-
 /** Stands a pending layout in the room the headset just described; returns what it placed, or null. */
 export function placeLayout(room) {
   if (!pendingLayout || walls(room).length < 4) return null;
@@ -327,11 +366,9 @@ export function placeLayout(room) {
 }
 
 /** One turn: returns { reply, calls }; the scene is changed in place. */
-export async function runTurn({ said, pointing: pointed0, room: scanned }) {
-  // the design starts from the room empty: its real furniture is left out of what Muse sees and what pieces are
-  // checked against, and a point that landed on real furniture goes on through it to the wall or floor behind
-  const room = emptyRoom(scanned);
-  const pointing = throughFurniture(pointed0, scanned);
+export async function runTurn({ said, pointing, room }) {
+  // `room` is the design's room (rooms.mjs: dictated, or the scan emptied of its furniture), `pointing` what was
+  // pointed at in it
   const laid = placeLayout(room);
   if (laid) console.log(`  (the designed layout stands in the room: ${laid.join(', ')})`);
   const pointed = pointedPiece(pointing, scene, catalog);
@@ -339,7 +376,7 @@ export async function runTurn({ said, pointing: pointed0, room: scanned }) {
     said,
     pointing: pointing ? { ...pointing, ray: undefined, piece: pointed } : null,
     viewer: room?.viewer ?? null,
-    room: { floorY: room?.floorY, items: (room?.items ?? []).map(({ outline, ...i }) => i), walls: walls(room).map((w) => ({ id: w.id, faces: w.n.map((v) => Math.round(v * 100) / 100), colour: finish.walls[w.id] ?? finish.wall ?? 'as it started' })), floor: finish.floor ?? 'as it started', ceiling: finish.ceiling ?? 'as it started' },
+    room: { ...rooms.describeSpec(), floorY: room?.floorY, items: (room?.items ?? []).map(({ outline, ...i }) => i), walls: walls(room).map((w) => ({ id: w.id, faces: w.n.map((v) => Math.round(v * 100) / 100), colour: finish.walls[w.id] ?? finish.wall ?? 'as it started' })), floor: finish.floor ?? 'as it started', ceiling: finish.ceiling ?? 'as it started' },
     pieces: scene.map(describe),
   };
   const messages = [{ role: 'system', content: SYSTEM }, ...history, { role: 'user', content: JSON.stringify(context) }];
@@ -356,6 +393,8 @@ export async function runTurn({ said, pointing: pointed0, room: scanned }) {
       try {
         const args = JSON.parse(call.function?.arguments || '{}');
         result = apply(call.function?.name, args, { room, pointing, actions });
+        // a changed room is the room the rest of this turn's calls work in
+        if (['room_size', 'opening', 'use_room'].includes(call.function?.name) && result.ok) room = rooms.designRoom(room?.viewer);
         calls.push({ name: call.function?.name, args, result });
       } catch (e) {
         result = { error: `bad arguments: ${e.message}` };

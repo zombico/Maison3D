@@ -263,6 +263,29 @@ Sizes are related: each piece knows its other sizes in its collection, smallest 
 smallest, then 2-, 3- and 4-seat; double, queen, king), and Muse's `resize` tool takes "smaller", "larger" or a size
 by name. The resized piece keeps its back where it was and keeps its colours and materials.
 
+### A dictated room
+
+The design now starts in a fresh room you dictate, not the scan: `07-spike-native-furnish/rooms.mjs` holds its size
+and openings and stands it round you where you were when the app started, in its middle, facing its front wall
+(4 × 5 m, 2.7 m high, a door behind you on the right and a window on your left, to begin with). Its walls are
+`wall-front`, `wall-right`, `wall-back` and `wall-left`, as you saw them then. Say "make it 4 by 5 metres", "12 by 14
+feet", "ceiling 2.7", "50 cm wider", "a door on the wall behind me", "move the door to the right", "a window on the
+left wall, centred", "no windows" (Muse's `room_size` and `opening`); after a change every piece is checked against the
+new walls and pushed back inside one that now runs through it. "Take me to the window" or "back to the middle"
+(`go_to`) moves you there. "Use my scanned room" (`use_room`) designs in the scan instead, as below.
+
+The room is described as the headset describes a scanned one, so the VR room, placement, door clearances, paint and
+every other tool work on both. The headset now always sends its pointer's ray, and the server finds what it meets in
+the dictated room. Each app launch is a new session: the room stands round you again, and the pieces move with it.
+
+Moving: push the right thumbstick forward to aim (a square shows where you will land), let go to step there; push it
+left or right to turn 45°. The Quest's own boundary stays on, since the room's walls are not your real ones.
+
+Hearing: a turn now has two halves. Let go of A and the server only transcribes (`POST /api/hear`): a chime and the
+words in a bubble over your right controller say it was heard, or a low tone and "didn't catch that" say it was not.
+Then the same words go to Muse (`/api/turn` with `text`), the bubble says "thinking…", and the reply shows there and is
+spoken. Holding A beeps and shows "listening…".
+
 ### Designing in VR, the room empty
 
 Maison3D Furnish now designs in VR: the room you scanned stands around you empty, 1:1 over the real one, so you can

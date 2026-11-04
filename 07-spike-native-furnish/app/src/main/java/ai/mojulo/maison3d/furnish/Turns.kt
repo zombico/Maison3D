@@ -15,14 +15,21 @@ import org.json.JSONObject
 class Turns(private val base: String) {
   private val io = Executors.newSingleThreadExecutor()
 
-  fun send(wav: ByteArray, pointing: JSONObject?, room: JSONObject, voice: Boolean, done: (Result<JSONObject>) -> Unit) {
+  /** The first half of a turn: only the words, back as soon as the server has heard them: { said }. */
+  fun hear(wav: ByteArray, room: JSONObject, done: (Result<JSONObject>) -> Unit) {
+    io.execute {
+      done(runCatching { post("/api/hear", JSONObject().put("audio", Base64.encodeToString(wav, Base64.NO_WRAP)).put("mime", "audio/wav").put("room", room)) })
+    }
+  }
+
+  /** The second half: those words, what was pointed at and the room, to Muse; answers with the reply, scene and room. */
+  fun act(said: String, pointing: JSONObject?, room: JSONObject, voice: Boolean, done: (Result<JSONObject>) -> Unit) {
     io.execute {
       done(
           runCatching {
             val body =
                 JSONObject()
-                    .put("audio", Base64.encodeToString(wav, Base64.NO_WRAP))
-                    .put("mime", "audio/wav")
+                    .put("text", said)
                     .put("pointing", pointing ?: JSONObject.NULL)
                     .put("room", room)
                     .put("voice", voice) // the reply as audio too, when the headset cannot speak it
@@ -38,8 +45,8 @@ class Turns(private val base: String) {
   }
 
   /** The room the headset just read; answers with the scene and the empty room to stand in VR. */
-  fun room(room: JSONObject, done: (Result<JSONObject>) -> Unit) {
-    io.execute { done(runCatching { post("/api/room", JSONObject().put("room", room)) }) }
+  fun room(room: JSONObject, session: String, done: (Result<JSONObject>) -> Unit) {
+    io.execute { done(runCatching { post("/api/room", JSONObject().put("room", room).put("session", session)) }) }
   }
 
   /** Takes every piece away; answers with the (empty) scene. */

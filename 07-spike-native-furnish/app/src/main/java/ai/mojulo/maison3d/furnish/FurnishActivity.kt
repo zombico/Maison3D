@@ -1,11 +1,14 @@
 package ai.mojulo.maison3d.furnish
 
 import android.Manifest
+import android.media.AudioManager
+import android.media.ToneGenerator
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
+import com.meta.spatial.core.Color4
 import com.meta.spatial.core.Entity
 import com.meta.spatial.core.Pose
 import com.meta.spatial.core.Quaternion
@@ -20,9 +23,11 @@ import com.meta.spatial.runtime.LayerConfig
 import com.meta.spatial.runtime.ReferenceSpace
 import com.meta.spatial.toolkit.AppSystemActivity
 import com.meta.spatial.toolkit.AvatarBody
+import com.meta.spatial.toolkit.Box
 import com.meta.spatial.toolkit.Controller
 import com.meta.spatial.toolkit.Grabbable
 import com.meta.spatial.toolkit.GrabbableType
+import com.meta.spatial.toolkit.Material
 import com.meta.spatial.toolkit.Mesh
 import com.meta.spatial.toolkit.MeshCollision
 import com.meta.spatial.toolkit.Panel
@@ -34,9 +39,11 @@ import com.meta.spatial.vr.VRFeature
 import org.json.JSONObject
 
 /**
- * Spike 07: design your room by voice, in VR. The room you scanned stands around you empty, 1:1 over the real one
- * (its walls, doors, windows, floor and ceiling, built by the laptop server as one model), with your real furniture
- * as outlines so you do not walk into it. Hold A and speak, let go: the words (as audio), what the right controller
+ * Spike 07: design a room by voice, in VR. The room stands around you (built by the laptop server as one model): by
+ * default a dictated one ("make it 4 by 5 metres, a door behind me"), with you in its middle facing its front wall;
+ * or the room you scanned, empty, 1:1 over the real one, its real furniture as outlines. The right thumbstick moves you:
+ * push it forward to aim at the floor and let go to step there, left or right to turn. Every turn is heard first (a
+ * chime and the words over the controller) and then acted on. Hold A and speak, let go: the words (as audio), what the right controller
  * pointed at, where you stand and the room go to the server, which transcribes them, asks Muse to place, move, turn,
  * recolour or remove pieces from a mojulo catalogue or paint the room, and answers with a reply, the furnished scene
  * and the room. The panel's Real room button (or "show me the real room") turns passthrough back on, the design over
@@ -75,6 +82,25 @@ class FurnishActivity : AppSystemActivity() {
   @Volatile private var viewButton: android.widget.Button? = null
   // the panel waits for the head to be tracked for a moment, so it lands in front of you, not where the headset lay
   private var trackedFrames = 0
+  // this launch: the server stands the dictated room round you again when it sees a new one
+  private val session = java.util.UUID.randomUUID().toString()
+
+  // the bubble over the right controller: listening, heard, thinking, the reply
+  @Volatile private var bubble: Entity? = null
+  @Volatile private var bubbleView: TextView? = null
+  @Volatile private var bubbleUntilNs = 0L
+  private var bubbleShown = false
+  private val tones = runCatching { ToneGenerator(AudioManager.STREAM_MUSIC, 70) }.getOrNull()
+
+  // moving: where the play space stands in the world (the head moves within it), the floor to aim at
+  private var originX = 0f
+  private var originZ = 0f
+  private var originYaw = 0f
+  @Volatile private var floorY = 0f
+  private var aiming = false
+  private var aimAt: Vector3? = null
+  private var marker: Entity? = null
+  @Volatile private var pendingTeleport: Pair<Vector3, Vector3?>? = null
 
   private var saidView: TextView? = null
   private var replyView: TextView? = null
@@ -132,12 +158,29 @@ class FurnishActivity : AppSystemActivity() {
     )
     // grabbed with the grip (pointing at it), it stays upright and turns to face you
     panel = Entity.create(listOf(Panel(R.layout.furnish_panel), Transform(), Visible(false), Grabbable(true, GrabbableType.PIVOT_Y)))
+    bubble = Entity.create(listOf(Panel(R.layout.furnish_bubble), Transform(), Visible(false)))
+    // where a teleport will land: a flat bright square on the floor
+    marker =
+        Entity.create(
+            listOf(
+                Mesh(Uri.parse("mesh://box")).apply { hittable = MeshCollision.NoCollision },
+                Box(Vector3(-0.2f, 0f, -0.2f), Vector3(0.2f, 0.01f, 0.2f)),
+                Material().apply {
+                  baseColor = Color4(0.5f, 0.85f, 1f, 1f)
+                  unlit = true
+                },
+                Transform(),
+                Visible(false),
+            ),
+        )
+    scene.setViewOrigin(0f, 0f, 0f, 0f)
     // what the server already holds, if it was furnishing before this launch
     turns.scene { r -> r.onSuccess { runCatching { incoming.set(parseScene(it)); it.optJSONObject("room")?.let(incomingRoom::set) } } }
   }
 
   override fun onSpatialShutdown() {
     speaker.stop()
+    tones?.release()
     super.onSpatialShutdown()
   }
 
@@ -164,6 +207,17 @@ class FurnishActivity : AppSystemActivity() {
               render()
             }
           },
+          PanelRegistration(R.layout.furnish_bubble) {
+            config {
+              width = 0.3f
+              height = 0.1f
+              fractionOfScreen = 1f
+              layoutDpi = 500
+              layerConfig = LayerConfig()
+              enableTransparent = true
+            }
+            panel { bubbleView = requireNotNull(rootView).findViewById(R.id.bubble_text) }
+          },
       )
 
   /**
@@ -187,23 +241,28 @@ class FurnishActivity : AppSystemActivity() {
 
   private fun loadRoom() {
     if (checkSelfPermission(PERMISSION_USE_SCENE) != PackageManager.PERMISSION_GRANTED) {
-      log("no spatial data permission: the room cannot be read")
+      log("no spatial data permission: designing in a dictated room only")
+      sendRoom()
       return
     }
     mruk.loadSceneFromDevice().whenComplete { result: MRUKLoadDeviceResult?, error: Throwable? ->
       when {
-        error != null -> log("loading the room failed: ${error.message}")
+        error != null -> log("no scan of the room (${error.message}): a dictated room only")
         result == MRUKLoadDeviceResult.SUCCESS -> {
           val d = room.describe()
-          log("room: ${d.optJSONArray("items")?.length() ?: 0} things, floor at ${d.opt("floorY")}")
-          // the server builds the empty room from it, to stand around you before anyone says anything
-          turns.room(d) { r ->
-            r.onSuccess { incoming.set(parseScene(it)); it.optJSONObject("room")?.let(incomingRoom::set) }
-            r.onFailure { log("the server did not take the room: ${it.message}") }
-          }
+          log("scan: ${d.optJSONArray("items")?.length() ?: 0} things")
         }
-        else -> log("loading the room: $result (run Space Setup in Settings > Physical space)")
+        else -> log("no scan of the room ($result): a dictated room only")
       }
+      sendRoom()
+    }
+  }
+
+  /** The server stands the design's room around you: dictated, or the scan (when there is one), emptied. */
+  private fun sendRoom() {
+    turns.room(room.describe(), session) { r ->
+      r.onSuccess { incoming.set(parseScene(it)); it.optJSONObject("room")?.let(incomingRoom::set) }
+      r.onFailure { log("server not reachable for the room: ${it.message}") }
     }
   }
 
@@ -222,50 +281,82 @@ class FurnishActivity : AppSystemActivity() {
       log("no microphone permission")
       return
     }
-    if (recorder.start()) setSaid("listening…") else log("the microphone did not start")
+    if (recorder.start()) {
+      tones?.startTone(ToneGenerator.TONE_PROP_BEEP, 60)
+      setSaid("listening…")
+      showBubble("● listening…", 0L)
+    } else log("the microphone did not start")
   }
 
+  /** Let go of A: first the words (heard, a chime, shown), then Muse acts on them and answers. */
   private fun stopTalking(controller: Pose?) {
     val wav = recorder.stop()
     if (wav == null) {
       setSaid("")
+      showBubble("", 1L)
       return
     }
     val pointing = controller?.let { room.pointAt(it.t, it.q.times(Vector3(0f, 0f, 1f)).normalize()) }
+    val described = room.describe().put("viewer", headPose?.let(::viewerJson) ?: JSONObject.NULL)
     busy = true
     setSaid("…")
-    turns.send(wav, pointing, room.describe().put("viewer", headPose?.let(::viewerJson) ?: JSONObject.NULL), speaker.needsServerVoice) { r ->
-      busy = false
-      r.onSuccess { answer ->
-        setSaid(answer.optString("said", "").ifEmpty { "(nothing heard)" })
-        val text = answer.optString("reply", "")
-        setReply(text)
-        val voice = answer.optString("voice")
-        if (voice.isNotEmpty()) speaker.play(android.util.Base64.decode(voice, android.util.Base64.DEFAULT))
-        else if (text.isNotEmpty()) speaker.say(text)
-        try {
-          answer.optJSONArray("scene")?.let { incoming.set(parseScene(JSONObject().put("scene", it))) }
-          answer.optJSONObject("room")?.let(incomingRoom::set)
-        } catch (e: Exception) {
-          Log.e(TAG, "the scene did not parse", e)
-          log("the scene did not parse: ${e.message}")
-        }
-        answer.optString("note").takeIf { it.isNotEmpty() }?.let(::log)
-        // things the model asked the headset itself to do
-        val actions = answer.optJSONArray("actions")
-        for (i in 0 until (actions?.length() ?: 0)) {
-          when (actions?.optString(i)) {
-            "rescan" -> runOnUiThread { rescan() }
-            "real" -> pendingView = true
-            "design" -> pendingView = false
+    showBubble("hearing…", 0L)
+    turns.hear(wav, described) { heard ->
+      val words = heard.getOrNull()?.optString("said", "")?.trim().orEmpty()
+      if (heard.isFailure || words.isEmpty()) {
+        busy = false
+        tones?.startTone(ToneGenerator.TONE_PROP_NACK, 200)
+        setSaid(if (heard.isFailure) "" else "(nothing heard)")
+        showBubble(if (heard.isFailure) "the server did not answer" else "didn't catch that: hold A and try again", 4_000L)
+        heard.exceptionOrNull()?.let { log("hearing failed: ${it.message}") }
+        return@hear
+      }
+      tones?.startTone(ToneGenerator.TONE_PROP_ACK, 150)
+      setSaid(words)
+      showBubble("“$words”\nthinking…", 0L)
+      turns.act(words, pointing, described, speaker.needsServerVoice) { r ->
+        busy = false
+        r.onSuccess { answer ->
+          val text = answer.optString("reply", "")
+          setReply(text)
+          showBubble(text.ifEmpty { "done" }, 8_000L)
+          val voice = answer.optString("voice")
+          if (voice.isNotEmpty()) speaker.play(android.util.Base64.decode(voice, android.util.Base64.DEFAULT))
+          else if (text.isNotEmpty()) speaker.say(text)
+          try {
+            answer.optJSONArray("scene")?.let { incoming.set(parseScene(JSONObject().put("scene", it))) }
+            answer.optJSONObject("room")?.let(incomingRoom::set)
+          } catch (e: Exception) {
+            Log.e(TAG, "the scene did not parse", e)
+            log("the scene did not parse: ${e.message}")
+          }
+          answer.optString("note").takeIf { it.isNotEmpty() }?.let(::log)
+          // things the model asked the headset itself to do
+          val actions = answer.optJSONArray("actions")
+          for (i in 0 until (actions?.length() ?: 0)) {
+            actions?.optJSONObject(i)?.optJSONObject("teleport")?.let { t ->
+              pendingTeleport = vec3(t.getJSONArray("position")) to t.optJSONArray("facing")?.let(::vec3)
+            }
+            when (actions?.optString(i)) {
+              "rescan" -> runOnUiThread { rescan() }
+              "real" -> pendingView = true
+              "design" -> pendingView = false
+            }
           }
         }
-      }
-      r.onFailure {
-        setSaid("")
-        log("turn failed: ${it.message}")
+        r.onFailure {
+          tones?.startTone(ToneGenerator.TONE_PROP_NACK, 200)
+          showBubble("that went wrong: ${it.message?.take(60)}", 5_000L)
+          log("turn failed: ${it.message}")
+        }
       }
     }
+  }
+
+  /** The bubble's words; `forMs` 0 keeps it up until the next change, else it goes after that long. */
+  private fun showBubble(text: String, forMs: Long) {
+    bubbleUntilNs = if (text.isEmpty()) 0L else if (forMs == 0L) Long.MAX_VALUE else System.nanoTime() + forMs * 1_000_000L
+    runOnUiThread { bubbleView?.text = text }
   }
 
   private fun parseScene(j: JSONObject): List<Piece> {
@@ -310,6 +401,7 @@ class FurnishActivity : AppSystemActivity() {
   private fun applyRoom(j: JSONObject) {
     val shell = if (j.isNull("shell")) null else j.optString("shell")
     val ghosts = if (j.isNull("ghosts")) null else j.optString("ghosts")
+    floorY = j.optDouble("floorY", 0.0).toFloat()
     if (shellShown?.first != shell) log(if (shell == null) "no room to show: rescan it" else "room: $shell")
     shellShown = showModel(shellShown, shell)
     ghostsShown = showModel(ghostsShown, ghosts)
@@ -399,6 +491,42 @@ class FurnishActivity : AppSystemActivity() {
         loadRoom()
       }
 
+      // moving: thumbstick forward aims at the floor, letting go steps there; left or right turns 45 degrees
+      body.rightHand.tryGetComponent<Controller>()?.let { c ->
+        if (head != null && right != null) {
+          if ((c.buttonState and ButtonBits.ButtonThumbRU) != 0) {
+            aiming = true
+            aimAt = floorHit(right)
+            marker?.setComponents(listOf(Transform(Pose(aimAt ?: Vector3(0f, -100f, 0f))), Visible(aimAt != null)))
+          } else if (aiming) {
+            aiming = false
+            marker?.setComponent(Visible(false))
+            aimAt?.let { teleport(head, it, null) }
+          }
+          if (pressed(c, ButtonBits.ButtonThumbRL)) turnBy(head, 45f)
+          if (pressed(c, ButtonBits.ButtonThumbRR)) turnBy(head, -45f)
+        }
+      }
+      pendingTeleport?.let { (to, facing) ->
+        if (head != null) {
+          pendingTeleport = null
+          teleport(head, to, facing)
+        }
+      }
+
+      // the bubble rides over the right controller, turned to you
+      val b = bubble
+      val showing = now < bubbleUntilNs
+      if (b != null && head != null && right != null && showing) {
+        val at = right.t.plus(Vector3(0f, 0.14f, 0f))
+        val away = at.minus(head.t)
+        b.setComponents(listOf(Transform(Pose(at, Quaternion.lookRotation(Vector3(away.x, 0f, away.z).normalize()))), Visible(true)))
+        bubbleShown = true
+      } else if (b != null && bubbleShown && !showing) {
+        b.setComponent(Visible(false))
+        bubbleShown = false
+      }
+
       // in front of you at eye height, a little below the line of sight, once the head has been tracked a moment
       val p = panel
       if (head != null) trackedFrames++ else trackedFrames = 0
@@ -429,6 +557,38 @@ class FurnishActivity : AppSystemActivity() {
         ent.setComponent(mesh)
       }
     }
+  }
+
+  /** Where the controller's ray meets the floor, within 8 m, or null. */
+  private fun floorHit(hand: Pose): Vector3? {
+    val d = hand.q.times(Vector3(0f, 0f, 1f))
+    if (d.y > -0.05f) return null
+    val t = (floorY - hand.t.y) / d.y
+    if (t <= 0f || t > 8f) return null
+    return Vector3(hand.t.x + d.x * t, floorY, hand.t.z + d.z * t)
+  }
+
+  private fun yawOf(v: Vector3) = Math.toDegrees(kotlin.math.atan2(v.x.toDouble(), v.z.toDouble())).toFloat()
+
+  /**
+   * Moves the play space so your head lands over `to` (and, with `facing`, turns you to face that way): the room
+   * stays put in the world and you move through it. The play space turns about your head, so a turn does not move you.
+   */
+  private fun teleport(head: Pose, to: Vector3, facing: Vector3?) {
+    val headFwd = head.q.times(Vector3(0f, 0f, 1f))
+    val turn = facing?.let { yawOf(it) - yawOf(Vector3(headFwd.x, 0f, headFwd.z)) } ?: 0f
+    val rel = Quaternion(0f, turn, 0f).times(Vector3(originX - head.t.x, 0f, originZ - head.t.z))
+    originX = head.t.x + rel.x + (to.x - head.t.x)
+    originZ = head.t.z + rel.z + (to.z - head.t.z)
+    originYaw += turn
+    scene.setViewOrigin(originX, 0f, originZ, originYaw)
+    Log.i(TAG, "moved to ${to} turned ${turn}: origin ($originX, $originZ) yaw $originYaw")
+  }
+
+  private fun turnBy(head: Pose, degrees: Float) {
+    val headFwd = head.q.times(Vector3(0f, 0f, 1f))
+    val f = Quaternion(0f, degrees, 0f).times(Vector3(headFwd.x, 0f, headFwd.z))
+    teleport(head, head.t, f)
   }
 
   /** `distance` m in front of the head, level, pitched by `pitch` degrees (Meta's MRUK sample's recipe). */

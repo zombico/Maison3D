@@ -8,7 +8,8 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config, runTurn, scene, catalog, catalogList, modelPath, parseModel, finish, settings, placeLayout } from './agent.mjs';
-import { shellGlb, ghostsGlb, shellKey, emptyRoom } from './shell.mjs';
+import { shellGlb, ghostsGlb, shellKey } from './shell.mjs';
+import { state as rooms, designRoom, resolvePointing, newSession } from './rooms.mjs';
 import { recolour } from '../70-inventory/colour.mjs';
 import { connect as connectMojulo } from '../mojulo/client.mjs';
 import { transcribe, sttStatus } from './stt.mjs';
@@ -17,18 +18,20 @@ import { speak, voiceStatus } from './voice.mjs';
 const PORT = Number(process.env.PORT) || 8091;
 const CATALOG = join(dirname(fileURLToPath(import.meta.url)), 'catalog');
 const sceneJson = () => scene.map((p) => ({ id: p.id, item: p.item, at: p.at, facing: p.facing, model: modelPath(p) }));
-// The empty room the headset stands in VR (shell.mjs), built from the room it last described, in the room's colours,
-// and the real furniture's outlines: { shell: '/room/<key>.glb', ghosts: '/ghosts/<key>.glb' | null }. The key names
-// the room and its colours, so a change is a new model the headset loads afresh.
-let lastRoom = null;
+// The room the headset stands in VR (shell.mjs): the design's room (rooms.mjs: dictated, or the scan emptied) in the
+// room's colours, and in a scanned room the real furniture's outlines: { shell: '/room/<key>.glb', ghosts, floorY }.
+// The key names the room and its colours, so a change is a new model the headset loads afresh.
 const built = new Map(); // key -> { shell, ghosts }
 function roomJson() {
-  if (!lastRoom) return null;
-  const key = shellKey(lastRoom, finish);
-  if (!built.has(key)) built.set(key, { shell: shellGlb(emptyRoom(lastRoom), finish), ghosts: ghostsGlb(lastRoom) });
+  const room = designRoom();
+  const scanned = rooms.source === 'scan' ? rooms.scanned : null;
+  const key = shellKey({ ...room, items: [...room.items, ...(scanned?.items ?? [])] }, finish);
+  if (!built.has(key)) built.set(key, { shell: shellGlb(room, finish), ghosts: scanned ? ghostsGlb(scanned) : null });
   const b = built.get(key);
-  return { shell: b.shell ? `/room/${key}.glb` : null, ghosts: settings.outlines && b.ghosts ? `/ghosts/${key}.glb` : null };
+  return { shell: b.shell ? `/room/${key}.glb` : null, ghosts: settings.outlines && b.ghosts ? `/ghosts/${key}.glb` : null, floorY: room.floorY ?? 0, source: rooms.source };
 }
+// speech recognition is biased toward this catalogue, the room's words and its sizes
+const keywordsFor = (room) => [...new Set([...catalogList.flatMap((c) => c.words ?? [c.id.replace('-', ' '), c.name]), ...(room?.items ?? []).map((i) => i.label), 'wall', 'door', 'window', 'ceiling', 'floor', 'metres', 'feet', 'wider', 'longer'])];
 
 // Models made on first request. The name says it all (materials, then colours), so the headset's cache never serves
 // a stale one. Another material is a mojulo rebuild of the SKU (a second or a few), kept on disk beside the catalogue
@@ -96,14 +99,13 @@ function readJson(req) {
 async function turn(req, res) {
   const body = await readJson(req);
   const t0 = Date.now();
-  if (body.room?.items?.length) lastRoom = body.room; // the design's room is the room as it is now
-  // typed text (for trying it without speaking) skips transcription
-  // bias the words toward this room and this catalogue: table, storage, sofa, armchair, rug…
-  const keywords = [...new Set([...catalogList.flatMap((c) => c.words ?? [c.id.replace('-', ' '), c.name]), ...(body.room?.items ?? []).map((i) => i.label)])];
-  const said = typeof body.text === 'string' && body.text.trim() ? body.text.trim() : await transcribe(Buffer.from(body.audio ?? '', 'base64'), keywords);
+  if (body.room?.items?.length) rooms.scanned = body.room; // the real room, as the headset reads it now
+  // the headset hears first (/api/hear) and sends the words here; typed text skips transcription too
+  const said = typeof body.text === 'string' && body.text.trim() ? body.text.trim() : await transcribe(Buffer.from(body.audio ?? '', 'base64'), keywordsFor(body.room));
   const heardMs = Date.now() - t0;
   if (!said) return send(res, 200, { said: '', reply: '', scene: sceneJson(), room: roomJson(), note: 'heard nothing' });
-  const { reply, calls, actions } = await runTurn({ said, pointing: body.pointing, room: body.room });
+  const room = designRoom(body.room?.viewer ?? null);
+  const { reply, calls, actions } = await runTurn({ said, pointing: resolvePointing(body.pointing, room), room });
   console.log(`\n> ${said}${body.pointing ? `   (pointing at ${body.pointing.id ?? body.pointing.target})` : ''}`);
   for (const c of calls) console.log(`  ${c.name} ${JSON.stringify(c.args)} -> ${c.result.error ?? (c.result.piece ? `${c.result.piece.id} at ${c.result.piece.at}` : 'ok')}${c.result.issues?.length ? `  [${c.result.issues.join('; ')}]` : ''}`);
   console.log(`< ${reply}   [${heardMs} ms to hear, ${Date.now() - t0 - heardMs} ms to answer]`);
@@ -119,14 +121,24 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET' && url.pathname === '/api/scene') return send(res, 200, { scene: sceneJson(), room: roomJson() });
     if (req.method === 'POST' && url.pathname === '/api/clear') { scene.length = 0; console.log('\n(cleared from the headset)'); return send(res, 200, { scene: [], room: roomJson() }); }
     // the headset has read its room: the empty room to stand in VR, before anyone has said anything
+    // (a new session: the app started, so its world's origin is where the person stands; the dictated room stands
+    // round them again, and the pieces move with it)
     if (req.method === 'POST' && url.pathname === '/api/room') {
       const body = await readJson(req);
-      if (body.room?.items?.length) {
-        lastRoom = body.room;
-        const laid = placeLayout(emptyRoom(lastRoom));
-        console.log(`\n(room from the headset: ${body.room.items.length} things${laid ? `; the designed layout stands in it: ${laid.join(', ')}` : ''})`);
-      }
+      if (body.room?.items?.length) rooms.scanned = body.room;
+      const fresh = newSession(body.session, scene);
+      const laid = placeLayout(designRoom());
+      console.log(`\n(headset ${fresh ? 'started' : 'reloaded its room'}: ${body.room?.items?.length ?? 0} things scanned; designing in the ${rooms.source} room${laid ? `; the designed layout stands in it: ${laid.join(', ')}` : ''})`);
       return send(res, 200, { scene: sceneJson(), room: roomJson() });
+    }
+    // the first half of a turn: only the words, back as soon as they are heard, so the headset can show them while
+    // Muse thinks (the second half is /api/turn with { text })
+    if (req.method === 'POST' && url.pathname === '/api/hear') {
+      const body = await readJson(req);
+      const t0 = Date.now();
+      const said = await transcribe(Buffer.from(body.audio ?? '', 'base64'), keywordsFor(body.room ?? rooms.scanned));
+      console.log(`\n(heard "${said}" in ${Date.now() - t0} ms)`);
+      return send(res, 200, { said, ms: Date.now() - t0 });
     }
     const shellPath = /^\/(room|ghosts)\/([0-9a-f]{12})\.glb$/.exec(url.pathname);
     if (req.method === 'GET' && shellPath) {

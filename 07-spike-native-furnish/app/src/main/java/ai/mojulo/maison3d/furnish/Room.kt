@@ -45,13 +45,17 @@ class Room(private val mruk: MRUKFeature) {
     return JSONObject().put("loaded", true).put("floorY", floorY?.let { r(it) } ?: JSONObject.NULL).put("items", items)
   }
 
-  /** What the ray from `origin` along `direction` hits first in the current room: a wall, the floor, a table… */
-  fun pointAt(origin: Vector3, direction: Vector3): JSONObject? {
-    val room = current() ?: return null
-    val hit = mruk.raycastRoom(room.anchor.uuid, origin, direction, 20f, SurfaceType.PLANE_VOLUME) ?: return null
+  /**
+   * What the ray from `origin` along `direction` hits first in the scanned room: a wall, the floor, a table… The ray
+   * itself always goes along, so the server can find what it meets in a dictated room, which the headset has no scan of.
+   */
+  fun pointAt(origin: Vector3, direction: Vector3): JSONObject {
+    val ray = JSONObject().put("origin", vec(origin)).put("direction", vec(direction))
+    val room = current() ?: return JSONObject().put("ray", ray).put("target", "nothing")
+    val hit = mruk.raycastRoom(room.anchor.uuid, origin, direction, 20f, SurfaceType.PLANE_VOLUME) ?: return JSONObject().put("ray", ray).put("target", "nothing")
     val anchor = anchors(room).firstOrNull { it.uuid == hit.sceneAnchorUuid.toString() }
     return JSONObject()
-        .put("ray", JSONObject().put("origin", vec(origin)).put("direction", vec(direction)))
+        .put("ray", ray)
         .put("target", anchor?.label ?: "surface")
         .put("id", anchor?.id ?: JSONObject.NULL)
         .put("point", vec(hit.hitPosition))
