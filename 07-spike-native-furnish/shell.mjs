@@ -39,7 +39,7 @@ export function openings(f, room) {
     const u = dot(d, f.along), w = i.size[0] * Math.abs(f.along[0]) + i.size[2] * Math.abs(f.along[1]);
     if (Math.abs(u) > f.half + w / 2) continue;
     const y0 = i.label === 'door frame' ? f.y0 : Math.max(f.y0, i.center[1] - i.size[1] / 2);
-    out.push({ kind: i.label === 'door frame' ? 'door' : 'window', u0: Math.max(-f.half, u - w / 2), u1: Math.min(f.half, u + w / 2), y0, y1: Math.min(f.y1 - 0.02, i.center[1] + i.size[1] / 2), ...(i.label === 'window frame' ? { style: { ...WINDOW_DEFAULT, ...i.style } } : {}) });
+    out.push({ id: i.id, kind: i.label === 'door frame' ? 'door' : 'window', u0: Math.max(-f.half, u - w / 2), u1: Math.min(f.half, u + w / 2), y0, y1: Math.min(f.y1 - 0.02, i.center[1] + i.size[1] / 2), ...(i.label === 'window frame' ? { style: { ...WINDOW_DEFAULT, ...i.style } } : {}) });
   }
   return out;
 }
@@ -311,7 +311,7 @@ export function shellSvg(room) {
  */
 export function shellHit({ origin: o, direction: d }, room) {
   let best = null;
-  const take = (t, target, id, normal) => { if (t > 0.01 && (!best || t < best.distance)) best = { target, id, point: [0, 1, 2].map((k) => round(o[k] + d[k] * t)), normal, distance: round(t) }; };
+  const take = (t, target, id, normal, more = {}) => { if (t > 0.01 && (!best || t < best.distance)) best = { target, id, ...more, point: [0, 1, 2].map((k) => round(o[k] + d[k] * t)), normal, distance: round(t) }; };
   const floor = (room.items ?? []).find((i) => i.label === 'floor');
   const floorY = room.floorY ?? floor?.center[1];
   if (floorY !== undefined && Math.abs(d[1]) > 1e-6) take((floorY - o[1]) / d[1], 'floor', floor?.id ?? null, [0, 1, 0]);
@@ -321,7 +321,11 @@ export function shellHit({ origin: o, direction: d }, room) {
     const t = ((f.c[0] - o[0]) * f.n[0] + (f.c[1] - o[2]) * f.n[1]) / den;
     const p = [o[0] + d[0] * t, o[1] + d[1] * t, o[2] + d[2] * t];
     const u = (p[0] - f.c[0]) * f.along[0] + (p[2] - f.c[1]) * f.along[1];
-    if (Math.abs(u) <= f.half && p[1] >= f.y0 && p[1] <= f.y1) take(t, 'wall', f.id, [round(f.n[0]), 0, round(f.n[1])]);
+    if (Math.abs(u) > f.half || p[1] < f.y0 || p[1] > f.y1) continue;
+    // a window or a door in that wall (with its casing): the pointing names it, and the wall it is in
+    const op = openings(f, room).find((x) => u >= x.u0 - 0.08 && u <= x.u1 + 0.08 && p[1] >= x.y0 - 0.1 && p[1] <= x.y1 + 0.08);
+    if (op) take(t, op.kind, op.id, [round(f.n[0]), 0, round(f.n[1])], { wall: f.id });
+    else take(t, 'wall', f.id, [round(f.n[0]), 0, round(f.n[1])], { wall: f.id });
   }
   return best;
 }

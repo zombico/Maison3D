@@ -92,8 +92,23 @@ function bay(m, M, kind, x0, x1, y0, y1, z, z0, { pullAt = 'right' } = {}) {
     behind(); panel(x0, x1, y0, y1); vpull(pullAt === 'right' ? x1 - 0.04 : x0 + 0.04, y0, y1);
   } else if (kind === 'doors') {
     behind(); const xm = (x0 + x1) / 2; panel(x0, xm, y0, y1); panel(xm, x1, y0, y1); vpull(xm - 0.03, y0, y1); vpull(xm + 0.03, y0, y1);
-  } else if (kind === 'drawers') {
-    behind(); const n = y1 - y0 > 0.32 ? 2 : 1;
+  } else if (kind === 'glass') {
+    // a glass door: a frame of the body and a pane, the shelves showing through
+    m.quad(M.inside, [[x0, y0, z0 + 0.009], [x1, y0, z0 + 0.009], [x1, y1, z0 + 0.009], [x0, y1, z0 + 0.009]].reverse());
+    const n = Math.max(1, Math.round((y1 - y0) / 0.36) - 1);
+    for (let k = 1; k <= n; k++) { const y = y0 + ((y1 - y0) * k) / (n + 1); m.box(M.body, [x0, y - T / 2, z0 + 0.01], [x1, y + T / 2, z - 0.025]); }
+    const fw = 0.045;
+    for (const [a, b, c, e] of [[x0, x0 + fw, y0, y1], [x1 - fw, x1, y0, y1], [x0, x1, y0, y0 + fw], [x0, x1, y1 - fw, y1]]) m.box(M.body, [a + 0.002, c + 0.002, z - 0.018], [b - 0.002, e - 0.002, z]);
+    m.quad({ name: 'glass:glass', colour: '#dfe9ec', alpha: 0.22, roughness: 0.05 }, [[x0 + fw, y0 + fw, z - 0.009], [x1 - fw, y0 + fw, z - 0.009], [x1 - fw, y1 - fw, z - 0.009], [x0 + fw, y1 - fw, z - 0.009]]);
+    vpull(pullAt === 'right' ? x1 - 0.022 : x0 + 0.022, y0, y1);
+  } else if (kind === 'bins' || kind === 'bin') {
+    // an open cube with a fabric bin in it, a cut-out handle
+    m.quad(M.inside, [[x0, y0, z0 + 0.009], [x1, y0, z0 + 0.009], [x1, y1, z0 + 0.009], [x0, y1, z0 + 0.009]].reverse());
+    const bin = { name: 'bins:fabric', colour: M.binColour ?? '#bfb5a3', roughness: 0.95 }, bx0 = x0 + 0.015, bx1 = x1 - 0.015, top = y1 - 0.03;
+    m.box(bin, [bx0, y0, z0 + 0.03], [bx1, top, z - 0.01]);
+    m.box(M.gap, [(bx0 + bx1) / 2 - 0.05, top - 0.07, z - 0.01], [(bx0 + bx1) / 2 + 0.05, top - 0.045, z - 0.008]);
+  } else if (kind.startsWith('drawers')) {
+    behind(); const n = Number(kind.split(':')[1]) || (y1 - y0 > 0.32 ? 2 : 1);
     for (let k = 0; k < n; k++) { const a = y0 + ((y1 - y0) * k) / n, b = y0 + ((y1 - y0) * (k + 1)) / n; panel(x0, x1, a, b); hpull(b - 0.045); }
   } else if (kind === 'flap') {
     behind(); panel(x0, x1, y0, y1); hpull(y1 - 0.035);
@@ -115,6 +130,8 @@ function bays(m, M, kinds, x0, x1, y0, y1, z0, z1) {
   }
 }
 const odd = (w, per) => 2 * Math.round((w / per - 1) / 2) + 1;
+// the parts storage.mjs builds its cabinets from
+export { matsOf, carcass, bay, bays, legs, LEG_H, cornerSpots, finishOf, odd, T as BOARD, metal, black };
 
 // --- consoles ----------------------------------------------------------------------------------------------------------
 const CONSOLES = {

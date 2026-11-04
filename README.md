@@ -239,8 +239,8 @@ not be recoloured apart from its base. Pictures and mirrors are the decor's (spi
 A build skips what it has already built (`--fresh` builds everything again). mojulo is started with its gallery
 thumbnails off (`MOJULO_DISABLE_SCENE_WARM`, `MOJULO_DISABLE_TURNTABLE_WARM`): it otherwise opens a headless browser
 per mint and keeps it, and a long build runs out of memory.
-The models are not committed (mojulo is deterministic, so a build gives the same pieces); on the laptop, once
-`npm run mojulo:setup` has run:
+The models are committed (`70-inventory/models/`, about 100 MB), so the library is there after a pull. To make them
+again (mojulo is deterministic, so a build gives the same pieces), once `npm run mojulo:setup` has run:
 
 ```bash
 npm run inventory:build
@@ -248,10 +248,12 @@ npm run inventory:build
 
 (`-- --collections HIN,SAB --rooms living,bedroom` builds a part of it.)
 
-Then furnish with them: the inventory joins spike 07's six pieces, with the same Maison3D Furnish app.
+The furnish server loads them by default: the inventory joins spike 07's pieces, with the same Maison3D Furnish app.
+`MAISON_CATALOG` names another catalogue (or `none`); a piece whose model is not on the laptop is left out, and the
+server says how many.
 
 ```bash
-MAISON_CATALOG=70-inventory/catalog.json npm run spike:furnish
+npm run spike:furnish
 ```
 
 Pieces are named by collection, so "a Sable sofa against that wall" or "swap the armchair for the Hinoki one" work.
@@ -349,6 +351,22 @@ Pot lights (`lights.mjs`):
 - Types: 4 in and 6 in round, 4 in square, and a 4 in gimbal, in a white, black, brass or nickel trim.
 - Muse's `potlights` lays them out as a grid over the room, spaced half the ceiling height apart and half that from the walls, or as a line over a piece (the island, the dining table).
 - Each one is then a piece of its own.
+
+Storage (`storage.mjs`), in the media furniture finishes:
+- Tall cabinets, a hutch with glass doors, a glass display cabinet, an armoire, a tallboy, a 6- or 9-drawer dresser.
+- Cube storage (2x2, 4x1, 2x4, 4x4) with fabric bins, floating shelves, wall cabinets and a mirrored medicine cabinet.
+- A ladder shelf, a brass étagère, filing cabinets, a storage bench, a hall tree with hooks, a bar cart, and a bookcase with doors below.
+
+Vases (`vases.mjs`), in a glaze or glass:
+- A bud vase, a bottle, an amphora, a jug, a moon jar, a ribbed vase and a footed bowl.
+- Tulips, a glass cylinder of eucalyptus, and floor vases of pampas grass or olive branches.
+
+Muse's `around` sets chairs round a table: along its long sides, at its ends when there are more, facing it and tucked in.
+
+Windows and doors, as the person sees them:
+- Pointing at a window or a door names it ("curtains on this window"), not just the wall it is in.
+- Each turn tells Muse where every window and door is from the person ("ahead", "on the left, 3 m away") and what already hangs at each window.
+- A window piece with no window named goes to the one the person faces.
 
 Windows and doors where you point: point the laser at a wall and say "this should be a window" (or "a door", or "move
 this door here"); Muse's `opening` takes `at_pointing` and centres it on the point (a window 4 ft wide, 1.4 m high,

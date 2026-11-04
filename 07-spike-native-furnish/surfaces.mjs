@@ -152,7 +152,7 @@ function stone(kind, C, G, seed = 6) {
     }
     if (kind === 'concrete') return scale(C, 0.86 + 0.2 * fbm(u, v, 4, seed, 5) + 0.06 * (pnoise(u, v, 128, seed) - 0.5));
     if (kind === 'carpet') return scale(C, 0.9 + 0.12 * pnoise(u, v, 256, seed) + 0.06 * fbm(u, v, 4, seed));
-    if (kind === 'limewash') return scale(C, 0.88 + 0.18 * fbm(u, v, 3, seed, 4) + 0.04 * pnoise(u, v, 32, seed + 1));
+    if (kind === 'limewash') return scale(C, 0.955 + 0.075 * fbm(u, v, 3, seed, 4) + 0.02 * pnoise(u, v, 32, seed + 1)); // soft clouds, not stains
     // stucco: a rough relief, lit from above (its slope shades it), finer and lumpier as popcorn
     const cells = kind === 'popcorn' ? 24 : 12, e = 1.5 / W, hgt = (a, b) => fbm(a, b, cells, seed, 3);
     const slope = Math.max(-1, Math.min(1, (hgt(u, v - e) - hgt(u, v + e)) * (kind === 'popcorn' ? 9 : 7)));

@@ -171,7 +171,7 @@ export function resolve(where, entry, { room, scene, catalog, pointing, current 
     if (!wall) return { error: `no wall "${where.against}"; walls are ${walls(room).map((x) => x.id).join(', ') || 'none'}` };
     // along the wall: where the person pointed on it, else where the piece already is, else the wall's middle
     let p = xz(wall.center);
-    const ref = pointing?.id === wall.id && pointing.point ? xz(pointing.point) : at ? [at[0], at[2]] : null;
+    const ref = (pointing?.id === wall.id || pointing?.wall === wall.id) && pointing.point ? xz(pointing.point) : at ? [at[0], at[2]] : null;
     if (ref) {
       const along = [-wall.n[1], wall.n[0]];
       const half = wall.length / 2;
@@ -280,6 +280,7 @@ export function check(piece, size, { room, scene, catalog }) {
   }
   for (const other of scene) {
     if (other.id === piece.id || ['rug', 'window'].includes(mountOf(catalog[other.item]))) continue; // curtains and rugs are in nobody's way
+    if (piece.around === other.id || other.around === piece.id) continue; // a chair tucked under its table
     const b = pieceBox(other, sizeOf(other, catalog));
     if (within(other, b, box, catalog) || within(piece, box, b, catalog)) continue; // a TV in an entertainment centre's opening
     const o = overlap(box, b);

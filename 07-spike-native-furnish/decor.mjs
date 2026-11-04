@@ -9,6 +9,8 @@ import { applianceEntries } from './appliances.mjs';
 import { mediaEntries } from './media.mjs';
 import { rugEntries } from './rugs.mjs';
 import { lightEntries } from './lights.mjs';
+import { storageEntries } from './storage.mjs';
+import { vaseEntries } from './vases.mjs';
 
 const R = (v) => Math.round(v * 1000) / 1000;
 
@@ -397,6 +399,8 @@ entries.push(...applianceEntries);
 entries.push(...mediaEntries);
 // rugs in shapes, designs and colourways (rugs.mjs); pot lights (lights.mjs)
 entries.push(...rugEntries, ...lightEntries);
+// storage (storage.mjs) and vases (vases.mjs)
+entries.push(...storageEntries, ...vaseEntries);
 
 const built = new Map();
 /** A decor entry's model: { glb, size [w, h, d], triangles }; a window piece's for its fit. Built once each. */
