@@ -234,7 +234,13 @@ function showArea(a, final) {
   area = a;
   const where = a.surface === 'wall' ? `on ${a.wall}` : `on the ${a.surface}`;
   $('area').hidden = false;
-  $('area').firstElementChild.textContent = `Area ${a.size[0]} × ${a.size[1]} m ${where} — “a sofa that fits here”, or Add something`;
+  $('area').firstElementChild.textContent = `Area ${a.size[0]} × ${a.size[1]} m ${where} — say what goes in it, or`;
+  // one tap: what is made to this area, no model in between
+  const acts = a.surface === 'wall' ? [['Window here', () => tool('opening', { action: 'add', kind: 'window', in_area: true })], ['Door here', () => tool('opening', { action: 'add', kind: 'door', in_area: true })], ['Frame here', () => addPiece({ id: 'ART-FRAME', mount: 'wall' })]]
+    : a.surface === 'floor' ? [['Rug here', () => addPiece({ id: 'RUGM-9x12ft', mount: 'rug' })], ['Add…', () => showLibrary()]]
+    : [['Pot lights here', () => tool('potlights', { action: 'grid', in_area: true })]];
+  const box = $('area').querySelector('.acts'); box.innerHTML = '';
+  for (const [label, run] of acts) { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.onclick = async () => { await run(); if (label !== 'Add…') clearArea(); }; box.append(b); }
   vrPanel.draw();
 }
 function clearArea() { area = null; areaMesh.visible = false; $('area').hidden = true; vrPanel.draw(); }
@@ -565,11 +571,15 @@ const hands = [0, 1].map((i) => {
     if (hit?.piece && pieces.get(hit.piece)?.data.grab) {
       const p = pieces.get(hit.piece), plane = dragPlane(p), at = new THREE.Ray(o, d).intersectPlane(plane, new THREE.Vector3());
       h.hold = { id: hit.piece, t0: performance.now(), plane, offset: at ? p.obj.position.clone().sub(at) : new THREE.Vector3(), moving: false, start: o.clone().add(d) };
+    } else if (hit) {
+      // on the room itself: a pull points; a pull dragged across the surface draws an area there
+      h.sweep = { draft: areaStart(o, d), start: hit.hit.point.clone(), drawing: false };
     }
   });
   c.addEventListener('selectend', () => {
-    const hold = h.hold; h.hold = null;
+    const hold = h.hold, sweep = h.sweep; h.hold = null; h.sweep = null;
     if (hold?.moving) { sendMove(hold.id, pieces.get(hold.id).obj); return; }
+    if (sweep?.drawing) { const [o, d] = aim(c); showArea(areaTo(sweep.draft, o, d), true); return; }
     const [o, d] = aim(c), hit = pointAlong(o, d);
     select(hit?.piece ?? null);
   });
@@ -597,7 +607,7 @@ const vrPanel = (() => {
       g.clearRect(0, 0, cv.width, cv.height);
       g.fillStyle = 'rgba(24,22,20,0.86)'; g.beginPath(); g.roundRect(0, 0, cv.width, cv.height, 28); g.fill();
       g.font = '600 26px system-ui, sans-serif'; g.fillStyle = '#d9a066';
-      g.fillText(statusText || (area ? `Area ${area.size[0]} × ${area.size[1]} m: say what goes in it` : pointing ? 'Pointing: say “here” or “this”' : 'Grip: talk · Trigger: point, hold to move · B: area'), 24, 44);
+      g.fillText(statusText || (area ? `Area ${area.size[0]} × ${area.size[1]} m: say what goes in it` : pointing ? 'Pointing: say “here” or “this”' : 'Grip: talk · Trigger: point, drag for an area, hold on a piece to move it'), 24, 44);
       let y = 92; g.font = '26px system-ui, sans-serif';
       for (const [kind, text] of lines.slice(-3)) {
         g.fillStyle = kind === 'you' ? '#e8e2d6' : kind === 'error' ? '#f0a08a' : kind === 'note' ? '#b9b3a8' : '#f4f1ec';
@@ -648,6 +658,13 @@ function xrFrame(t) {
         if (Math.abs(x) > 0.2 && p.data.mount !== 'wall') p.obj.rotation.y -= x * dt * 1.8;
         box.box.setFromObject(p.obj); box.visible = true;
       }
+      continue;
+    }
+    // a trigger sweep across a surface: the area follows the laser once it has moved 10 cm from where it started
+    if (h.sweep?.draft) {
+      const now = areaTo(h.sweep.draft, o, d);
+      if (!h.sweep.drawing && now && Math.max(...now.size) > 0.1) h.sweep.drawing = true;
+      if (h.sweep.drawing) showArea(now, false);
       continue;
     }
     // B (the right hand's second face button): hold and sweep to highlight an area

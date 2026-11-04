@@ -25,8 +25,9 @@ uses (`/api/tool`):
   removes it. In VR, hold the trigger on a piece to carry it and the thumbstick turns it.
 - **A piece's panel:** turn it, the next size down or up, its finish, its parts' colours, remove.
 - **The room:** its size in feet, and what the floor, walls and ceiling are made of, with their colours.
-- **Highlight an area:** shift-drag (or the Highlight button) over the floor, a wall or the ceiling; in VR, hold B
-  and sweep. Then "a sofa that fits here", or add from the library: the largest size that fits is chosen, backed onto
+- **Highlight an area:** shift-drag (or the Highlight button) over the floor, a wall or the ceiling; in VR, pull the
+  trigger and drag it across a surface (or hold B and sweep). The area's chip makes things to it in one tap: a window
+  or a door cut to its size ("make this a window" by voice does the same), a frame, a rug that fits, pot lights. Then "a sofa that fits here", or add from the library: the largest size that fits is chosen, backed onto
   a wall the area runs along; a picture is made to the area; pot lights fill it.
 - **Day and evening:** daylight through the windows, or the evening with the lamps, ceiling lights and pot lights
   lighting the room (each fixture knows where its bulb is; the nearest eight light the view).
