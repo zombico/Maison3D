@@ -146,10 +146,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 280432,
+   "bytes": 227936,
    "file": "models/ATL-BAR-std.glb",
    "mojulo": {
-    "ref": "sku_atl_bar_std_mw1uf6hx",
+    "ref": "sku_atl_bar_std_mw1uphp5",
     "kind": "furniture",
     "spec": {
      "like": "counter",
@@ -199,7 +199,7 @@
    "bytes": 63520,
    "file": "models/ATL-BEB-std.glb",
    "mojulo": {
-    "ref": "sku_atl_beb_std_mw1uew76",
+    "ref": "sku_atl_beb_std_mw1up2i3",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -254,7 +254,7 @@
    "bytes": 532680,
    "file": "models/ATL-BED-double.glb",
    "mojulo": {
-    "ref": "sku_atl_bed_double_mw1ue28r",
+    "ref": "sku_atl_bed_double_mw1uo8z4",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -536,7 +536,7 @@
    "bytes": 742952,
    "file": "models/ATL-BED-king.glb",
    "mojulo": {
-    "ref": "sku_atl_bed_king_mw1ue2o5",
+    "ref": "sku_atl_bed_king_mw1uo9fc",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -818,7 +818,7 @@
    "bytes": 622580,
    "file": "models/ATL-BED-queen.glb",
    "mojulo": {
-    "ref": "sku_atl_bed_queen_mw1ue2fd",
+    "ref": "sku_atl_bed_queen_mw1uo97p",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -1095,10 +1095,10 @@
     "wood": "#5a3a22"
    },
    "triangles": 204,
-   "bytes": 175936,
+   "bytes": 136200,
    "file": "models/ATL-BKC-std.glb",
    "mojulo": {
-    "ref": "sku_atl_bkc_std_mw1udp38",
+    "ref": "sku_atl_bkc_std_mw1unw6r",
     "kind": "furniture",
     "spec": {
      "like": "bookcase",
@@ -1146,10 +1146,10 @@
     "wood": "#5a3a22"
    },
    "triangles": 228,
-   "bytes": 194544,
+   "bytes": 149748,
    "file": "models/ATL-BKC-tall.glb",
    "mojulo": {
-    "ref": "sku_atl_bkc_tall_mw1udp4k",
+    "ref": "sku_atl_bkc_tall_mw1unwb3",
     "kind": "furniture",
     "spec": {
      "like": "bookcase",
@@ -1330,10 +1330,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 262124,
+   "bytes": 209576,
    "file": "models/ATL-CAB-std.glb",
    "mojulo": {
-    "ref": "sku_atl_cab_std_mw1ufj1r",
+    "ref": "sku_atl_cab_std_mw1upusj",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -1385,10 +1385,10 @@
     "handles": "#34363a"
    },
    "triangles": 492,
-   "bytes": 654716,
+   "bytes": 352500,
    "file": "models/ATL-CHT-tall.glb",
    "mojulo": {
-    "ref": "sku_atl_cht_tall_mw1uenu1",
+    "ref": "sku_atl_cht_tall_mw1uoufr",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -1670,10 +1670,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 264276,
+   "bytes": 211728,
    "file": "models/ATL-CON-std.glb",
    "mojulo": {
-    "ref": "sku_atl_con_std_mw1ufq4w",
+    "ref": "sku_atl_con_std_mw1upvcz",
     "kind": "furniture",
     "spec": {
      "like": "sideboard",
@@ -1723,7 +1723,7 @@
    "bytes": 219236,
    "file": "models/ATL-CUS-std.glb",
    "mojulo": {
-    "ref": "sku_atl_cus_std_mw1ugihp",
+    "ref": "sku_atl_cus_std_mw1uqtvr",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -1812,7 +1812,7 @@
    "bytes": 66976,
    "file": "models/ATL-DBN-std.glb",
    "mojulo": {
-    "ref": "sku_atl_dbn_std_mw1uf6ed",
+    "ref": "sku_atl_dbn_std_mw1uphgs",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -1865,7 +1865,7 @@
    "bytes": 66920,
    "file": "models/ATL-DCH-std.glb",
    "mojulo": {
-    "ref": "sku_atl_dch_std_mw1uf63z",
+    "ref": "sku_atl_dch_std_mw1upeb0",
     "kind": "furniture",
     "spec": {
      "like": "chair",
@@ -1918,7 +1918,7 @@
    "bytes": 71876,
    "file": "models/ATL-DKC-std.glb",
    "mojulo": {
-    "ref": "sku_atl_dkc_std_mw1uffd3",
+    "ref": "sku_atl_dkc_std_mw1upniq",
     "kind": "furniture",
     "spec": {
      "like": "chair",
@@ -1969,10 +1969,10 @@
     "handles": "#34363a"
    },
    "triangles": 408,
-   "bytes": 556880,
+   "bytes": 337416,
    "file": "models/ATL-DRS-std.glb",
    "mojulo": {
-    "ref": "sku_atl_drs_std_mw1uefhe",
+    "ref": "sku_atl_drs_std_mw1uotio",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -2024,10 +2024,10 @@
     "handles": "#34363a"
    },
    "triangles": 408,
-   "bytes": 565524,
+   "bytes": 346072,
    "file": "models/ATL-DRS-wide.glb",
    "mojulo": {
-    "ref": "sku_atl_drs_wide_mw1uefkw",
+    "ref": "sku_atl_drs_wide_mw1uotl1",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -2080,7 +2080,7 @@
    "bytes": 65244,
    "file": "models/ATL-DSK-std.glb",
    "mojulo": {
-    "ref": "sku_atl_dsk_std_mw1ufb9f",
+    "ref": "sku_atl_dsk_std_mw1upj7s",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -2132,7 +2132,7 @@
    "bytes": 71728,
    "file": "models/ATL-DSK-wide.glb",
    "mojulo": {
-    "ref": "sku_atl_dsk_wide_mw1ufba2",
+    "ref": "sku_atl_dsk_wide_mw1upj8f",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -2184,7 +2184,7 @@
    "bytes": 74972,
    "file": "models/ATL-DTB-4-seat.glb",
    "mojulo": {
-    "ref": "sku_atl_dtb_4_seat_mw1uf1vv",
+    "ref": "sku_atl_dtb_4_seat_mw1upa04",
     "kind": "furniture",
     "spec": {
      "like": "dining-table",
@@ -2236,7 +2236,7 @@
    "bytes": 84692,
    "file": "models/ATL-DTB-6-seat.glb",
    "mojulo": {
-    "ref": "sku_atl_dtb_6_seat_mw1uf1wp",
+    "ref": "sku_atl_dtb_6_seat_mw1upa0s",
     "kind": "furniture",
     "spec": {
      "like": "dining-table",
@@ -2288,7 +2288,7 @@
    "bytes": 99832,
    "file": "models/ATL-DTB-8-seat.glb",
    "mojulo": {
-    "ref": "sku_atl_dtb_8_seat_mw1uf1xg",
+    "ref": "sku_atl_dtb_8_seat_mw1upa1e",
     "kind": "furniture",
     "spec": {
      "like": "dining-table",
@@ -2340,7 +2340,7 @@
    "bytes": 56184,
    "file": "models/ATL-EBN-std.glb",
    "mojulo": {
-    "ref": "sku_atl_ebn_std_mw1ufmcv",
+    "ref": "sku_atl_ebn_std_mw1upv7a",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -2427,7 +2427,7 @@
    "bytes": 215348,
    "file": "models/ATL-LMB-std.glb",
    "mojulo": {
-    "ref": "sku_atl_lmb_std_mw1ugjhf",
+    "ref": "sku_atl_lmb_std_mw1uquys",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -2627,7 +2627,7 @@
    "bytes": 79308,
    "file": "models/ATL-MCT-6-seat.glb",
    "mojulo": {
-    "ref": "sku_atl_mct_6_seat_mw1uf5gk",
+    "ref": "sku_atl_mct_6_seat_mw1updpb",
     "kind": "furniture",
     "spec": {
      "like": "mid-century-table",
@@ -2675,10 +2675,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 180252,
+   "bytes": 155464,
    "file": "models/ATL-MED-long.glb",
    "mojulo": {
-    "ref": "sku_atl_med_long_mw1udhkn",
+    "ref": "sku_atl_med_long_mw1unoqt",
     "kind": "furniture",
     "spec": {
      "like": "media-console",
@@ -2831,10 +2831,10 @@
     "handles": "#34363a"
    },
    "triangles": 240,
-   "bytes": 321568,
+   "bytes": 213524,
    "file": "models/ATL-NST-std.glb",
    "mojulo": {
-    "ref": "sku_atl_nst_std_mw1ueeoe",
+    "ref": "sku_atl_nst_std_mw1uomca",
     "kind": "furniture",
     "spec": {
      "like": "nightstand",
@@ -2919,7 +2919,7 @@
    "bytes": 179504,
    "file": "models/ATL-POF-std.glb",
    "mojulo": {
-    "ref": "sku_atl_pof_std_mw1ugnl7",
+    "ref": "sku_atl_pof_std_mw1uqze6",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -3172,10 +3172,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 288232,
+   "bytes": 235736,
    "file": "models/ATL-SDB-long.glb",
    "mojulo": {
-    "ref": "sku_atl_sdb_long_mw1udwqu",
+    "ref": "sku_atl_sdb_long_mw1uo0s3",
     "kind": "furniture",
     "spec": {
      "like": "sideboard",
@@ -3224,10 +3224,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 279376,
+   "bytes": 226868,
    "file": "models/ATL-SDB-std.glb",
    "mojulo": {
-    "ref": "sku_atl_sdb_std_mw1udwop",
+    "ref": "sku_atl_sdb_std_mw1uo0qa",
     "kind": "furniture",
     "spec": {
      "like": "sideboard",
@@ -3277,7 +3277,7 @@
    "bytes": 71732,
    "file": "models/ATL-SDK-std.glb",
    "mojulo": {
-    "ref": "sku_atl_sdk_std_mw1ufej0",
+    "ref": "sku_atl_sdk_std_mw1upmpz",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -3328,10 +3328,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 145620,
+   "bytes": 120812,
    "file": "models/ATL-SHO-std.glb",
    "mojulo": {
-    "ref": "sku_atl_sho_std_mw1ufqp7",
+    "ref": "sku_atl_sho_std_mw1uq2m7",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -3616,7 +3616,7 @@
    "bytes": 43664,
    "file": "models/ATL-STL-counter.glb",
    "mojulo": {
-    "ref": "sku_atl_stl_counter_mw1ufb1c",
+    "ref": "sku_atl_stl_counter_mw1upj07",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -3668,7 +3668,7 @@
    "bytes": 103332,
    "file": "models/ATL-THR-std.glb",
    "mojulo": {
-    "ref": "sku_atl_thr_std_mw1ugkd6",
+    "ref": "sku_atl_thr_std_mw1uqz0a",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -3894,10 +3894,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 166192,
+   "bytes": 141408,
    "file": "models/ATL-WRD-double.glb",
    "mojulo": {
-    "ref": "sku_atl_wrd_double_mw1ues9f",
+    "ref": "sku_atl_wrd_double_mw1up255",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -3949,10 +3949,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 153232,
+   "bytes": 128416,
    "file": "models/ATL-WRD-single.glb",
    "mojulo": {
-    "ref": "sku_atl_wrd_single_mw1ues4c",
+    "ref": "sku_atl_wrd_single_mw1up248",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -4117,10 +4117,10 @@
     "handles": "#34363a"
    },
    "triangles": 240,
-   "bytes": 331368,
+   "bytes": 223332,
    "file": "models/BIB-BCH-std.glb",
    "mojulo": {
-    "ref": "sku_bib_bch_std_mw1uezi2",
+    "ref": "sku_bib_bch_std_mw1up9vz",
     "kind": "furniture",
     "spec": {
      "like": "chest",
@@ -4170,7 +4170,7 @@
    "bytes": 135720,
    "file": "models/BIB-BEB-std.glb",
    "mojulo": {
-    "ref": "sku_bib_beb_std_mw1uewb3",
+    "ref": "sku_bib_beb_std_mw1up5kq",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -4225,7 +4225,7 @@
    "bytes": 532680,
    "file": "models/BIB-BED-double.glb",
    "mojulo": {
-    "ref": "sku_bib_bed_double_mw1ue8gw",
+    "ref": "sku_bib_bed_double_mw1uofnc",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -4507,7 +4507,7 @@
    "bytes": 742952,
    "file": "models/BIB-BED-king.glb",
    "mojulo": {
-    "ref": "sku_bib_bed_king_mw1ue8y5",
+    "ref": "sku_bib_bed_king_mw1uog22",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -4789,7 +4789,7 @@
    "bytes": 622580,
    "file": "models/BIB-BED-queen.glb",
    "mojulo": {
-    "ref": "sku_bib_bed_queen_mw1ue8pt",
+    "ref": "sku_bib_bed_queen_mw1uofu2",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -5066,10 +5066,10 @@
     "wood": "#3b2a1e"
    },
    "triangles": 204,
-   "bytes": 175936,
+   "bytes": 136200,
    "file": "models/BIB-BKC-std.glb",
    "mojulo": {
-    "ref": "sku_bib_bkc_std_mw1udwf8",
+    "ref": "sku_bib_bkc_std_mw1uo0ih",
     "kind": "furniture",
     "spec": {
      "like": "bookcase",
@@ -5117,10 +5117,10 @@
     "wood": "#3b2a1e"
    },
    "triangles": 228,
-   "bytes": 194544,
+   "bytes": 149748,
    "file": "models/BIB-BKC-tall.glb",
    "mojulo": {
-    "ref": "sku_bib_bkc_tall_mw1udwgf",
+    "ref": "sku_bib_bkc_tall_mw1uo0jb",
     "kind": "furniture",
     "spec": {
      "like": "bookcase",
@@ -5301,10 +5301,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 262124,
+   "bytes": 209576,
    "file": "models/BIB-CAB-std.glb",
    "mojulo": {
-    "ref": "sku_bib_cab_std_mw1ufjge",
+    "ref": "sku_bib_cab_std_mw1upv58",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -5410,10 +5410,10 @@
     "handles": "#34363a"
    },
    "triangles": 492,
-   "bytes": 654716,
+   "bytes": 352500,
    "file": "models/BIB-CHT-tall.glb",
    "mojulo": {
-    "ref": "sku_bib_cht_tall_mw1ueoe1",
+    "ref": "sku_bib_cht_tall_mw1uoupm",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -5695,10 +5695,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 264276,
+   "bytes": 211728,
    "file": "models/BIB-CON-std.glb",
    "mojulo": {
-    "ref": "sku_bib_con_std_mw1ufqk9",
+    "ref": "sku_bib_con_std_mw1uq2hq",
     "kind": "furniture",
     "spec": {
      "like": "sideboard",
@@ -5748,7 +5748,7 @@
    "bytes": 219236,
    "file": "models/BIB-CUS-std.glb",
    "mojulo": {
-    "ref": "sku_bib_cus_std_mw1ugj4t",
+    "ref": "sku_bib_cus_std_mw1uquo4",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -5837,7 +5837,7 @@
    "bytes": 139176,
    "file": "models/BIB-DBN-std.glb",
    "mojulo": {
-    "ref": "sku_bib_dbn_std_mw1uf6h9",
+    "ref": "sku_bib_dbn_std_mw1uphoa",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -5890,7 +5890,7 @@
    "bytes": 137312,
    "file": "models/BIB-DCH-std.glb",
    "mojulo": {
-    "ref": "sku_bib_dch_std_mw1uf6a7",
+    "ref": "sku_bib_dch_std_mw1upegx",
     "kind": "furniture",
     "spec": {
      "like": "chair",
@@ -5943,7 +5943,7 @@
    "bytes": 142268,
    "file": "models/BIB-DKC-std.glb",
    "mojulo": {
-    "ref": "sku_bib_dkc_std_mw1uffid",
+    "ref": "sku_bib_dkc_std_mw1upra2",
     "kind": "furniture",
     "spec": {
      "like": "chair",
@@ -5994,10 +5994,10 @@
     "handles": "#34363a"
    },
    "triangles": 408,
-   "bytes": 556880,
+   "bytes": 337416,
    "file": "models/BIB-DRS-std.glb",
    "mojulo": {
-    "ref": "sku_bib_drs_std_mw1uengy",
+    "ref": "sku_bib_drs_std_mw1uou9u",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -6049,10 +6049,10 @@
     "handles": "#34363a"
    },
    "triangles": 408,
-   "bytes": 565524,
+   "bytes": 346072,
    "file": "models/BIB-DRS-wide.glb",
    "mojulo": {
-    "ref": "sku_bib_drs_wide_mw1uenl3",
+    "ref": "sku_bib_drs_wide_mw1uoubk",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -6105,7 +6105,7 @@
    "bytes": 137448,
    "file": "models/BIB-DSK-std.glb",
    "mojulo": {
-    "ref": "sku_bib_dsk_std_mw1ufbgm",
+    "ref": "sku_bib_dsk_std_mw1upmm3",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -6157,7 +6157,7 @@
    "bytes": 143928,
    "file": "models/BIB-DSK-wide.glb",
    "mojulo": {
-    "ref": "sku_bib_dsk_wide_mw1ufbhq",
+    "ref": "sku_bib_dsk_wide_mw1upmni",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -6209,7 +6209,7 @@
    "bytes": 147176,
    "file": "models/BIB-DTB-4-seat.glb",
    "mojulo": {
-    "ref": "sku_bib_dtb_4_seat_mw1uf27j",
+    "ref": "sku_bib_dtb_4_seat_mw1updht",
     "kind": "furniture",
     "spec": {
      "like": "dining-table",
@@ -6261,7 +6261,7 @@
    "bytes": 156900,
    "file": "models/BIB-DTB-6-seat.glb",
    "mojulo": {
-    "ref": "sku_bib_dtb_6_seat_mw1uf288",
+    "ref": "sku_bib_dtb_6_seat_mw1updje",
     "kind": "furniture",
     "spec": {
      "like": "dining-table",
@@ -6313,7 +6313,7 @@
    "bytes": 172040,
    "file": "models/BIB-DTB-8-seat.glb",
    "mojulo": {
-    "ref": "sku_bib_dtb_8_seat_mw1uf28y",
+    "ref": "sku_bib_dtb_8_seat_mw1updkj",
     "kind": "furniture",
     "spec": {
      "like": "dining-table",
@@ -6365,7 +6365,7 @@
    "bytes": 128376,
    "file": "models/BIB-EBN-std.glb",
    "mojulo": {
-    "ref": "sku_bib_ebn_std_mw1ufmia",
+    "ref": "sku_bib_ebn_std_mw1upvas",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -6471,7 +6471,7 @@
    "bytes": 162320,
    "file": "models/BIB-FHT-6-seat.glb",
    "mojulo": {
-    "ref": "sku_bib_fht_6_seat_mw1uf5er",
+    "ref": "sku_bib_fht_6_seat_mw1updoa",
     "kind": "furniture",
     "spec": {
      "like": "farmhouse-table",
@@ -6555,7 +6555,7 @@
    "bytes": 215348,
    "file": "models/BIB-LMB-std.glb",
    "mojulo": {
-    "ref": "sku_bib_lmb_std_mw1ugk56",
+    "ref": "sku_bib_lmb_std_mw1uqysw",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -6700,10 +6700,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 180252,
+   "bytes": 155464,
    "file": "models/BIB-MED-long.glb",
    "mojulo": {
-    "ref": "sku_bib_med_long_mw1udoqa",
+    "ref": "sku_bib_med_long_mw1unt24",
     "kind": "furniture",
     "spec": {
      "like": "media-console",
@@ -6752,10 +6752,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 153652,
+   "bytes": 128840,
    "file": "models/BIB-MED-short.glb",
    "mojulo": {
-    "ref": "sku_bib_med_short_mw1udooe",
+    "ref": "sku_bib_med_short_mw1unt0f",
     "kind": "furniture",
     "spec": {
      "like": "media-console",
@@ -6804,10 +6804,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 167240,
+   "bytes": 142456,
    "file": "models/BIB-MED-std.glb",
    "mojulo": {
-    "ref": "sku_bib_med_std_mw1udopd",
+    "ref": "sku_bib_med_std_mw1unt17",
     "kind": "furniture",
     "spec": {
      "like": "media-console",
@@ -6856,10 +6856,10 @@
     "handles": "#34363a"
    },
    "triangles": 240,
-   "bytes": 321568,
+   "bytes": 213524,
    "file": "models/BIB-NST-std.glb",
    "mojulo": {
-    "ref": "sku_bib_nst_std_mw1uef5c",
+    "ref": "sku_bib_nst_std_mw1uomqc",
     "kind": "furniture",
     "spec": {
      "like": "nightstand",
@@ -6944,7 +6944,7 @@
    "bytes": 179504,
    "file": "models/BIB-POF-std.glb",
    "mojulo": {
-    "ref": "sku_bib_pof_std_mw1ugobv",
+    "ref": "sku_bib_pof_std_mw1uqzw2",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -7197,10 +7197,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 288232,
+   "bytes": 235736,
    "file": "models/BIB-SDB-long.glb",
    "mojulo": {
-    "ref": "sku_bib_sdb_long_mw1ue0as",
+    "ref": "sku_bib_sdb_long_mw1uo7xw",
     "kind": "furniture",
     "spec": {
      "like": "sideboard",
@@ -7249,10 +7249,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 279376,
+   "bytes": 226868,
    "file": "models/BIB-SDB-std.glb",
    "mojulo": {
-    "ref": "sku_bib_sdb_std_mw1udxa7",
+    "ref": "sku_bib_sdb_std_mw1uo7w8",
     "kind": "furniture",
     "spec": {
      "like": "sideboard",
@@ -7301,10 +7301,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 145620,
+   "bytes": 120812,
    "file": "models/BIB-SHO-std.glb",
    "mojulo": {
-    "ref": "sku_bib_sho_std_mw1ufquv",
+    "ref": "sku_bib_sho_std_mw1uq2sf",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -7589,7 +7589,7 @@
    "bytes": 115852,
    "file": "models/BIB-STL-counter.glb",
    "mojulo": {
-    "ref": "sku_bib_stl_counter_mw1ufb66",
+    "ref": "sku_bib_stl_counter_mw1upj5k",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -7641,7 +7641,7 @@
    "bytes": 134208,
    "file": "models/BIB-STT-std.glb",
    "mojulo": {
-    "ref": "sku_bib_stt_std_mw1ufer4",
+    "ref": "sku_bib_stt_std_mw1upmv1",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -7693,7 +7693,7 @@
    "bytes": 103332,
    "file": "models/BIB-THR-std.glb",
    "mojulo": {
-    "ref": "sku_bib_thr_std_mw1ugkhy",
+    "ref": "sku_bib_thr_std_mw1uqz8q",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -7919,10 +7919,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 166192,
+   "bytes": 141408,
    "file": "models/BIB-WRD-double.glb",
    "mojulo": {
-    "ref": "sku_bib_wrd_double_mw1uew5c",
+    "ref": "sku_bib_wrd_double_mw1up2gq",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -7974,10 +7974,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 153232,
+   "bytes": 128416,
    "file": "models/BIB-WRD-single.glb",
    "mojulo": {
-    "ref": "sku_bib_wrd_single_mw1uew4h",
+    "ref": "sku_bib_wrd_single_mw1up2g5",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -8031,7 +8031,7 @@
    "bytes": 137316,
    "file": "models/BIB-WSR-std.glb",
    "mojulo": {
-    "ref": "sku_bib_wsr_std_mw1uf6c7",
+    "ref": "sku_bib_wsr_std_mw1upeje",
     "kind": "furniture",
     "spec": {
      "like": "windsor-side-chair",
@@ -8193,7 +8193,7 @@
    "bytes": 109244,
    "file": "models/CAL-BEB-std.glb",
    "mojulo": {
-    "ref": "sku_cal_beb_std_mw1uew7s",
+    "ref": "sku_cal_beb_std_mw1up2ip",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -8248,7 +8248,7 @@
    "bytes": 532680,
    "file": "models/CAL-BED-double.glb",
    "mojulo": {
-    "ref": "sku_cal_bed_double_mw1ue2yk",
+    "ref": "sku_cal_bed_double_mw1uo9ok",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -8530,7 +8530,7 @@
    "bytes": 742952,
    "file": "models/CAL-BED-king.glb",
    "mojulo": {
-    "ref": "sku_cal_bed_king_mw1ue3ag",
+    "ref": "sku_cal_bed_king_mw1uoa2m",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -8812,7 +8812,7 @@
    "bytes": 622580,
    "file": "models/CAL-BED-queen.glb",
    "mojulo": {
-    "ref": "sku_cal_bed_queen_mw1ue34h",
+    "ref": "sku_cal_bed_queen_mw1uo9vs",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -9089,10 +9089,10 @@
     "wood": "#d9cfc1"
    },
    "triangles": 204,
-   "bytes": 507480,
+   "bytes": 214032,
    "file": "models/CAL-BKC-std.glb",
    "mojulo": {
-    "ref": "sku_cal_bkc_std_mw1udp60",
+    "ref": "sku_cal_bkc_std_mw1unwcz",
     "kind": "furniture",
     "spec": {
      "like": "bookcase",
@@ -9140,10 +9140,10 @@
     "wood": "#d9cfc1"
    },
    "triangles": 228,
-   "bytes": 567304,
+   "bytes": 227444,
    "file": "models/CAL-BKC-tall.glb",
    "mojulo": {
-    "ref": "sku_cal_bkc_tall_mw1udp7d",
+    "ref": "sku_cal_bkc_tall_mw1unwgg",
     "kind": "furniture",
     "spec": {
      "like": "bookcase",
@@ -9324,10 +9324,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 725564,
+   "bytes": 334276,
    "file": "models/CAL-CAB-std.glb",
    "mojulo": {
-    "ref": "sku_cal_cab_std_mw1ufj3h",
+    "ref": "sku_cal_cab_std_mw1upuu0",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -9436,7 +9436,7 @@
    "bytes": 553804,
    "file": "models/CAL-CHT-tall.glb",
    "mojulo": {
-    "ref": "sku_cal_cht_tall_mw1umf2s",
+    "ref": "sku_cal_cht_tall_mw1uoui0",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -9718,10 +9718,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 727716,
+   "bytes": 336428,
    "file": "models/CAL-CON-std.glb",
    "mojulo": {
-    "ref": "sku_cal_con_std_mw1ufq73",
+    "ref": "sku_cal_con_std_mw1upyd9",
     "kind": "furniture",
     "spec": {
      "like": "sideboard",
@@ -9771,7 +9771,7 @@
    "bytes": 219236,
    "file": "models/CAL-CUS-std.glb",
    "mojulo": {
-    "ref": "sku_cal_cus_std_mw1ugion",
+    "ref": "sku_cal_cus_std_mw1uqu2l",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -9860,7 +9860,7 @@
    "bytes": 112700,
    "file": "models/CAL-DBN-std.glb",
    "mojulo": {
-    "ref": "sku_cal_dbn_std_mw1uf6eu",
+    "ref": "sku_cal_dbn_std_mw1uphjb",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -9913,7 +9913,7 @@
    "bytes": 113260,
    "file": "models/CAL-DCH-std.glb",
    "mojulo": {
-    "ref": "sku_cal_dch_std_mw1uf65b",
+    "ref": "sku_cal_dch_std_mw1upebu",
     "kind": "furniture",
     "spec": {
      "like": "chair",
@@ -9966,7 +9966,7 @@
    "bytes": 118180,
    "file": "models/CAL-DKC-std.glb",
    "mojulo": {
-    "ref": "sku_cal_dkc_std_mw1uffe8",
+    "ref": "sku_cal_dkc_std_mw1upnjl",
     "kind": "furniture",
     "spec": {
      "like": "chair",
@@ -10020,7 +10020,7 @@
    "bytes": 539348,
    "file": "models/CAL-DRS-std.glb",
    "mojulo": {
-    "ref": "sku_cal_drs_std_mw1ume6f",
+    "ref": "sku_cal_drs_std_mw1uotmw",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -10075,7 +10075,7 @@
    "bytes": 547992,
    "file": "models/CAL-DRS-wide.glb",
    "mojulo": {
-    "ref": "sku_cal_drs_wide_mw1umem1",
+    "ref": "sku_cal_drs_wide_mw1uotv1",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -10128,7 +10128,7 @@
    "bytes": 110968,
    "file": "models/CAL-DSK-std.glb",
    "mojulo": {
-    "ref": "sku_cal_dsk_std_mw1ufbaq",
+    "ref": "sku_cal_dsk_std_mw1upj94",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -10180,7 +10180,7 @@
    "bytes": 117444,
    "file": "models/CAL-DSK-wide.glb",
    "mojulo": {
-    "ref": "sku_cal_dsk_wide_mw1ufbbf",
+    "ref": "sku_cal_dsk_wide_mw1upj9z",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -10232,7 +10232,7 @@
    "bytes": 120692,
    "file": "models/CAL-DTB-4-seat.glb",
    "mojulo": {
-    "ref": "sku_cal_dtb_4_seat_mw1uf1y3",
+    "ref": "sku_cal_dtb_4_seat_mw1upa22",
     "kind": "furniture",
     "spec": {
      "like": "dining-table",
@@ -10284,7 +10284,7 @@
    "bytes": 130416,
    "file": "models/CAL-DTB-6-seat.glb",
    "mojulo": {
-    "ref": "sku_cal_dtb_6_seat_mw1uf1z2",
+    "ref": "sku_cal_dtb_6_seat_mw1upa35",
     "kind": "furniture",
     "spec": {
      "like": "dining-table",
@@ -10336,7 +10336,7 @@
    "bytes": 145560,
    "file": "models/CAL-DTB-8-seat.glb",
    "mojulo": {
-    "ref": "sku_cal_dtb_8_seat_mw1uf20b",
+    "ref": "sku_cal_dtb_8_seat_mw1upa4j",
     "kind": "furniture",
     "spec": {
      "like": "dining-table",
@@ -10388,7 +10388,7 @@
    "bytes": 101900,
    "file": "models/CAL-EBN-std.glb",
    "mojulo": {
-    "ref": "sku_cal_ebn_std_mw1ufmdw",
+    "ref": "sku_cal_ebn_std_mw1upv7v",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -10475,7 +10475,7 @@
    "bytes": 83984,
    "file": "models/CAL-LDK-std.glb",
    "mojulo": {
-    "ref": "sku_cal_ldk_std_mw1ufeoz",
+    "ref": "sku_cal_ldk_std_mw1upms6",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -10644,7 +10644,7 @@
    "bytes": 215348,
    "file": "models/CAL-LMB-std.glb",
    "mojulo": {
-    "ref": "sku_cal_lmb_std_mw1ugjn1",
+    "ref": "sku_cal_lmb_std_mw1uqy0w",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -10789,10 +10789,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 378348,
+   "bytes": 224428,
    "file": "models/CAL-MDU-std.glb",
    "mojulo": {
-    "ref": "sku_cal_mdu_std_mw1udosy",
+    "ref": "sku_cal_mdu_std_mw1unt4m",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -10844,10 +10844,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 387656,
+   "bytes": 233748,
    "file": "models/CAL-MED-long.glb",
    "mojulo": {
-    "ref": "sku_cal_med_long_mw1udhqf",
+    "ref": "sku_cal_med_long_mw1unp28",
     "kind": "furniture",
     "spec": {
      "like": "media-console",
@@ -10896,10 +10896,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 361044,
+   "bytes": 207108,
    "file": "models/CAL-MED-short.glb",
    "mojulo": {
-    "ref": "sku_cal_med_short_mw1udhln",
+    "ref": "sku_cal_med_short_mw1unowr",
     "kind": "furniture",
     "spec": {
      "like": "media-console",
@@ -10948,10 +10948,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 374640,
+   "bytes": 220716,
    "file": "models/CAL-MED-std.glb",
    "mojulo": {
-    "ref": "sku_cal_med_std_mw1udhph",
+    "ref": "sku_cal_med_std_mw1unp13",
     "kind": "furniture",
     "spec": {
      "like": "media-console",
@@ -11000,10 +11000,10 @@
     "handles": "#34363a"
    },
    "triangles": 240,
-   "bytes": 900096,
+   "bytes": 366396,
    "file": "models/CAL-NST-std.glb",
    "mojulo": {
-    "ref": "sku_cal_nst_std_mw1ueer7",
+    "ref": "sku_cal_nst_std_mw1uomeb",
     "kind": "furniture",
     "spec": {
      "like": "nightstand",
@@ -11056,7 +11056,7 @@
    "bytes": 778720,
    "file": "models/CAL-PLT-king.glb",
    "mojulo": {
-    "ref": "sku_cal_plt_king_mw1ue9y4",
+    "ref": "sku_cal_plt_king_mw1uoh82",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -11287,7 +11287,7 @@
    "bytes": 653784,
    "file": "models/CAL-PLT-queen.glb",
    "mojulo": {
-    "ref": "sku_cal_plt_queen_mw1ue9q1",
+    "ref": "sku_cal_plt_queen_mw1uogzg",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -11550,7 +11550,7 @@
    "bytes": 179504,
    "file": "models/CAL-POF-std.glb",
    "mojulo": {
-    "ref": "sku_cal_pof_std_mw1ugnvi",
+    "ref": "sku_cal_pof_std_mw1uqzhx",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -11803,10 +11803,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 751684,
+   "bytes": 360416,
    "file": "models/CAL-SDB-long.glb",
    "mojulo": {
-    "ref": "sku_cal_sdb_long_mw1udwvu",
+    "ref": "sku_cal_sdb_long_mw1uo11m",
     "kind": "furniture",
     "spec": {
      "like": "sideboard",
@@ -11855,10 +11855,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 742820,
+   "bytes": 351540,
    "file": "models/CAL-SDB-std.glb",
    "mojulo": {
-    "ref": "sku_cal_sdb_std_mw1udwsj",
+    "ref": "sku_cal_sdb_std_mw1uo0uu",
     "kind": "furniture",
     "spec": {
      "like": "sideboard",
@@ -11908,7 +11908,7 @@
    "bytes": 117452,
    "file": "models/CAL-SDK-std.glb",
    "mojulo": {
-    "ref": "sku_cal_sdk_std_mw1ufem1",
+    "ref": "sku_cal_sdk_std_mw1upmqk",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -11959,10 +11959,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 353020,
+   "bytes": 199084,
    "file": "models/CAL-SHO-std.glb",
    "mojulo": {
-    "ref": "sku_cal_sho_std_mw1ufqq2",
+    "ref": "sku_cal_sho_std_mw1uq2n3",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -12247,7 +12247,7 @@
    "bytes": 89388,
    "file": "models/CAL-STL-counter.glb",
    "mojulo": {
-    "ref": "sku_cal_stl_counter_mw1ufb2u",
+    "ref": "sku_cal_stl_counter_mw1upj12",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -12299,7 +12299,7 @@
    "bytes": 103332,
    "file": "models/CAL-THR-std.glb",
    "mojulo": {
-    "ref": "sku_cal_thr_std_mw1ugkek",
+    "ref": "sku_cal_thr_std_mw1uqz1m",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -12579,10 +12579,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 373588,
+   "bytes": 219660,
    "file": "models/CAL-WRD-double.glb",
    "mojulo": {
-    "ref": "sku_cal_wrd_double_mw1ueseh",
+    "ref": "sku_cal_wrd_double_mw1up286",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -12634,10 +12634,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 360624,
+   "bytes": 206688,
    "file": "models/CAL-WRD-single.glb",
    "mojulo": {
-    "ref": "sku_cal_wrd_single_mw1uesb3",
+    "ref": "sku_cal_wrd_single_mw1up269",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -12802,10 +12802,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 743876,
+   "bytes": 352592,
    "file": "models/FET-BAR-std.glb",
    "mojulo": {
-    "ref": "sku_fet_bar_std_mw1ufanx",
+    "ref": "sku_fet_bar_std_mw1upit1",
     "kind": "furniture",
     "spec": {
      "like": "counter",
@@ -12854,10 +12854,10 @@
     "handles": "#34363a"
    },
    "triangles": 240,
-   "bytes": 909892,
+   "bytes": 376184,
    "file": "models/FET-BCH-std.glb",
    "mojulo": {
-    "ref": "sku_fet_bch_std_mw1uewgb",
+    "ref": "sku_fet_bch_std_mw1up9ps",
     "kind": "furniture",
     "spec": {
      "like": "chest",
@@ -12907,7 +12907,7 @@
    "bytes": 135720,
    "file": "models/FET-BEB-std.glb",
    "mojulo": {
-    "ref": "sku_fet_beb_std_mw1uewa3",
+    "ref": "sku_fet_beb_std_mw1up5h1",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -12962,7 +12962,7 @@
    "bytes": 532680,
    "file": "models/FET-BED-double.glb",
    "mojulo": {
-    "ref": "sku_fet_bed_double_mw1ue4p6",
+    "ref": "sku_fet_bed_double_mw1uoevq",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -13244,7 +13244,7 @@
    "bytes": 742952,
    "file": "models/FET-BED-king.glb",
    "mojulo": {
-    "ref": "sku_fet_bed_king_mw1ue7xi",
+    "ref": "sku_fet_bed_king_mw1uofd9",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -13526,7 +13526,7 @@
    "bytes": 622580,
    "file": "models/FET-BED-queen.glb",
    "mojulo": {
-    "ref": "sku_fet_bed_queen_mw1ue4uq",
+    "ref": "sku_fet_bed_queen_mw1uof4i",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -13803,10 +13803,10 @@
     "wood": "#c9a227"
    },
    "triangles": 204,
-   "bytes": 507480,
+   "bytes": 214032,
    "file": "models/FET-BKC-std.glb",
    "mojulo": {
-    "ref": "sku_fet_bkc_std_mw1udwc9",
+    "ref": "sku_fet_bkc_std_mw1uo0g5",
     "kind": "furniture",
     "spec": {
      "like": "bookcase",
@@ -13854,10 +13854,10 @@
     "wood": "#c9a227"
    },
    "triangles": 228,
-   "bytes": 567304,
+   "bytes": 227444,
    "file": "models/FET-BKC-tall.glb",
    "mojulo": {
-    "ref": "sku_fet_bkc_tall_mw1udwdm",
+    "ref": "sku_fet_bkc_tall_mw1uo0hc",
     "kind": "furniture",
     "spec": {
      "like": "bookcase",
@@ -14038,10 +14038,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 725564,
+   "bytes": 334276,
    "file": "models/FET-CAB-std.glb",
    "mojulo": {
-    "ref": "sku_fet_cab_std_mw1ufjdz",
+    "ref": "sku_fet_cab_std_mw1upv3s",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -14150,7 +14150,7 @@
    "bytes": 553804,
    "file": "models/FET-CHT-tall.glb",
    "mojulo": {
-    "ref": "sku_fet_cht_tall_mw1umf99",
+    "ref": "sku_fet_cht_tall_mw1uounu",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -14375,10 +14375,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 727716,
+   "bytes": 336428,
    "file": "models/FET-CON-std.glb",
    "mojulo": {
-    "ref": "sku_fet_con_std_mw1ufqhr",
+    "ref": "sku_fet_con_std_mw1uq2g2",
     "kind": "furniture",
     "spec": {
      "like": "sideboard",
@@ -14428,7 +14428,7 @@
    "bytes": 219236,
    "file": "models/FET-CUS-std.glb",
    "mojulo": {
-    "ref": "sku_fet_cus_std_mw1ugizm",
+    "ref": "sku_fet_cus_std_mw1uqujd",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -14517,7 +14517,7 @@
    "bytes": 139176,
    "file": "models/FET-DBN-std.glb",
    "mojulo": {
-    "ref": "sku_fet_dbn_std_mw1uf6gi",
+    "ref": "sku_fet_dbn_std_mw1uphmv",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -14570,7 +14570,7 @@
    "bytes": 137312,
    "file": "models/FET-DCH-std.glb",
    "mojulo": {
-    "ref": "sku_fet_dch_std_mw1uf68u",
+    "ref": "sku_fet_dch_std_mw1upefd",
     "kind": "furniture",
     "spec": {
      "like": "chair",
@@ -14623,7 +14623,7 @@
    "bytes": 142268,
    "file": "models/FET-DKC-std.glb",
    "mojulo": {
-    "ref": "sku_fet_dkc_std_mw1uffh6",
+    "ref": "sku_fet_dkc_std_mw1upqk6",
     "kind": "furniture",
     "spec": {
      "like": "chair",
@@ -14677,7 +14677,7 @@
    "bytes": 539348,
    "file": "models/FET-DRS-std.glb",
    "mojulo": {
-    "ref": "sku_fet_drs_std_mw1umexr",
+    "ref": "sku_fet_drs_std_mw1uou67",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -14732,7 +14732,7 @@
    "bytes": 547992,
    "file": "models/FET-DRS-wide.glb",
    "mojulo": {
-    "ref": "sku_fet_drs_wide_mw1umf0d",
+    "ref": "sku_fet_drs_wide_mw1uou82",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -14785,7 +14785,7 @@
    "bytes": 137448,
    "file": "models/FET-DSK-std.glb",
    "mojulo": {
-    "ref": "sku_fet_dsk_std_mw1ufbej",
+    "ref": "sku_fet_dsk_std_mw1upmj3",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -14837,7 +14837,7 @@
    "bytes": 143928,
    "file": "models/FET-DSK-wide.glb",
    "mojulo": {
-    "ref": "sku_fet_dsk_wide_mw1ufbfh",
+    "ref": "sku_fet_dsk_wide_mw1upmkm",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -14889,7 +14889,7 @@
    "bytes": 147176,
    "file": "models/FET-DTB-4-seat.glb",
    "mojulo": {
-    "ref": "sku_fet_dtb_4_seat_mw1uf250",
+    "ref": "sku_fet_dtb_4_seat_mw1upacd",
     "kind": "furniture",
     "spec": {
      "like": "dining-table",
@@ -14941,7 +14941,7 @@
    "bytes": 156900,
    "file": "models/FET-DTB-6-seat.glb",
    "mojulo": {
-    "ref": "sku_fet_dtb_6_seat_mw1uf264",
+    "ref": "sku_fet_dtb_6_seat_mw1updao",
     "kind": "furniture",
     "spec": {
      "like": "dining-table",
@@ -14993,7 +14993,7 @@
    "bytes": 172040,
    "file": "models/FET-DTB-8-seat.glb",
    "mojulo": {
-    "ref": "sku_fet_dtb_8_seat_mw1uf26s",
+    "ref": "sku_fet_dtb_8_seat_mw1updf1",
     "kind": "furniture",
     "spec": {
      "like": "dining-table",
@@ -15045,7 +15045,7 @@
    "bytes": 128376,
    "file": "models/FET-EBN-std.glb",
    "mojulo": {
-    "ref": "sku_fet_ebn_std_mw1ufmh1",
+    "ref": "sku_fet_ebn_std_mw1upv9y",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -15135,7 +15135,7 @@
    "bytes": 419532,
    "file": "models/FET-KBD-single.glb",
    "mojulo": {
-    "ref": "sku_fet_kbd_single_mw1ufu7h",
+    "ref": "sku_fet_kbd_single_mw1uq3a4",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -15412,10 +15412,10 @@
     "wood": "#c9a227"
    },
    "triangles": 108,
-   "bytes": 293948,
+   "bytes": 186672,
    "file": "models/FET-KBK-low.glb",
    "mojulo": {
-    "ref": "sku_fet_kbk_low_mw1ufy00",
+    "ref": "sku_fet_kbk_low_mw1uq3i8",
     "kind": "furniture",
     "spec": {
      "like": "bookcase",
@@ -15466,7 +15466,7 @@
    "bytes": 130220,
    "file": "models/FET-KCH-std.glb",
    "mojulo": {
-    "ref": "sku_fet_kch_std_mw1ufy5o",
+    "ref": "sku_fet_kch_std_mw1uq79j",
     "kind": "furniture",
     "spec": {
      "like": "chair",
@@ -15517,10 +15517,10 @@
     "handles": "#34363a"
    },
    "triangles": 240,
-   "bytes": 906612,
+   "bytes": 372912,
    "file": "models/FET-KCT-std.glb",
    "mojulo": {
-    "ref": "sku_fet_kct_std_mw1ufyf0",
+    "ref": "sku_fet_kct_std_mw1uqavr",
     "kind": "furniture",
     "spec": {
      "like": "chest",
@@ -15570,7 +15570,7 @@
    "bytes": 130984,
    "file": "models/FET-KTB-std.glb",
    "mojulo": {
-    "ref": "sku_fet_ktb_std_mw1ufy2o",
+    "ref": "sku_fet_ktb_std_mw1uq3lf",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -15622,7 +15622,7 @@
    "bytes": 215348,
    "file": "models/FET-LMB-std.glb",
    "mojulo": {
-    "ref": "sku_fet_lmb_std_mw1ugjzf",
+    "ref": "sku_fet_lmb_std_mw1uqyn0",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -15767,10 +15767,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 387656,
+   "bytes": 233748,
    "file": "models/FET-MED-long.glb",
    "mojulo": {
-    "ref": "sku_fet_med_long_mw1udonc",
+    "ref": "sku_fet_med_long_mw1unsza",
     "kind": "furniture",
     "spec": {
      "like": "media-console",
@@ -15819,10 +15819,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 361044,
+   "bytes": 207108,
    "file": "models/FET-MED-short.glb",
    "mojulo": {
-    "ref": "sku_fet_med_short_mw1udol4",
+    "ref": "sku_fet_med_short_mw1unswx",
     "kind": "furniture",
     "spec": {
      "like": "media-console",
@@ -15871,10 +15871,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 374640,
+   "bytes": 220716,
    "file": "models/FET-MED-std.glb",
    "mojulo": {
-    "ref": "sku_fet_med_std_mw1udom7",
+    "ref": "sku_fet_med_std_mw1unsy9",
     "kind": "furniture",
     "spec": {
      "like": "media-console",
@@ -15923,10 +15923,10 @@
     "handles": "#34363a"
    },
    "triangles": 240,
-   "bytes": 900096,
+   "bytes": 366396,
    "file": "models/FET-NST-std.glb",
    "mojulo": {
-    "ref": "sku_fet_nst_std_mw1uef3c",
+    "ref": "sku_fet_nst_std_mw1uomof",
     "kind": "furniture",
     "spec": {
      "like": "nightstand",
@@ -15978,7 +15978,7 @@
    "bytes": 538920,
    "file": "models/FET-PDR-std.glb",
    "mojulo": {
-    "ref": "sku_fet_pdr_std_mw1umfe9",
+    "ref": "sku_fet_pdr_std_mw1uoy7k",
     "kind": "furniture",
     "spec": {
      "like": "painted-dresser",
@@ -16063,7 +16063,7 @@
    "bytes": 179504,
    "file": "models/FET-POF-std.glb",
    "mojulo": {
-    "ref": "sku_fet_pof_std_mw1ugo77",
+    "ref": "sku_fet_pof_std_mw1uqzrb",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -16316,10 +16316,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 751684,
+   "bytes": 360416,
    "file": "models/FET-SDB-long.glb",
    "mojulo": {
-    "ref": "sku_fet_sdb_long_mw1udx8m",
+    "ref": "sku_fet_sdb_long_mw1uo7uk",
     "kind": "furniture",
     "spec": {
      "like": "sideboard",
@@ -16368,10 +16368,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 742820,
+   "bytes": 351540,
    "file": "models/FET-SDB-std.glb",
    "mojulo": {
-    "ref": "sku_fet_sdb_std_mw1udx78",
+    "ref": "sku_fet_sdb_std_mw1uo7nx",
     "kind": "furniture",
     "spec": {
      "like": "sideboard",
@@ -16420,10 +16420,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 353020,
+   "bytes": 199084,
    "file": "models/FET-SHO-std.glb",
    "mojulo": {
-    "ref": "sku_fet_sho_std_mw1ufqtz",
+    "ref": "sku_fet_sho_std_mw1uq2r7",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -16708,7 +16708,7 @@
    "bytes": 115852,
    "file": "models/FET-STL-counter.glb",
    "mojulo": {
-    "ref": "sku_fet_stl_counter_mw1ufb4p",
+    "ref": "sku_fet_stl_counter_mw1upj4e",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -16760,7 +16760,7 @@
    "bytes": 103332,
    "file": "models/FET-THR-std.glb",
    "mojulo": {
-    "ref": "sku_fet_thr_std_mw1ugkgv",
+    "ref": "sku_fet_thr_std_mw1uqz76",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -17040,10 +17040,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 373588,
+   "bytes": 219660,
    "file": "models/FET-WRD-double.glb",
    "mojulo": {
-    "ref": "sku_fet_wrd_double_mw1uew3c",
+    "ref": "sku_fet_wrd_double_mw1up2f8",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -17095,10 +17095,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 360624,
+   "bytes": 206688,
    "file": "models/FET-WRD-single.glb",
    "mojulo": {
-    "ref": "sku_fet_wrd_single_mw1uew2c",
+    "ref": "sku_fet_wrd_single_mw1up2e8",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -17262,10 +17262,10 @@
     "handles": "#34363a"
    },
    "triangles": 240,
-   "bytes": 376860,
+   "bytes": 244228,
    "file": "models/HIN-BCH-std.glb",
    "mojulo": {
-    "ref": "sku_hin_bch_std_mw1uewbz",
+    "ref": "sku_hin_bch_std_mw1up5mk",
     "kind": "furniture",
     "spec": {
      "like": "chest",
@@ -17314,7 +17314,7 @@
    "bytes": 55656,
    "file": "models/HIN-BEB-std.glb",
    "mojulo": {
-    "ref": "sku_hin_beb_std_mw1uew6e",
+    "ref": "sku_hin_beb_std_mw1up2hb",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -17369,7 +17369,7 @@
    "bytes": 532680,
    "file": "models/HIN-BED-double.glb",
    "mojulo": {
-    "ref": "sku_hin_bed_double_mw1ue1fv",
+    "ref": "sku_hin_bed_double_mw1uo82b",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -17651,7 +17651,7 @@
    "bytes": 742952,
    "file": "models/HIN-BED-king.glb",
    "mojulo": {
-    "ref": "sku_hin_bed_king_mw1ue1yz",
+    "ref": "sku_hin_bed_king_mw1uo8lf",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -17933,7 +17933,7 @@
    "bytes": 622580,
    "file": "models/HIN-BED-queen.glb",
    "mojulo": {
-    "ref": "sku_hin_bed_queen_mw1ue1qn",
+    "ref": "sku_hin_bed_queen_mw1uo8du",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -18212,7 +18212,7 @@
    "bytes": 53064,
    "file": "models/HIN-BEN-std.glb",
    "mojulo": {
-    "ref": "sku_hin_ben_std_mw1ue1cu",
+    "ref": "sku_hin_ben_std_mw1uo7zm",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -18261,10 +18261,10 @@
     "body": "#bf9c67"
    },
    "triangles": 204,
-   "bytes": 278704,
+   "bytes": 183092,
    "file": "models/HIN-BKC-std.glb",
    "mojulo": {
-    "ref": "sku_hin_bkc_std_mw1udowm",
+    "ref": "sku_hin_bkc_std_mw1unt6x",
     "kind": "furniture",
     "spec": {
      "like": "bookcase",
@@ -18310,10 +18310,10 @@
     "body": "#c09c67"
    },
    "triangles": 228,
-   "bytes": 312064,
+   "bytes": 196952,
    "file": "models/HIN-BKC-tall.glb",
    "mojulo": {
-    "ref": "sku_hin_bkc_tall_mw1udozz",
+    "ref": "sku_hin_bkc_tall_mw1unt9d",
     "kind": "furniture",
     "spec": {
      "like": "bookcase",
@@ -18492,10 +18492,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 339000,
+   "bytes": 242696,
    "file": "models/HIN-CAB-std.glb",
    "mojulo": {
-    "ref": "sku_hin_cab_std_mw1uffmf",
+    "ref": "sku_hin_cab_std_mw1uprge",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -18545,10 +18545,10 @@
     "handles": "#34363a"
    },
    "triangles": 492,
-   "bytes": 719672,
+   "bytes": 361788,
    "file": "models/HIN-CHT-tall.glb",
    "mojulo": {
-    "ref": "sku_hin_cht_tall_mw1uenp5",
+    "ref": "sku_hin_cht_tall_mw1uoudp",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -18771,10 +18771,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 341148,
+   "bytes": 244844,
    "file": "models/HIN-CON-std.glb",
    "mojulo": {
-    "ref": "sku_hin_con_std_mw1ufmjk",
+    "ref": "sku_hin_con_std_mw1upvbf",
     "kind": "furniture",
     "spec": {
      "like": "sideboard",
@@ -18823,7 +18823,7 @@
    "bytes": 219236,
    "file": "models/HIN-CUS-std.glb",
    "mojulo": {
-    "ref": "sku_hin_cus_std_mw1ugi6b",
+    "ref": "sku_hin_cus_std_mw1uqtla",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -18912,7 +18912,7 @@
    "bytes": 59112,
    "file": "models/HIN-DBN-std.glb",
    "mojulo": {
-    "ref": "sku_hin_dbn_std_mw1uf6dr",
+    "ref": "sku_hin_dbn_std_mw1upem3",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -18965,7 +18965,7 @@
    "bytes": 57392,
    "file": "models/HIN-DCH-std.glb",
    "mojulo": {
-    "ref": "sku_hin_dch_std_mw1uf5hp",
+    "ref": "sku_hin_dch_std_mw1updpz",
     "kind": "furniture",
     "spec": {
      "like": "chair",
@@ -19018,7 +19018,7 @@
    "bytes": 62356,
    "file": "models/HIN-DKC-std.glb",
    "mojulo": {
-    "ref": "sku_hin_dkc_std_mw1ufesb",
+    "ref": "sku_hin_dkc_std_mw1upmw5",
     "kind": "furniture",
     "spec": {
      "like": "chair",
@@ -19068,10 +19068,10 @@
     "handles": "#34363a"
    },
    "triangles": 408,
-   "bytes": 615168,
+   "bytes": 346344,
    "file": "models/HIN-DRS-std.glb",
    "mojulo": {
-    "ref": "sku_hin_drs_std_mw1uef7p",
+    "ref": "sku_hin_drs_std_mw1uopm2",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -19121,10 +19121,10 @@
     "handles": "#34363a"
    },
    "triangles": 408,
-   "bytes": 623812,
+   "bytes": 354988,
    "file": "models/HIN-DRS-wide.glb",
    "mojulo": {
-    "ref": "sku_hin_drs_wide_mw1uefcy",
+    "ref": "sku_hin_drs_wide_mw1uotfz",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -19176,7 +19176,7 @@
    "bytes": 57384,
    "file": "models/HIN-DSK-std.glb",
    "mojulo": {
-    "ref": "sku_hin_dsk_std_mw1ufb80",
+    "ref": "sku_hin_dsk_std_mw1upj6l",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -19228,7 +19228,7 @@
    "bytes": 63864,
    "file": "models/HIN-DSK-wide.glb",
    "mojulo": {
-    "ref": "sku_hin_dsk_wide_mw1ufb8n",
+    "ref": "sku_hin_dsk_wide_mw1upj75",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -19280,7 +19280,7 @@
    "bytes": 67108,
    "file": "models/HIN-DTB-4-seat.glb",
    "mojulo": {
-    "ref": "sku_hin_dtb_4_seat_mw1uf1sm",
+    "ref": "sku_hin_dtb_4_seat_mw1up9xr",
     "kind": "furniture",
     "spec": {
      "like": "dining-table",
@@ -19332,7 +19332,7 @@
    "bytes": 76828,
    "file": "models/HIN-DTB-6-seat.glb",
    "mojulo": {
-    "ref": "sku_hin_dtb_6_seat_mw1uf1ua",
+    "ref": "sku_hin_dtb_6_seat_mw1up9yj",
     "kind": "furniture",
     "spec": {
      "like": "dining-table",
@@ -19384,7 +19384,7 @@
    "bytes": 91968,
    "file": "models/HIN-DTB-8-seat.glb",
    "mojulo": {
-    "ref": "sku_hin_dtb_8_seat_mw1uf1v5",
+    "ref": "sku_hin_dtb_8_seat_mw1up9zb",
     "kind": "furniture",
     "spec": {
      "like": "dining-table",
@@ -19436,7 +19436,7 @@
    "bytes": 48312,
    "file": "models/HIN-EBN-std.glb",
    "mojulo": {
-    "ref": "sku_hin_ebn_std_mw1ufma5",
+    "ref": "sku_hin_ebn_std_mw1upv6s",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -19523,7 +19523,7 @@
    "bytes": 215348,
    "file": "models/HIN-LMB-std.glb",
    "mojulo": {
-    "ref": "sku_hin_lmb_std_mw1ugjam",
+    "ref": "sku_hin_lmb_std_mw1uqutg",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -19724,10 +19724,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 235288,
+   "bytes": 192104,
    "file": "models/HIN-MDU-std.glb",
    "mojulo": {
-    "ref": "sku_hin_mdu_std_mw1udor5",
+    "ref": "sku_hin_mdu_std_mw1unt2x",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -19927,10 +19927,10 @@
     "handles": "#34363a"
    },
    "triangles": 240,
-   "bytes": 367072,
+   "bytes": 234428,
    "file": "models/HIN-NST-std.glb",
    "mojulo": {
-    "ref": "sku_hin_nst_std_mw1ueaog",
+    "ref": "sku_hin_nst_std_mw1uoi4s",
     "kind": "furniture",
     "spec": {
      "like": "nightstand",
@@ -19979,7 +19979,7 @@
    "bytes": 53496,
    "file": "models/HIN-OBN-std.glb",
    "mojulo": {
-    "ref": "sku_hin_obn_std_mw1ufygu",
+    "ref": "sku_hin_obn_std_mw1uqax6",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -20031,7 +20031,7 @@
    "bytes": 48756,
    "file": "models/HIN-OBT-std.glb",
    "mojulo": {
-    "ref": "sku_hin_obt_std_mw1ufyij",
+    "ref": "sku_hin_obt_std_mw1uqb0c",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -20084,7 +20084,7 @@
    "bytes": 58016,
    "file": "models/HIN-OCH-std.glb",
    "mojulo": {
-    "ref": "sku_hin_och_std_mw1ufykj",
+    "ref": "sku_hin_och_std_mw1uqb32",
     "kind": "furniture",
     "spec": {
      "like": "chair",
@@ -20139,7 +20139,7 @@
    "bytes": 778720,
    "file": "models/HIN-PLT-king.glb",
    "mojulo": {
-    "ref": "sku_hin_plt_king_mw1ue9fs",
+    "ref": "sku_hin_plt_king_mw1uogni",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -20370,7 +20370,7 @@
    "bytes": 653784,
    "file": "models/HIN-PLT-queen.glb",
    "mojulo": {
-    "ref": "sku_hin_plt_queen_mw1ue96i",
+    "ref": "sku_hin_plt_queen_mw1uogco",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -20633,7 +20633,7 @@
    "bytes": 179504,
    "file": "models/HIN-POF-std.glb",
    "mojulo": {
-    "ref": "sku_hin_pof_std_mw1ugkj9",
+    "ref": "sku_hin_pof_std_mw1uqzae",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -20885,10 +20885,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 365144,
+   "bytes": 268824,
    "file": "models/HIN-SDB-long.glb",
    "mojulo": {
-    "ref": "sku_hin_sdb_long_mw1udwll",
+    "ref": "sku_hin_sdb_long_mw1uo0nx",
     "kind": "furniture",
     "spec": {
      "like": "sideboard",
@@ -20935,10 +20935,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 356272,
+   "bytes": 259944,
    "file": "models/HIN-SDB-std.glb",
    "mojulo": {
-    "ref": "sku_hin_sdb_std_mw1udwhj",
+    "ref": "sku_hin_sdb_std_mw1uo0k5",
     "kind": "furniture",
     "spec": {
      "like": "sideboard",
@@ -20987,7 +20987,7 @@
    "bytes": 63868,
    "file": "models/HIN-SDK-std.glb",
    "mojulo": {
-    "ref": "sku_hin_sdk_std_mw1ufbiu",
+    "ref": "sku_hin_sdk_std_mw1upmog",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -21037,10 +21037,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 209940,
+   "bytes": 166776,
    "file": "models/HIN-SHO-std.glb",
    "mojulo": {
-    "ref": "sku_hin_sho_std_mw1ufqml",
+    "ref": "sku_hin_sho_std_mw1uq2js",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -21324,7 +21324,7 @@
    "bytes": 35796,
    "file": "models/HIN-STL-counter.glb",
    "mojulo": {
-    "ref": "sku_hin_stl_counter_mw1ufayj",
+    "ref": "sku_hin_stl_counter_mw1upiz0",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -21376,7 +21376,7 @@
    "bytes": 103332,
    "file": "models/HIN-THR-std.glb",
    "mojulo": {
-    "ref": "sku_hin_thr_std_mw1ugkb4",
+    "ref": "sku_hin_thr_std_mw1uqyyp",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -21533,10 +21533,10 @@
     "wood": "#6b4a2e"
    },
    "triangles": 204,
-   "bytes": 180212,
+   "bytes": 140480,
    "file": "models/HIN-UTL-std.glb",
    "mojulo": {
-    "ref": "sku_hin_utl_std_mw1uffjc",
+    "ref": "sku_hin_utl_std_mw1uprby",
     "kind": "furniture",
     "spec": {
      "like": "shop-shelves",
@@ -21651,10 +21651,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 230532,
+   "bytes": 187348,
    "file": "models/HIN-WRD-double.glb",
    "mojulo": {
-    "ref": "sku_hin_wrd_double_mw1uep8c",
+    "ref": "sku_hin_wrd_double_mw1up20t",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -21704,10 +21704,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 217556,
+   "bytes": 174380,
    "file": "models/HIN-WRD-single.glb",
    "mojulo": {
-    "ref": "sku_hin_wrd_single_mw1ueonr",
+    "ref": "sku_hin_wrd_single_mw1uoyad",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -21760,7 +21760,7 @@
    "bytes": 68036,
    "file": "models/HIN-YOK-std.glb",
    "mojulo": {
-    "ref": "sku_hin_yok_std_mw1uf6d4",
+    "ref": "sku_hin_yok_std_mw1upekc",
     "kind": "furniture",
     "spec": {
      "like": "chair",
@@ -21925,7 +21925,7 @@
    "bytes": 63520,
    "file": "models/LIT-BEB-std.glb",
    "mojulo": {
-    "ref": "sku_lit_beb_std_mw1uew8k",
+    "ref": "sku_lit_beb_std_mw1up2jj",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -21980,7 +21980,7 @@
    "bytes": 532680,
    "file": "models/LIT-BED-double.glb",
    "mojulo": {
-    "ref": "sku_lit_bed_double_mw1ue3ja",
+    "ref": "sku_lit_bed_double_mw1uoabk",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -22262,7 +22262,7 @@
    "bytes": 742952,
    "file": "models/LIT-BED-king.glb",
    "mojulo": {
-    "ref": "sku_lit_bed_king_mw1ue3v3",
+    "ref": "sku_lit_bed_king_mw1uoaod",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -22544,7 +22544,7 @@
    "bytes": 622580,
    "file": "models/LIT-BED-queen.glb",
    "mojulo": {
-    "ref": "sku_lit_bed_queen_mw1ue3om",
+    "ref": "sku_lit_bed_queen_mw1uoahu",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -22823,7 +22823,7 @@
    "bytes": 60928,
    "file": "models/LIT-BEN-std.glb",
    "mojulo": {
-    "ref": "sku_lit_ben_std_mw1ue1e3",
+    "ref": "sku_lit_ben_std_mw1uo80n",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -22873,10 +22873,10 @@
     "wood": "#f2efe8"
    },
    "triangles": 204,
-   "bytes": 507480,
+   "bytes": 214032,
    "file": "models/LIT-BKC-std.glb",
    "mojulo": {
-    "ref": "sku_lit_bkc_std_mw1udsb9",
+    "ref": "sku_lit_bkc_std_mw1unwho",
     "kind": "furniture",
     "spec": {
      "like": "bookcase",
@@ -22924,10 +22924,10 @@
     "wood": "#f2efe8"
    },
    "triangles": 228,
-   "bytes": 567304,
+   "bytes": 227444,
    "file": "models/LIT-BKC-tall.glb",
    "mojulo": {
-    "ref": "sku_lit_bkc_tall_mw1udsi8",
+    "ref": "sku_lit_bkc_tall_mw1unwit",
     "kind": "furniture",
     "spec": {
      "like": "bookcase",
@@ -23108,10 +23108,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 725564,
+   "bytes": 334276,
    "file": "models/LIT-CAB-std.glb",
    "mojulo": {
-    "ref": "sku_lit_cab_std_mw1ufj93",
+    "ref": "sku_lit_cab_std_mw1upuzx",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -23166,7 +23166,7 @@
    "bytes": 553804,
    "file": "models/LIT-CHT-tall.glb",
    "mojulo": {
-    "ref": "sku_lit_cht_tall_mw1umf5x",
+    "ref": "sku_lit_cht_tall_mw1uouk2",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -23391,10 +23391,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 727716,
+   "bytes": 336428,
    "file": "models/LIT-CON-std.glb",
    "mojulo": {
-    "ref": "sku_lit_con_std_mw1ufqcx",
+    "ref": "sku_lit_con_std_mw1upynp",
     "kind": "furniture",
     "spec": {
      "like": "sideboard",
@@ -23444,7 +23444,7 @@
    "bytes": 219236,
    "file": "models/LIT-CUS-std.glb",
    "mojulo": {
-    "ref": "sku_lit_cus_std_mw1ugiub",
+    "ref": "sku_lit_cus_std_mw1uqu87",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -23533,7 +23533,7 @@
    "bytes": 66976,
    "file": "models/LIT-DBN-std.glb",
    "mojulo": {
-    "ref": "sku_lit_dbn_std_mw1uf6fh",
+    "ref": "sku_lit_dbn_std_mw1uphkz",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -23586,7 +23586,7 @@
    "bytes": 66920,
    "file": "models/LIT-DCH-std.glb",
    "mojulo": {
-    "ref": "sku_lit_dch_std_mw1uf66o",
+    "ref": "sku_lit_dch_std_mw1upecx",
     "kind": "furniture",
     "spec": {
      "like": "chair",
@@ -23639,7 +23639,7 @@
    "bytes": 71876,
    "file": "models/LIT-DKC-std.glb",
    "mojulo": {
-    "ref": "sku_lit_dkc_std_mw1uffg6",
+    "ref": "sku_lit_dkc_std_mw1upnks",
     "kind": "furniture",
     "spec": {
      "like": "chair",
@@ -23693,7 +23693,7 @@
    "bytes": 539348,
    "file": "models/LIT-DRS-std.glb",
    "mojulo": {
-    "ref": "sku_lit_drs_std_mw1umera",
+    "ref": "sku_lit_drs_std_mw1uotx5",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -23748,7 +23748,7 @@
    "bytes": 547992,
    "file": "models/LIT-DRS-wide.glb",
    "mojulo": {
-    "ref": "sku_lit_drs_wide_mw1umeua",
+    "ref": "sku_lit_drs_wide_mw1uotyz",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -23801,7 +23801,7 @@
    "bytes": 65244,
    "file": "models/LIT-DSK-std.glb",
    "mojulo": {
-    "ref": "sku_lit_dsk_std_mw1ufbca",
+    "ref": "sku_lit_dsk_std_mw1upmbm",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -23853,7 +23853,7 @@
    "bytes": 71728,
    "file": "models/LIT-DSK-wide.glb",
    "mojulo": {
-    "ref": "sku_lit_dsk_wide_mw1ufbcx",
+    "ref": "sku_lit_dsk_wide_mw1upmf7",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -23905,7 +23905,7 @@
    "bytes": 74972,
    "file": "models/LIT-DTB-4-seat.glb",
    "mojulo": {
-    "ref": "sku_lit_dtb_4_seat_mw1uf21i",
+    "ref": "sku_lit_dtb_4_seat_mw1upa5s",
     "kind": "furniture",
     "spec": {
      "like": "dining-table",
@@ -23957,7 +23957,7 @@
    "bytes": 84692,
    "file": "models/LIT-DTB-6-seat.glb",
    "mojulo": {
-    "ref": "sku_lit_dtb_6_seat_mw1uf223",
+    "ref": "sku_lit_dtb_6_seat_mw1upa6k",
     "kind": "furniture",
     "spec": {
      "like": "dining-table",
@@ -24009,7 +24009,7 @@
    "bytes": 99832,
    "file": "models/LIT-DTB-8-seat.glb",
    "mojulo": {
-    "ref": "sku_lit_dtb_8_seat_mw1uf22n",
+    "ref": "sku_lit_dtb_8_seat_mw1upa7b",
     "kind": "furniture",
     "spec": {
      "like": "dining-table",
@@ -24061,7 +24061,7 @@
    "bytes": 56184,
    "file": "models/LIT-EBN-std.glb",
    "mojulo": {
-    "ref": "sku_lit_ebn_std_mw1ufmfe",
+    "ref": "sku_lit_ebn_std_mw1upv8q",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -24167,7 +24167,7 @@
    "bytes": 162320,
    "file": "models/LIT-FHT-6-seat.glb",
    "mojulo": {
-    "ref": "sku_lit_fht_6_seat_mw1uf5an",
+    "ref": "sku_lit_fht_6_seat_mw1updlp",
     "kind": "furniture",
     "spec": {
      "like": "farmhouse-table",
@@ -24254,7 +24254,7 @@
    "bytes": 419532,
    "file": "models/LIT-KBD-single.glb",
    "mojulo": {
-    "ref": "sku_lit_kbd_single_mw1uftuz",
+    "ref": "sku_lit_kbd_single_mw1uq2ta",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -24531,10 +24531,10 @@
     "wood": "#f2efe8"
    },
    "triangles": 108,
-   "bytes": 293948,
+   "bytes": 186672,
    "file": "models/LIT-KBK-low.glb",
    "mojulo": {
-    "ref": "sku_lit_kbk_low_mw1ufuei",
+    "ref": "sku_lit_kbk_low_mw1uq3g0",
     "kind": "furniture",
     "spec": {
      "like": "bookcase",
@@ -24585,7 +24585,7 @@
    "bytes": 59824,
    "file": "models/LIT-KCH-std.glb",
    "mojulo": {
-    "ref": "sku_lit_kch_std_mw1ufy3v",
+    "ref": "sku_lit_kch_std_mw1uq6kd",
     "kind": "furniture",
     "spec": {
      "like": "chair",
@@ -24636,10 +24636,10 @@
     "handles": "#34363a"
    },
    "triangles": 240,
-   "bytes": 906612,
+   "bytes": 372912,
    "file": "models/LIT-KCT-std.glb",
    "mojulo": {
-    "ref": "sku_lit_kct_std_mw1ufy6u",
+    "ref": "sku_lit_kct_std_mw1uq7b4",
     "kind": "furniture",
     "spec": {
      "like": "chest",
@@ -24689,7 +24689,7 @@
    "bytes": 58788,
    "file": "models/LIT-KTB-std.glb",
    "mojulo": {
-    "ref": "sku_lit_ktb_std_mw1ufy10",
+    "ref": "sku_lit_ktb_std_mw1uq3j0",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -24741,7 +24741,7 @@
    "bytes": 215348,
    "file": "models/LIT-LMB-std.glb",
    "mojulo": {
-    "ref": "sku_lit_lmb_std_mw1ugjst",
+    "ref": "sku_lit_lmb_std_mw1uqya1",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -24943,10 +24943,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 387656,
+   "bytes": 233748,
    "file": "models/LIT-MED-long.glb",
    "mojulo": {
-    "ref": "sku_lit_med_long_mw1udkwd",
+    "ref": "sku_lit_med_long_mw1unp5q",
     "kind": "furniture",
     "spec": {
      "like": "media-console",
@@ -24995,10 +24995,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 361044,
+   "bytes": 207108,
    "file": "models/LIT-MED-short.glb",
    "mojulo": {
-    "ref": "sku_lit_med_short_mw1udkn9",
+    "ref": "sku_lit_med_short_mw1unp3b",
     "kind": "furniture",
     "spec": {
      "like": "media-console",
@@ -25047,10 +25047,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 374640,
+   "bytes": 220716,
    "file": "models/LIT-MED-std.glb",
    "mojulo": {
-    "ref": "sku_lit_med_std_mw1udkut",
+    "ref": "sku_lit_med_std_mw1unp4v",
     "kind": "furniture",
     "spec": {
      "like": "media-console",
@@ -25099,10 +25099,10 @@
     "handles": "#34363a"
    },
    "triangles": 240,
-   "bytes": 900096,
+   "bytes": 366396,
    "file": "models/LIT-NST-std.glb",
    "mojulo": {
-    "ref": "sku_lit_nst_std_mw1ueey9",
+    "ref": "sku_lit_nst_std_mw1uomks",
     "kind": "furniture",
     "spec": {
      "like": "nightstand",
@@ -25152,7 +25152,7 @@
    "bytes": 61360,
    "file": "models/LIT-OBN-std.glb",
    "mojulo": {
-    "ref": "sku_lit_obn_std_mw1ufyhf",
+    "ref": "sku_lit_obn_std_mw1uqay3",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -25204,7 +25204,7 @@
    "bytes": 56628,
    "file": "models/LIT-OBT-std.glb",
    "mojulo": {
-    "ref": "sku_lit_obt_std_mw1ufyj3",
+    "ref": "sku_lit_obt_std_mw1uqb10",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -25257,7 +25257,7 @@
    "bytes": 67544,
    "file": "models/LIT-OCH-std.glb",
    "mojulo": {
-    "ref": "sku_lit_och_std_mw1ug1o5",
+    "ref": "sku_lit_och_std_mw1uqb3v",
     "kind": "furniture",
     "spec": {
      "like": "chair",
@@ -25307,10 +25307,10 @@
     "wood": "#e4d4b4"
    },
    "triangles": 11532,
-   "bytes": 482756,
+   "bytes": 481196,
    "file": "models/LIT-OLS-std.glb",
    "mojulo": {
-    "ref": "sku_lit_ols_std_mw1ug2ct",
+    "ref": "sku_lit_ols_std_mw1uqb5w",
     "kind": "furniture",
     "spec": {
      "piece": "sofa",
@@ -25371,7 +25371,7 @@
    "bytes": 538920,
    "file": "models/LIT-PDR-std.glb",
    "mojulo": {
-    "ref": "sku_lit_pdr_std_mw1umfbu",
+    "ref": "sku_lit_pdr_std_mw1uoxti",
     "kind": "furniture",
     "spec": {
      "like": "painted-dresser",
@@ -25456,7 +25456,7 @@
    "bytes": 179504,
    "file": "models/LIT-POF-std.glb",
    "mojulo": {
-    "ref": "sku_lit_pof_std_mw1ugo2e",
+    "ref": "sku_lit_pof_std_mw1uqzl4",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -25709,10 +25709,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 751684,
+   "bytes": 360416,
    "file": "models/LIT-SDB-long.glb",
    "mojulo": {
-    "ref": "sku_lit_sdb_long_mw1udwzu",
+    "ref": "sku_lit_sdb_long_mw1uo14y",
     "kind": "furniture",
     "spec": {
      "like": "sideboard",
@@ -25761,10 +25761,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 742820,
+   "bytes": 351540,
    "file": "models/LIT-SDB-std.glb",
    "mojulo": {
-    "ref": "sku_lit_sdb_std_mw1udwy8",
+    "ref": "sku_lit_sdb_std_mw1uo13n",
     "kind": "furniture",
     "spec": {
      "like": "sideboard",
@@ -25813,10 +25813,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 353020,
+   "bytes": 199084,
    "file": "models/LIT-SHO-std.glb",
    "mojulo": {
-    "ref": "sku_lit_sho_std_mw1ufqr1",
+    "ref": "sku_lit_sho_std_mw1uq2o5",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -26101,7 +26101,7 @@
    "bytes": 43664,
    "file": "models/LIT-STL-counter.glb",
    "mojulo": {
-    "ref": "sku_lit_stl_counter_mw1ufb40",
+    "ref": "sku_lit_stl_counter_mw1upj2f",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -26153,7 +26153,7 @@
    "bytes": 62008,
    "file": "models/LIT-STT-std.glb",
    "mojulo": {
-    "ref": "sku_lit_stt_std_mw1ufeqa",
+    "ref": "sku_lit_stt_std_mw1upmua",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -26205,7 +26205,7 @@
    "bytes": 103332,
    "file": "models/LIT-THR-std.glb",
    "mojulo": {
-    "ref": "sku_lit_thr_std_mw1ugkfs",
+    "ref": "sku_lit_thr_std_mw1uqz3e",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -26431,10 +26431,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 373588,
+   "bytes": 219660,
    "file": "models/LIT-WRD-double.glb",
    "mojulo": {
-    "ref": "sku_lit_wrd_double_mw1uesgt",
+    "ref": "sku_lit_wrd_double_mw1up2aa",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -26486,10 +26486,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 360624,
+   "bytes": 206688,
    "file": "models/LIT-WRD-single.glb",
    "mojulo": {
-    "ref": "sku_lit_wrd_single_mw1uesfo",
+    "ref": "sku_lit_wrd_single_mw1up29b",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -26543,7 +26543,7 @@
    "bytes": 137316,
    "file": "models/LIT-WSR-std.glb",
    "mojulo": {
-    "ref": "sku_lit_wsr_std_mw1uf6b8",
+    "ref": "sku_lit_wsr_std_mw1upeib",
     "kind": "furniture",
     "spec": {
      "like": "windsor-side-chair",
@@ -26805,7 +26805,7 @@
    "bytes": 109244,
    "file": "models/SAB-BEB-std.glb",
    "mojulo": {
-    "ref": "sku_sab_beb_std_mw1uew98",
+    "ref": "sku_sab_beb_std_mw1up2k3",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -26860,7 +26860,7 @@
    "bytes": 532680,
    "file": "models/SAB-BED-double.glb",
    "mojulo": {
-    "ref": "sku_sab_bed_double_mw1ue43n",
+    "ref": "sku_sab_bed_double_mw1uoaxc",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -27142,7 +27142,7 @@
    "bytes": 742952,
    "file": "models/SAB-BED-king.glb",
    "mojulo": {
-    "ref": "sku_sab_bed_king_mw1ue4gq",
+    "ref": "sku_sab_bed_king_mw1uoeg8",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -27424,7 +27424,7 @@
    "bytes": 622580,
    "file": "models/SAB-BED-queen.glb",
    "mojulo": {
-    "ref": "sku_sab_bed_queen_mw1ue49q",
+    "ref": "sku_sab_bed_queen_mw1uoe0a",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -27703,7 +27703,7 @@
    "bytes": 106652,
    "file": "models/SAB-BEN-std.glb",
    "mojulo": {
-    "ref": "sku_sab_ben_std_mw1ue1ey",
+    "ref": "sku_sab_ben_std_mw1uo81a",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -27752,10 +27752,10 @@
     "body": "#c8ad81"
    },
    "triangles": 204,
-   "bytes": 278708,
+   "bytes": 183096,
    "file": "models/SAB-BKC-std.glb",
    "mojulo": {
-    "ref": "sku_sab_bkc_std_mw1udsl0",
+    "ref": "sku_sab_bkc_std_mw1unwjz",
     "kind": "furniture",
     "spec": {
      "like": "bookcase",
@@ -27801,10 +27801,10 @@
     "body": "#c8ad81"
    },
    "triangles": 228,
-   "bytes": 312064,
+   "bytes": 196956,
    "file": "models/SAB-BKC-tall.glb",
    "mojulo": {
-    "ref": "sku_sab_bkc_tall_mw1udw8r",
+    "ref": "sku_sab_bkc_tall_mw1uo0ed",
     "kind": "furniture",
     "spec": {
      "like": "bookcase",
@@ -27983,10 +27983,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 339004,
+   "bytes": 242700,
    "file": "models/SAB-CAB-std.glb",
    "mojulo": {
-    "ref": "sku_sab_cab_std_mw1ufjau",
+    "ref": "sku_sab_cab_std_mw1upv1q",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -28036,10 +28036,10 @@
     "handles": "#34363a"
    },
    "triangles": 492,
-   "bytes": 719688,
+   "bytes": 361804,
    "file": "models/SAB-CHT-tall.glb",
    "mojulo": {
-    "ref": "sku_sab_cht_tall_mw1ueo58",
+    "ref": "sku_sab_cht_tall_mw1uoulw",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -28262,10 +28262,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 341156,
+   "bytes": 244852,
    "file": "models/SAB-CON-std.glb",
    "mojulo": {
-    "ref": "sku_sab_con_std_mw1ufqel",
+    "ref": "sku_sab_con_std_mw1upyq0",
     "kind": "furniture",
     "spec": {
      "like": "sideboard",
@@ -28314,7 +28314,7 @@
    "bytes": 219236,
    "file": "models/SAB-CUS-std.glb",
    "mojulo": {
-    "ref": "sku_sab_cus_std_mw1u62zp",
+    "ref": "sku_sab_cus_std_mw1uqudi",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -28403,7 +28403,7 @@
    "bytes": 112700,
    "file": "models/SAB-DBN-std.glb",
    "mojulo": {
-    "ref": "sku_sab_dbn_std_mw1uf6fx",
+    "ref": "sku_sab_dbn_std_mw1uphls",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -28456,7 +28456,7 @@
    "bytes": 113296,
    "file": "models/SAB-DCH-std.glb",
    "mojulo": {
-    "ref": "sku_sab_dch_std_mw1uf67j",
+    "ref": "sku_sab_dch_std_mw1upedx",
     "kind": "furniture",
     "spec": {
      "like": "chair",
@@ -28509,7 +28509,7 @@
    "bytes": 118216,
    "file": "models/SAB-DKC-std.glb",
    "mojulo": {
-    "ref": "sku_sab_dkc_std_mw1u6282",
+    "ref": "sku_sab_dkc_std_mw1upnlm",
     "kind": "furniture",
     "spec": {
      "like": "chair",
@@ -28559,10 +28559,10 @@
     "handles": "#34363a"
    },
    "triangles": 408,
-   "bytes": 615184,
+   "bytes": 346360,
    "file": "models/SAB-DRS-std.glb",
    "mojulo": {
-    "ref": "sku_sab_drs_std_mw1uej9c",
+    "ref": "sku_sab_drs_std_mw1uou15",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -28612,10 +28612,10 @@
     "handles": "#34363a"
    },
    "triangles": 408,
-   "bytes": 623828,
+   "bytes": 355004,
    "file": "models/SAB-DRS-wide.glb",
    "mojulo": {
-    "ref": "sku_sab_drs_wide_mw1uen60",
+    "ref": "sku_sab_drs_wide_mw1uou3z",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -28667,7 +28667,7 @@
    "bytes": 110968,
    "file": "models/SAB-DSK-std.glb",
    "mojulo": {
-    "ref": "sku_sab_dsk_std_mw1u624y",
+    "ref": "sku_sab_dsk_std_mw1upmgp",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -28719,7 +28719,7 @@
    "bytes": 117444,
    "file": "models/SAB-DSK-wide.glb",
    "mojulo": {
-    "ref": "sku_sab_dsk_wide_mw1ufbdk",
+    "ref": "sku_sab_dsk_wide_mw1upmi6",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -28771,7 +28771,7 @@
    "bytes": 120692,
    "file": "models/SAB-DTB-4-seat.glb",
    "mojulo": {
-    "ref": "sku_sab_dtb_4_seat_mw1uf23b",
+    "ref": "sku_sab_dtb_4_seat_mw1upa87",
     "kind": "furniture",
     "spec": {
      "like": "dining-table",
@@ -28823,7 +28823,7 @@
    "bytes": 130416,
    "file": "models/SAB-DTB-6-seat.glb",
    "mojulo": {
-    "ref": "sku_sab_dtb_6_seat_mw1u619f",
+    "ref": "sku_sab_dtb_6_seat_mw1upa97",
     "kind": "furniture",
     "spec": {
      "like": "dining-table",
@@ -28875,7 +28875,7 @@
    "bytes": 145560,
    "file": "models/SAB-DTB-8-seat.glb",
    "mojulo": {
-    "ref": "sku_sab_dtb_8_seat_mw1uf246",
+    "ref": "sku_sab_dtb_8_seat_mw1upaat",
     "kind": "furniture",
     "spec": {
      "like": "dining-table",
@@ -28927,7 +28927,7 @@
    "bytes": 101900,
    "file": "models/SAB-EBN-std.glb",
    "mojulo": {
-    "ref": "sku_sab_ebn_std_mw1ufmg4",
+    "ref": "sku_sab_ebn_std_mw1upv98",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -28979,7 +28979,7 @@
    "bytes": 162320,
    "file": "models/SAB-FHT-6-seat.glb",
    "mojulo": {
-    "ref": "sku_sab_fht_6_seat_mw1u61et",
+    "ref": "sku_sab_fht_6_seat_mw1updn1",
     "kind": "furniture",
     "spec": {
      "like": "farmhouse-table",
@@ -29066,7 +29066,7 @@
    "bytes": 419532,
    "file": "models/SAB-KBD-single.glb",
    "mojulo": {
-    "ref": "sku_sab_kbd_single_mw1u62es",
+    "ref": "sku_sab_kbd_single_mw1uq32v",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -29342,10 +29342,10 @@
     "body": "#c6aa7f"
    },
    "triangles": 108,
-   "bytes": 180428,
+   "bytes": 153904,
    "file": "models/SAB-KBK-low.glb",
    "mojulo": {
-    "ref": "sku_sab_kbk_low_mw1ufujm",
+    "ref": "sku_sab_kbk_low_mw1uq3gr",
     "kind": "furniture",
     "spec": {
      "like": "bookcase",
@@ -29395,7 +29395,7 @@
    "bytes": 106160,
    "file": "models/SAB-KCH-std.glb",
    "mojulo": {
-    "ref": "sku_sab_kch_std_mw1ufy4p",
+    "ref": "sku_sab_kch_std_mw1uq77v",
     "kind": "furniture",
     "spec": {
      "like": "chair",
@@ -29445,10 +29445,10 @@
     "handles": "#34363a"
    },
    "triangles": 240,
-   "bytes": 373596,
+   "bytes": 240964,
    "file": "models/SAB-KCT-std.glb",
    "mojulo": {
-    "ref": "sku_sab_kct_std_mw1ufybv",
+    "ref": "sku_sab_kct_std_mw1uq7jl",
     "kind": "furniture",
     "spec": {
      "like": "chest",
@@ -29497,7 +29497,7 @@
    "bytes": 104500,
    "file": "models/SAB-KTB-std.glb",
    "mojulo": {
-    "ref": "sku_sab_ktb_std_mw1ufy1s",
+    "ref": "sku_sab_ktb_std_mw1uq3jx",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -29549,7 +29549,7 @@
    "bytes": 83984,
    "file": "models/SAB-LDK-std.glb",
    "mojulo": {
-    "ref": "sku_sab_ldk_std_mw1u626g",
+    "ref": "sku_sab_ldk_std_mw1upmta",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -29718,7 +29718,7 @@
    "bytes": 215348,
    "file": "models/SAB-LMB-std.glb",
    "mojulo": {
-    "ref": "sku_sab_lmb_std_mw1u63fo",
+    "ref": "sku_sab_lmb_std_mw1uqyhz",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -29973,10 +29973,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 235292,
+   "bytes": 192104,
    "file": "models/SAB-MDU-std.glb",
    "mojulo": {
-    "ref": "sku_sab_mdu_std_mw1udoud",
+    "ref": "sku_sab_mdu_std_mw1unt5h",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -30026,10 +30026,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 244612,
+   "bytes": 201436,
    "file": "models/SAB-MED-long.glb",
    "mojulo": {
-    "ref": "sku_sab_med_long_mw1udoj4",
+    "ref": "sku_sab_med_long_mw1unsup",
     "kind": "furniture",
     "spec": {
      "like": "media-console",
@@ -30076,10 +30076,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 217980,
+   "bytes": 174804,
    "file": "models/SAB-MED-short.glb",
    "mojulo": {
-    "ref": "sku_sab_med_short_mw1udkxn",
+    "ref": "sku_sab_med_short_mw1unp6t",
     "kind": "furniture",
     "spec": {
      "like": "media-console",
@@ -30126,10 +30126,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 231584,
+   "bytes": 188404,
    "file": "models/SAB-MED-std.glb",
    "mojulo": {
-    "ref": "sku_sab_med_std_mw1udogx",
+    "ref": "sku_sab_med_std_mw1unssz",
     "kind": "furniture",
     "spec": {
      "like": "media-console",
@@ -30176,10 +30176,10 @@
     "handles": "#34363a"
    },
    "triangles": 240,
-   "bytes": 367080,
+   "bytes": 234436,
    "file": "models/SAB-NST-std.glb",
    "mojulo": {
-    "ref": "sku_sab_nst_std_mw1uef0f",
+    "ref": "sku_sab_nst_std_mw1uomml",
     "kind": "furniture",
     "spec": {
      "like": "nightstand",
@@ -30228,7 +30228,7 @@
    "bytes": 107084,
    "file": "models/SAB-OBN-std.glb",
    "mojulo": {
-    "ref": "sku_sab_obn_std_mw1ufyhw",
+    "ref": "sku_sab_obn_std_mw1uqaz3",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -30280,7 +30280,7 @@
    "bytes": 102336,
    "file": "models/SAB-OBT-std.glb",
    "mojulo": {
-    "ref": "sku_sab_obt_std_mw1ufyjr",
+    "ref": "sku_sab_obt_std_mw1uqb1v",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -30333,7 +30333,7 @@
    "bytes": 113936,
    "file": "models/SAB-OCH-std.glb",
    "mojulo": {
-    "ref": "sku_sab_och_std_mw1ug2ax",
+    "ref": "sku_sab_och_std_mw1uqb4p",
     "kind": "furniture",
     "spec": {
      "like": "chair",
@@ -30383,10 +30383,10 @@
     "wood": "#d6bc94"
    },
    "triangles": 12588,
-   "bytes": 708496,
+   "bytes": 569416,
    "file": "models/SAB-OLS-std.glb",
    "mojulo": {
-    "ref": "sku_sab_ols_std_mw1u62nz",
+    "ref": "sku_sab_ols_std_mw1uqbdk",
     "kind": "furniture",
     "spec": {
      "piece": "sofa",
@@ -30448,7 +30448,7 @@
    "bytes": 778720,
    "file": "models/SAB-PLT-king.glb",
    "mojulo": {
-    "ref": "sku_sab_plt_king_mw1ueaes",
+    "ref": "sku_sab_plt_king_mw1uohpo",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -30679,7 +30679,7 @@
    "bytes": 653784,
    "file": "models/SAB-PLT-queen.glb",
    "mojulo": {
-    "ref": "sku_sab_plt_queen_mw1uea73",
+    "ref": "sku_sab_plt_queen_mw1uohig",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -30942,7 +30942,7 @@
    "bytes": 179504,
    "file": "models/SAB-POF-std.glb",
    "mojulo": {
-    "ref": "sku_sab_pof_std_mw1u64fi",
+    "ref": "sku_sab_pof_std_mw1uqzo9",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -31194,10 +31194,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 365148,
+   "bytes": 268828,
    "file": "models/SAB-SDB-long.glb",
    "mojulo": {
-    "ref": "sku_sab_sdb_long_mw1udx4g",
+    "ref": "sku_sab_sdb_long_mw1uo462",
     "kind": "furniture",
     "spec": {
      "like": "sideboard",
@@ -31244,10 +31244,10 @@
     "handles": "#34363a"
    },
    "triangles": 252,
-   "bytes": 356280,
+   "bytes": 259952,
    "file": "models/SAB-SDB-std.glb",
    "mojulo": {
-    "ref": "sku_sab_sdb_std_mw1udx1m",
+    "ref": "sku_sab_sdb_std_mw1uo167",
     "kind": "furniture",
     "spec": {
      "like": "sideboard",
@@ -31296,7 +31296,7 @@
    "bytes": 117452,
    "file": "models/SAB-SDK-std.glb",
    "mojulo": {
-    "ref": "sku_sab_sdk_std_mw1ufenq",
+    "ref": "sku_sab_sdk_std_mw1upmrg",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -31346,10 +31346,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 209944,
+   "bytes": 166780,
    "file": "models/SAB-SHO-std.glb",
    "mojulo": {
-    "ref": "sku_sab_sho_std_mw1ufqry",
+    "ref": "sku_sab_sho_std_mw1uq2pc",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -31633,7 +31633,7 @@
    "bytes": 89388,
    "file": "models/SAB-STL-counter.glb",
    "mojulo": {
-    "ref": "sku_sab_stl_counter_mw1u623g",
+    "ref": "sku_sab_stl_counter_mw1upj3c",
     "kind": "furniture",
     "spec": {
      "piece": "table",
@@ -31685,7 +31685,7 @@
    "bytes": 103332,
    "file": "models/SAB-THR-std.glb",
    "mojulo": {
-    "ref": "sku_sab_thr_std_mw1u647c",
+    "ref": "sku_sab_thr_std_mw1uqz50",
     "kind": "workbench",
     "spec": {
      "units": "mm",
@@ -31842,10 +31842,10 @@
     "wood": "#6b4a2e"
    },
    "triangles": 204,
-   "bytes": 180216,
+   "bytes": 140480,
    "file": "models/SAB-UTL-std.glb",
    "mojulo": {
-    "ref": "sku_sab_utl_std_mw1u629m",
+    "ref": "sku_sab_utl_std_mw1uprfn",
     "kind": "furniture",
     "spec": {
      "like": "shop-shelves",
@@ -31960,10 +31960,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 230532,
+   "bytes": 187352,
    "file": "models/SAB-WRD-double.glb",
    "mojulo": {
-    "ref": "sku_sab_wrd_double_mw1uevzu",
+    "ref": "sku_sab_wrd_double_mw1up2cr",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -32013,10 +32013,10 @@
     "handles": "#34363a"
    },
    "triangles": 156,
-   "bytes": 217560,
+   "bytes": 174384,
    "file": "models/SAB-WRD-single.glb",
    "mojulo": {
-    "ref": "sku_sab_wrd_single_mw1uesi2",
+    "ref": "sku_sab_wrd_single_mw1up2bc",
     "kind": "furniture",
     "spec": {
      "piece": "casework",
@@ -32069,7 +32069,7 @@
    "bytes": 68036,
    "file": "models/SAB-YOK-std.glb",
    "mojulo": {
-    "ref": "sku_sab_yok_std_mw1u61hl",
+    "ref": "sku_sab_yok_std_mw1upel5",
     "kind": "furniture",
     "spec": {
      "like": "chair",
