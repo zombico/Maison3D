@@ -11,6 +11,12 @@
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
+#micbar { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; color: var(--ink); border-color: rgba(217, 160, 102, 0.6); z-index: 6; max-width: calc(100% - 32px); }
+#micbar button { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 999px; padding: 4px 12px; font-weight: 600; white-space: nowrap; }
+.modal { top: 50% !important; left: 50% !important; bottom: auto !important; transform: translate(-50%, -50%); width: min(520px, calc(100% - 32px)) !important; z-index: 10; }
+.modal ol { margin: 6px 0 10px; padding-left: 20px; color: var(--ink); }
+.modal li { margin: 5px 0; }
+.modal .muted { color: var(--muted); font-size: 13px; }
 html, body { margin: 0; height: 100%; overflow: hidden; background: #1b1a18; color: var(--ink); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
 #view { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
 button { font: inherit; color: inherit; cursor: pointer; }

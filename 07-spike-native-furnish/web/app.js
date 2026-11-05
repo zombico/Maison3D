@@ -582,6 +582,59 @@ $('help').onclick = () => { closePanel(); $('intro').classList.toggle('tucked');
 $('close').onclick = () => $('intro').classList.add('tucked');
 $('restart').onclick = () => { if (!confirm('Start over in an empty room?')) return; design = newId(); store.set('maison-design', design); location.reload(); };
 
+// --- the microphone: asked for outside VR (a Quest browser cannot show its prompt inside VR), and how to unblock it -------------
+// A page cannot open the browser's settings, so when the microphone is blocked it shows the steps for this browser.
+const ua = navigator.userAgent, isQuest = /OculusBrowser|Quest/i.test(ua), isSafari = /Safari/i.test(ua) && !/Chrome|Chromium|Edg|OculusBrowser/i.test(ua);
+let micPerm = 'unknown';
+async function micStatus() {
+  try { const s = await navigator.permissions.query({ name: 'microphone' }); micPerm = s.state; s.onchange = () => { micPerm = s.state; showMic(); if (micPerm === 'granted') { $('micmodal').hidden = true; note('The microphone is on: hold the mic, the space bar, or the grip in VR, and talk.'); } }; }
+  catch { micPerm = 'unknown'; }
+  showMic();
+  return micPerm;
+}
+function showMic() {
+  const bar = $('micbar'), say = bar.querySelector('span');
+  if (micPerm === 'denied') { bar.hidden = false; say.textContent = 'The microphone is blocked for this site: you can type, but not talk.'; $('micallow').hidden = true; $('michelp').hidden = false; }
+  else if (micPerm === 'prompt' && isQuest && !renderer.xr.isPresenting) { bar.hidden = false; say.textContent = 'Allow the microphone now: inside VR the browser cannot ask.'; $('micallow').hidden = false; $('michelp').hidden = true; }
+  else bar.hidden = true;
+}
+/** Asks for the microphone (the browser's own prompt), and lets it go again at once. True if it is allowed. */
+async function askMic() {
+  try { const s = await navigator.mediaDevices.getUserMedia({ audio: true }); s.getTracks().forEach((t) => t.stop()); micPerm = 'granted'; }
+  catch (e) { if (e.name === 'NotAllowedError' || e.name === 'SecurityError') { micPerm = 'denied'; showMicHelp(); } }
+  showMic();
+  return micPerm === 'granted';
+}
+/** How to unblock the microphone, in this browser's own words. */
+function showMicHelp() {
+  if (renderer.xr.isPresenting) { status('The microphone is blocked: leave VR to fix it'); return; }
+  const host = esc(location.host);
+  const steps = isQuest ? [
+    `Tap the <b>lock</b> (or the tune icon) at the left of the address bar, then <b>Permissions</b> (or <b>Site settings</b>), and set <b>Microphone</b> to <b>Allow</b>.`,
+    `Or open the browser's menu (<b>⋯</b>) → <b>Settings</b> → site permissions → <b>Microphone</b>, and allow <b>${host}</b>.`,
+    `Still blocked? The headset itself may be keeping it from the browser: open the Quest's <b>Settings</b> → <b>Privacy &amp; safety</b> → <b>App permissions</b> → <b>Microphone</b>, and turn it on for <b>Browser</b>.`,
+    `Come back here and press <b>Try again</b> (or reload the page).`,
+  ] : isSafari ? [
+    `In the menu bar choose <b>Safari</b> → <b>Settings for ${host}</b> (or <b>Settings</b> → <b>Websites</b> → <b>Microphone</b>).`,
+    `Set <b>Microphone</b> to <b>Allow</b> for this site, then press <b>Try again</b>.`,
+  ] : [
+    `Click the icon at the left of the address bar (the lock, or the tune icon), and set <b>Microphone</b> to <b>Allow</b>.`,
+    `If your computer blocks it too: on a Mac, <b>System Settings</b> → <b>Privacy &amp; Security</b> → <b>Microphone</b>, and turn your browser on; on Windows, <b>Settings</b> → <b>Privacy</b> → <b>Microphone</b>.`,
+    `Press <b>Try again</b> (or reload the page).`,
+  ];
+  const m = $('micmodal');
+  m.innerHTML = `<button class="x" type="button" aria-label="Close">×</button><h2 id="michead">Turn on the microphone</h2>
+    <p class="muted">${isQuest ? 'The Quest browser blocked the microphone for this site (it cannot ask inside VR, so a first try in VR is refused).' : 'Your browser blocked the microphone for this site.'} A page cannot change that setting itself; here is where it is:</p>
+    <ol>${steps.map((s) => `<li>${s}</li>`).join('')}</ol>
+    <div class="row"><button class="btn primary" id="mictry" type="button">Try again</button><button class="btn" id="micclose" type="button">Type instead</button></div>
+    <p class="muted">Everything works by typing too, and the library works without talking at all.</p>`;
+  m.hidden = false;
+  m.querySelector('.x').onclick = $('micclose').onclick = () => (m.hidden = true);
+  $('mictry').onclick = async () => { if (await askMic()) { m.hidden = true; note('The microphone is on.'); } else note('Still blocked: change the setting above, then try again (a reload helps).'); };
+}
+$('micallow').onclick = () => askMic();
+$('michelp').onclick = () => showMicHelp();
+
 // --- hold to talk: a 16 kHz mono WAV, transcribed by the server ----------------------------------------------------------------
 let rec = null, browserSR = null;
 const libraryOpen = () => panelKind === 'library' || vrLib?.open;
@@ -609,7 +662,10 @@ async function startTalking() {
     rec = { stream, ctx, src, proc, chunks, t0: performance.now() };
     speechSynthesis?.cancel();
     $('mic').classList.add('on'); $('libmic')?.classList.add('on'); status(libraryOpen() ? 'Listening… say what you are looking for' : 'Listening… let go when you are done');
-  } catch (e) { log('error', 'The microphone is not available: allow it for this page, or type instead.'); }
+  } catch (e) {
+    if (e.name === 'NotAllowedError' || e.name === 'SecurityError') { micPerm = 'denied'; showMic(); if (renderer.xr.isPresenting) status('The microphone is blocked: leave VR (the Meta button) to fix it'); else showMicHelp(); }
+    else log('error', 'There is no microphone to use here: type instead.');
+  }
 }
 async function stopTalking() {
   if (browserSR) { browserSR.stop(); return; }
@@ -659,7 +715,19 @@ addEventListener('keyup', (e) => { if (e.code === 'Space' && !e.target.matches('
 
 // --- VR: a laser on each controller. Grip: talk. Trigger: point, or hold it on a piece to move it (thumbstick turns it).
 // B: hold and sweep to highlight an area. Thumbstick: forward steps to where you point, left or right turns you. ----------
-navigator.xr?.isSessionSupported('immersive-vr').then((ok) => ok && $('vr').append(VRButton.createButton(renderer, { optionalFeatures: ['local-floor', 'bounded-floor'] }))).catch(() => {});
+navigator.xr?.isSessionSupported('immersive-vr').then((ok) => {
+  if (!ok) return;
+  const btn = VRButton.createButton(renderer, { optionalFeatures: ['local-floor', 'bounded-floor'] });
+  // the microphone first, while the browser can still ask (it cannot inside VR); then Enter VR again
+  btn.addEventListener('click', async (e) => {
+    if (renderer.xr.isPresenting || micPerm === 'granted' || micPerm === 'denied' || btn.dataset.asked) return;
+    e.stopImmediatePropagation(); e.preventDefault(); btn.dataset.asked = '1';
+    status('Allow the microphone so you can talk in VR…');
+    const ok = await askMic();
+    status(ok ? 'Microphone on. Press Enter VR again.' : 'No microphone: you can still use the library and the laser. Press Enter VR again.');
+  }, { capture: true });
+  $('vr').append(btn);
+}).catch(() => {});
 const factory = new XRControllerModelFactory();
 const hands = [0, 1].map((i) => {
   const c = renderer.xr.getController(i), grip = renderer.xr.getControllerGrip(i);
@@ -892,6 +960,7 @@ renderer.setAnimationLoop((t) => {
   try {
     await apply(await api('/api/scene'));
     lighting.set(lighting.mode);
+    micStatus();
     showLimit(await api('/api/limit'));
     if (pieces.size) $('intro').classList.add('tucked');
   } catch (e) { log('error', `The server is not answering: ${e.message}`); }
