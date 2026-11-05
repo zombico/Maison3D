@@ -387,8 +387,8 @@ async function showLibrary() {
   panel.querySelectorAll('.tabs button').forEach((b) => (b.onclick = () => { libCat = b.dataset.cat; libHits = null; libQuery = ''; $('libq').value = ''; refreshLibrary(); }));
   $('liblist').onclick = (e) => { const b = e.target.closest('[data-id]'); if (b) pick(byId(b.dataset.id)); };
   const lm = $('libmic');
-  lm.onpointerdown = (e) => { e.preventDefault(); lm.setPointerCapture(e.pointerId); startTalking(); };
-  lm.onpointerup = stopTalking; lm.onpointercancel = stopTalking;
+  lm.onpointerdown = (e) => micDown(e, lm);
+  lm.onpointerup = micUp; lm.onpointercancel = () => { if (!rec?.toggle) stopTalking(); };
 }
 
 /** A picked piece: into the highlighted area, at the window, or as a preview to place by hand. */
@@ -419,7 +419,7 @@ async function startPlacing(p) {
   placing = { p, obj, yaw: Math.atan2(-v.forward[0], -v.forward[2]), pose: null };
   obj.visible = false; scene.add(obj);
   if (innerWidth <= 760 && !renderer.xr.isPresenting) closePanel();
-  status(renderer.xr.isPresenting ? `${p.name}: pull the trigger where it goes (thumbstick turns it, A cancels)` : `${p.name}: click where it goes (Q and E turn it, Esc cancels)`);
+  status(renderer.xr.isPresenting ? `${p.name}: pull the trigger where it goes (thumbstick turns it, B cancels)` : `${p.name}: click where it goes (Q and E turn it, Esc cancels)`);
 }
 function cancelPlacing() { if (placing) { scene.remove(placing.obj); placing = null; status(''); } }
 /** Where the preview stands for a ray: on the floor, against the wall it meets, under the ceiling, or on top of a piece. */
@@ -598,10 +598,32 @@ function showMic() {
   else if (micPerm === 'prompt' && isQuest && !renderer.xr.isPresenting) { bar.hidden = false; say.textContent = 'Allow the microphone now: inside VR the browser cannot ask.'; $('micallow').hidden = false; $('michelp').hidden = true; }
   else bar.hidden = true;
 }
+/**
+ * The microphone's stream: asked for simply (no exact demands a headset's microphone might refuse), then plainer still if
+ * that is refused for any reason but permission.
+ */
+async function getMic() {
+  if (!navigator.mediaDevices?.getUserMedia) throw Object.assign(new Error('this page cannot reach a microphone (it needs https)'), { name: 'NoMediaDevices' });
+  try { return await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: true } }); }
+  catch (e) { if (e.name === 'NotAllowedError' || e.name === 'SecurityError') throw e; return navigator.mediaDevices.getUserMedia({ audio: true }); }
+}
+/** Why the microphone failed, said plainly, with the browser's own words, and where to fix it. */
+function micFailed(e) {
+  const why = `${e.name}${e.message ? `: ${e.message}` : ''}`;
+  if (e.name === 'NotAllowedError' || e.name === 'SecurityError') {
+    micPerm = 'denied'; showMic();
+    log('error', isQuest ? `The microphone was refused (${why}). If the site is allowed, the headset may be keeping it from the Browser app: Settings → Privacy & safety → App permissions → Microphone, turn on Browser.` : `The microphone was refused (${why}).`);
+    if (renderer.xr.isPresenting) status('The microphone is blocked: leave VR (the Meta button) to fix it'); else showMicHelp();
+  } else if (e.name === 'NotReadableError' || e.name === 'AbortError') {
+    log('error', `The microphone is busy or could not start (${why}). Close other apps using it (a call, a recording), then try again.`);
+  } else if (e.name === 'NotFoundError' || e.name === 'OverconstrainedError') {
+    log('error', `No microphone was found (${why}).${isQuest ? ' Check Settings → Privacy & safety → App permissions → Microphone (Browser on).' : ''}`);
+  } else log('error', `The microphone could not start (${why}). You can type instead.`);
+}
 /** Asks for the microphone (the browser's own prompt), and lets it go again at once. True if it is allowed. */
 async function askMic() {
-  try { const s = await navigator.mediaDevices.getUserMedia({ audio: true }); s.getTracks().forEach((t) => t.stop()); micPerm = 'granted'; }
-  catch (e) { if (e.name === 'NotAllowedError' || e.name === 'SecurityError') { micPerm = 'denied'; showMicHelp(); } }
+  try { const s = await getMic(); s.getTracks().forEach((t) => t.stop()); micPerm = 'granted'; }
+  catch (e) { micFailed(e); }
   showMic();
   return micPerm === 'granted';
 }
@@ -636,7 +658,13 @@ $('micallow').onclick = () => askMic();
 $('michelp').onclick = () => showMicHelp();
 
 // --- hold to talk: a 16 kHz mono WAV, transcribed by the server ----------------------------------------------------------------
-let rec = null, browserSR = null;
+let rec = null, browserSR = null, audioCtx = null;
+/** The page's one audio context, made and woken inside a real tap or key press (a browser holds audio back otherwise). */
+function wakeAudio() {
+  try { audioCtx ??= new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {}); } catch {}
+}
+addEventListener('pointerdown', wakeAudio, { capture: true });
+addEventListener('keydown', wakeAudio, { capture: true });
 const libraryOpen = () => panelKind === 'library' || vrLib?.open;
 function heardSearch(said) {
   note(`Searching the library: “${said}”`);
@@ -654,27 +682,46 @@ async function startTalking() {
     browserSR.start(); $('mic').classList.add('on'); $('libmic')?.classList.add('on'); status('Listening… say what you are looking for');
     return;
   }
+  wakeAudio(); // still inside the tap: a browser lets audio run only from one
+  rec = { pending: true, t0: performance.now() };
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true } });
-    const ctx = new AudioContext(), src = ctx.createMediaStreamSource(stream), proc = ctx.createScriptProcessor(4096, 1, 1), chunks = [];
-    proc.onaudioprocess = (e) => chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
-    src.connect(proc); proc.connect(ctx.destination);
-    rec = { stream, ctx, src, proc, chunks, t0: performance.now() };
+    const stream = await getMic();
+    if (audioCtx.state !== 'running') await audioCtx.resume().catch(() => {});
+    if (audioCtx.state !== 'running') { stream.getTracks().forEach((t) => t.stop()); rec = null; status('The browser is holding audio back: tap the page once, then try again'); return; }
+    const src = audioCtx.createMediaStreamSource(stream), proc = audioCtx.createScriptProcessor(4096, 1, 1), chunks = [];
+    const was = rec; rec = { stream, ctx: audioCtx, src, proc, chunks, t0: was.t0, peak: 0, toggle: was.toggle, stopSoon: was.stopSoon };
+    let shown = 0;
+    proc.onaudioprocess = (e) => {
+      const d = e.inputBuffer.getChannelData(0); chunks.push(new Float32Array(d));
+      let p = 0; for (let i = 0; i < d.length; i += 8) p = Math.max(p, Math.abs(d[i]));
+      if (!rec) return;
+      rec.peak = Math.max(rec.peak, p);
+      // a level you can see: the microphone is hearing you (or not)
+      const t = performance.now();
+      if (t - shown > 150) { shown = t; status(`${rec.toggle ? 'Listening… tap the mic again to send' : libraryOpen() ? 'Listening… say what you are looking for' : 'Listening… let go when you are done'}  ${'▮'.repeat(Math.min(8, Math.round(p * 40)))}${'▯'.repeat(8 - Math.min(8, Math.round(p * 40)))}`); }
+    };
+    src.connect(proc); proc.connect(audioCtx.destination);
     speechSynthesis?.cancel();
-    $('mic').classList.add('on'); $('libmic')?.classList.add('on'); status(libraryOpen() ? 'Listening… say what you are looking for' : 'Listening… let go when you are done');
+    $('mic').classList.add('on'); $('libmic')?.classList.add('on'); status(rec.toggle ? 'Listening… tap the mic again to send' : libraryOpen() ? 'Listening… say what you are looking for' : 'Listening… let go when you are done');
+    if (rec.stopSoon) stopTalking(); // let go while the microphone was still starting
   } catch (e) {
-    if (e.name === 'NotAllowedError' || e.name === 'SecurityError') { micPerm = 'denied'; showMic(); if (renderer.xr.isPresenting) status('The microphone is blocked: leave VR (the Meta button) to fix it'); else showMicHelp(); }
-    else log('error', 'There is no microphone to use here: type instead.');
+    rec = null;
+    micFailed(e);
   }
 }
 async function stopTalking() {
   if (browserSR) { browserSR.stop(); return; }
   if (!rec) return;
-  const { stream, ctx, src, proc, chunks, t0 } = rec; rec = null;
+  if (rec.pending) { rec.stopSoon = true; return; } // still starting: it stops as soon as it has
+  const { stream, ctx, src, proc, chunks, t0, peak } = rec; rec = null;
   $('mic').classList.remove('on'); $('libmic')?.classList.remove('on');
   src.disconnect(); proc.disconnect(); stream.getTracks().forEach((t) => t.stop());
-  const rate = ctx.sampleRate; await ctx.close();
+  const rate = ctx.sampleRate;
   if (performance.now() - t0 < 350) { status(''); return; }
+  // nothing but silence: the microphone is not giving the page any sound
+  const seconds = chunks.reduce((n, c) => n + c.length, 0) / rate;
+  if (seconds < 0.4) { status('Too short: hold the mic while you talk (or tap, talk, then tap again)'); return; }
+  if (peak < 0.002) { status(''); log('error', isQuest ? 'I heard only silence: the microphone gave this page no sound. Check Settings → Privacy & safety → App permissions → Microphone (Browser on), then reload.' : 'I heard only silence: check the microphone is on and not muted, then try again.'); return; }
   const wav = toWav(chunks, rate, 16000);
   setBusy(true, 'Hearing…');
   try {
@@ -707,9 +754,21 @@ function toWav(chunks, from, to) {
 function base64(bytes) { let s = ''; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000)); return btoa(s); }
 
 const mic = $('mic');
-mic.addEventListener('pointerdown', (e) => { e.preventDefault(); mic.setPointerCapture(e.pointerId); startTalking(); });
-mic.addEventListener('pointerup', stopTalking);
-mic.addEventListener('pointercancel', stopTalking);
+/** The mic: hold it while you talk, or tap it to start and tap again to send. */
+function micDown(e, el) {
+  e.preventDefault(); try { el.setPointerCapture(e.pointerId); } catch {}
+  if (rec?.toggle || browserSR) { stopTalking(); return; }
+  startTalking();
+}
+function micUp() {
+  if (!rec || rec.toggle) return;
+  // a quick tap: keep listening until the next tap
+  if (performance.now() - rec.t0 < 400) { rec.toggle = true; status('Listening… tap the mic again to send'); return; }
+  stopTalking();
+}
+mic.addEventListener('pointerdown', (e) => micDown(e, mic));
+mic.addEventListener('pointerup', micUp);
+mic.addEventListener('pointercancel', () => { if (!rec?.toggle) stopTalking(); });
 addEventListener('keydown', (e) => { if (e.code === 'Space' && !e.repeat && !e.target.matches('input, select, textarea')) { e.preventDefault(); startTalking(); } });
 addEventListener('keyup', (e) => { if (e.code === 'Space' && !e.target.matches('input, select, textarea')) stopTalking(); });
 
@@ -785,7 +844,7 @@ const vrPanel = (() => {
       g.clearRect(0, 0, cv.width, cv.height);
       g.fillStyle = 'rgba(24,22,20,0.86)'; g.beginPath(); g.roundRect(0, 0, cv.width, cv.height, 28); g.fill();
       g.font = '600 26px system-ui, sans-serif'; g.fillStyle = '#d9a066';
-      g.fillText(statusText || (area ? `Area ${area.size[0]} × ${area.size[1]} m: say what goes in it` : pointing ? 'Pointing: say “here” or “this”' : 'Grip: talk · Trigger: point, drag an area · A: library'), 24, 44);
+      g.fillText(statusText || (area ? `Area ${area.size[0]} × ${area.size[1]} m: say what goes in it` : pointing ? 'Pointing: say “here” or “this”' : 'Hold A to talk · Trigger: point, drag an area · X: library'), 24, 44);
       let y = 92; g.font = '26px system-ui, sans-serif';
       for (const [kind, text] of lines.slice(-3)) {
         g.fillStyle = kind === 'you' ? '#e8e2d6' : kind === 'error' ? '#f0a08a' : kind === 'note' ? '#b9b3a8' : '#f4f1ec';
@@ -798,7 +857,7 @@ const vrPanel = (() => {
 })();
 vrPanel.draw();
 
-// The library in VR: a panel in front of you (A or X opens and closes it). Tabs, a page of previews, pages; the laser
+// The library in VR: a panel in front of you (X or Y opens and closes it). Tabs, a page of previews, pages; the laser
 // picks; holding the grip while it is open searches it by voice. A picked piece rides the laser as a preview.
 const vrLib = (() => {
   const W = 1024, H = 768, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
@@ -828,7 +887,7 @@ const vrLib = (() => {
       g.clearRect(0, 0, W, H); round(0, 0, W, H, 28, 'rgba(24,22,20,0.94)');
       g.fillStyle = '#f4f1ec'; g.font = '600 34px system-ui, sans-serif'; g.fillText('Library', 28, 52);
       g.fillStyle = '#b9b3a8'; g.font = '24px system-ui, sans-serif';
-      g.fillText(libHits ? `${libHits.length} for “${libQuery}” — hold grip to search again` : 'Hold grip and say what you are looking for', 170, 50);
+      g.fillText(libHits ? `${libHits.length} for “${libQuery}” — hold A to search again` : 'Hold A and say what you are looking for', 170, 50);
       const cat = (label, x, y, w, on, act) => { const hv = hover === act; round(x, y, w, 40, 20, on ? '#d9a066' : hv ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.07)'); g.fillStyle = on ? '#1d1a17' : '#f4f1ec'; g.font = '22px system-ui, sans-serif'; g.fillText(label, x + 14, y + 28); rects.push({ x, y, w, h: 40, act }); };
       const cats = [...new Set(library.map((p) => p.category))].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
       cats.forEach((c, i) => cat(c, 28 + (i % 6) * 162, 78 + Math.floor(i / 6) * 48, 152, !libHits && c === libCat, `cat:${c}`));
@@ -890,10 +949,15 @@ function xrFrame(t) {
     if (!h.source) continue;
     const [o, d] = aim(h.c);
     const gp = h.source.gamepad, axes = gp?.axes ?? [], x = axes[2] ?? 0, y = axes[3] ?? 0;
-    // A (right) or X (left): the library opens and closes; with a preview on the laser, it cancels it
-    const aDown = !!gp?.buttons?.[4]?.pressed;
-    if (aDown && !h.a) { if (placing) cancelPlacing(); else if (vrLib.open) vrLib.hide(); else vrLib.show(); }
-    h.a = aDown;
+    // hold A (right hand) to talk, as in the native app; X or Y (left hand) opens and closes the library;
+    // B cancels a preview on the laser
+    const right = h.source.handedness !== 'left', aDown = !!gp?.buttons?.[4]?.pressed, bDownNow = !!gp?.buttons?.[5]?.pressed;
+    if (right) {
+      if (aDown && !h.a) startTalking();
+      if (!aDown && h.a) stopTalking();
+      if (bDownNow && placing) { cancelPlacing(); h.b = true; continue; }
+    } else if ((aDown && !h.a) || (bDownNow && !h.y)) { if (placing) cancelPlacing(); else if (vrLib.open) vrLib.hide(); else vrLib.show(); }
+    h.a = aDown; if (!right) h.y = bDownNow;
     const ph = panelHit(o, d);
     if (vrLib.open && h.source.handedness !== 'left') vrLib.hoverAt(ph?.uv ?? null);
     if (ph) { h.laser.scale.z = ph.distance; continue; }
@@ -947,7 +1011,7 @@ function xrFrame(t) {
 }
 
 // ?debug: the page's state, for tests
-if (new URLSearchParams(location.search).has('debug')) window.__m3d = { hands, pieces, get area() { return area; }, get pointing() { return pointing; }, get placing() { return placing; }, vrLib, rig, camera };
+if (new URLSearchParams(location.search).has('debug')) window.__m3d = { hands, pieces, get area() { return area; }, get pointing() { return pointing; }, get placing() { return placing; }, get rec() { return rec; }, get audioCtx() { return audioCtx; }, vrLib, rig, camera };
 
 renderer.setAnimationLoop((t) => {
   if (renderer.xr.isPresenting) xrFrame(t); else controls.update();

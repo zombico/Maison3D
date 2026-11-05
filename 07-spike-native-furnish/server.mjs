@@ -244,7 +244,10 @@ async function handle(req, res, design) {
       const body = await readJson(req);
       if (PUBLIC && (body.audio?.length ?? 0) > 2.8e6) return send(res, 413, { error: 'too long: hold the button for under a minute' });
       const t0 = Date.now();
-      const said = await transcribe(Buffer.from(body.audio ?? '', 'base64'), keywordsFor(body.room ?? rooms.scanned));
+      // a failed transcription says why (Meta's answer, never the key), even on the public demo
+      let said;
+      try { said = await transcribe(Buffer.from(body.audio ?? '', 'base64'), keywordsFor(body.room ?? rooms.scanned)); }
+      catch (e) { console.error(`! speech to text: ${e.message}`); return send(res, 502, { error: `speech-to-text failed: ${e.message.replace(/Bearer \S+/g, '').slice(0, 200)}` }); }
       console.log(`\n(heard "${said}" in ${Date.now() - t0} ms)`);
       return send(res, 200, { said, ms: Date.now() - t0 });
     }
