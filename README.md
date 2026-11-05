@@ -55,8 +55,8 @@ rugs, curtains and chairs tucked under their table are exempt). The tool's answe
 ## The public demo
 
 The same server serves a web client (`07-spike-native-furnish/web/`): the room in 3D in any browser, typed or spoken
-requests, a click to point, and **Enter VR** in a Quest's browser (WebXR: grip to talk, trigger to point, thumbstick to
-step and turn). Nothing to install.
+requests, a click to point, and **Enter VR** in a Quest's browser (WebXR: grip to talk, trigger to point, left stick to
+walk and strafe, right stick to turn; a Sticks setting switches to stepping and turning in clicks). Nothing to install.
 
 With `MAISON_PUBLIC=1` the server is a public demo:
 

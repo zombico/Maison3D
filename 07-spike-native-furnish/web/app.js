@@ -776,10 +776,21 @@ addEventListener('keydown', (e) => { if (e.code === 'Space' && !e.repeat && !e.t
 addEventListener('keyup', (e) => { if (e.code === 'Space' && !e.target.matches('input, select, textarea')) stopTalking(); });
 
 // --- VR: a laser on each controller. Grip: talk. Trigger: point, or hold it on a piece to move it (thumbstick turns it).
-// B: hold and sweep to highlight an area. Thumbstick: forward steps to where you point, left or right turns you. ----------
+// B: hold and sweep to highlight an area. The sticks, by the Sticks setting: walk (left moves you, right turns you) or step
+// (forward steps to where you point, left or right turns you in clicks). ------------------------------------------------
+let walking = store.get('maison-sticks') !== 'step';
+const showSticks = () => {
+  const b = $('sticks');
+  b.textContent = walking ? 'Sticks: walk' : 'Sticks: step'; b.setAttribute('aria-pressed', String(walking));
+  b.title = walking ? 'In VR, the left stick walks and strafes, the right stick turns you. Press for stepping instead.' : 'In VR, a stick steps to where you point and turns you in clicks. Press for walking instead.';
+};
+function setWalking(on) { walking = on; store.set('maison-sticks', on ? 'walk' : 'step'); showSticks(); vrLib.draw(); }
+$('sticks').onclick = () => setWalking(!walking);
+showSticks();
 navigator.xr?.isSessionSupported('immersive-vr').then((ok) => {
   if (!ok) return;
-  const btn = VRButton.createButton(renderer, { optionalFeatures: ['local-floor', 'bounded-floor'] });
+  $('sticks').hidden = false;
+  const btn =VRButton.createButton(renderer, { optionalFeatures: ['local-floor', 'bounded-floor'] });
   // the microphone first, while the browser can still ask (it cannot inside VR); then Enter VR again
   btn.addEventListener('click', async (e) => {
     if (renderer.xr.isPresenting || micPerm === 'granted' || micPerm === 'denied' || btn.dataset.asked) return;
@@ -908,6 +919,7 @@ const vrLib = (() => {
       });
       if (!list.length) { g.fillStyle = '#b9b3a8'; g.font = '24px system-ui, sans-serif'; g.fillText('Nothing matches. For ideas, close the library and ask Maison3D.', 28, 260); }
       cat('◀ Back', 28, 708, 150, false, 'prev'); cat('Next ▶', 846, 708, 150, false, 'next'); cat('Close', 680, 708, 150, false, 'close');
+      cat(walking ? 'Sticks: walk' : 'Sticks: step', 190, 708, 170, false, 'sticks'); // the header's setting cannot be reached in VR
       g.fillStyle = '#b9b3a8'; g.font = '22px system-ui, sans-serif'; g.fillText(`${page + 1} of ${pages}`, 440, 736);
       tex.needsUpdate = true;
     },
@@ -917,6 +929,7 @@ const vrLib = (() => {
     click(uv) {
       const a = self.at(uv); if (!a) return;
       if (a === 'close') self.hide();
+      else if (a === 'sticks') setWalking(!walking);
       else if (a === 'prev') { page = Math.max(0, page - 1); self.draw(); }
       else if (a === 'next') { page++; self.draw(); }
       else if (a.startsWith('cat:')) { libCat = a.slice(4); libHits = null; libQuery = ''; page = 0; self.draw(); }
@@ -944,6 +957,39 @@ renderer.xr.addEventListener('sessionend', () => {
   if (saved) { camera.position.copy(saved.pos); camera.quaternion.copy(saved.quat); controls.target.copy(saved.target); }
   controls.enabled = true; controls.update();
 });
+
+// Walking: the left stick moves you relative to where you look, the right stick turns you, both smoothly. The room's floor
+// is the boundary: you may go where there is floor a little ahead of you, each axis on its own so a wall slides you along it.
+const WALK_SPEED = 1.5, TURN_SPEED = Math.PI / 2, STICK_DEAD = 0.18, WALL_GAP = 0.25; // m/s, rad/s, of a full push, m
+const stickPush = (v) => { const a = Math.abs(v); return a < STICK_DEAD ? 0 : Math.sign(v) * ((a - STICK_DEAD) / (1 - STICK_DEAD)) ** 2; }; // gentle near the middle
+const heading = new THREE.Vector3(0, 0, -1), lookNow = new THREE.Vector3(), floorProbe = new THREE.Vector3(), DOWN = new THREE.Vector3(0, -1, 0);
+function floorAt(x, z) {
+  raycaster.set(floorProbe.set(x, 1, z), DOWN);
+  const hit = raycaster.intersectObject(roomGroup, true)[0];
+  return !!hit && hit.point.y < 0.3; // the same floor a step may land on
+}
+function walk(dt) {
+  const left = hands.find((h) => h.source?.handedness === 'left'), right = hands.find((h) => h.source && h.source.handedness !== 'left');
+  // a stick that is turning a held piece, or a preview on the right laser, is not moving you
+  const turn = right && !right.hold && !placing ? stickPush(right.source.gamepad?.axes?.[2] ?? 0) : 0;
+  if (turn) {
+    // about your head, not the middle of the play space
+    camera.getWorldPosition(tmpV);
+    const before = tmpV.clone();
+    rig.rotation.y -= turn * TURN_SPEED * dt; rig.updateMatrixWorld(true);
+    camera.getWorldPosition(tmpV); rig.position.x += before.x - tmpV.x; rig.position.z += before.z - tmpV.z;
+  }
+  if (!left || left.hold) return;
+  const axes = left.source.gamepad?.axes ?? [], side = stickPush(axes[2] ?? 0), ahead = -stickPush(axes[3] ?? 0);
+  if (!side && !ahead) return;
+  camera.getWorldDirection(lookNow); lookNow.y = 0;
+  if (lookNow.lengthSq() > 0.01) heading.copy(lookNow).normalize(); // looking straight up or down: keep the last way
+  const dx = (-heading.z * side + heading.x * ahead) * WALK_SPEED * dt, dz = (heading.x * side + heading.z * ahead) * WALK_SPEED * dt;
+  camera.getWorldPosition(tmpV);
+  const lost = !floorAt(tmpV.x, tmpV.z); // already off the floor (you started outside, or walked out for real): free to come back
+  if (dx && (lost || floorAt(tmpV.x + dx + Math.sign(dx) * WALL_GAP, tmpV.z))) { rig.position.x += dx; tmpV.x += dx; }
+  if (dz && (lost || floorAt(tmpV.x, tmpV.z + dz + Math.sign(dz) * WALL_GAP))) rig.position.z += dz;
+}
 
 let lastFrame = 0;
 function xrFrame(t) {
@@ -998,6 +1044,7 @@ function xrFrame(t) {
     if (bDown && h.areaDraft) showArea(areaTo(h.areaDraft, o, d), false);
     if (!bDown && h.b && h.areaDraft) { showArea(areaTo(h.areaDraft, o, d), true); h.areaDraft = null; }
     h.b = bDown;
+    if (walking) continue; // walk() has the sticks, below
     const was = h.stick;
     h.stick = Math.abs(x) > 0.7 ? Math.sign(x) : y < -0.7 ? 2 : 0;
     if (h.stick === was || h.stick === 0) continue;
@@ -1011,6 +1058,7 @@ function xrFrame(t) {
       camera.getWorldPosition(tmpV); rig.position.x += before.x - tmpV.x; rig.position.z += before.z - tmpV.z;
     }
   }
+  if (walking) walk(dt);
 }
 
 // ?debug: the page's state, for tests
