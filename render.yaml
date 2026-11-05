@@ -16,6 +16,6 @@ services:
       - key: MAISON_TURNS_PER_VISITOR
         value: "30"
       - key: MAISON_TURNS_PER_ADDRESS
-        value: "60"
+        value: "300"
       - key: MAISON_TURNS_PER_DAY
         value: "1500"

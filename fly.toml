@@ -1,5 +1,6 @@
 # Fly.io config for the public demo: fly launch --copy-config --no-deploy, fly secrets set META_API_KEY=…, fly deploy.
-# Keep it to one machine: each visitor's room and the day's turn counts live in the server's memory.
+# Keep it to one machine, and running: each visitor's room and the day's turn counts live in the server's memory, so a
+# stopped machine would lose them, including the daily cap. The address limit is high enough for a group on one network.
 app = "maison3d"
 primary_region = "iad"
 
@@ -10,15 +11,15 @@ primary_region = "iad"
   MAISON_PUBLIC = "1"
   PORT = "8080"
   MAISON_TURNS_PER_VISITOR = "30"
-  MAISON_TURNS_PER_ADDRESS = "60"
+  MAISON_TURNS_PER_ADDRESS = "300"
   MAISON_TURNS_PER_DAY = "1500"
 
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = "stop"
+  auto_stop_machines = "off"
   auto_start_machines = true
-  min_machines_running = 0
+  min_machines_running = 1
   max_machines_running = 1
 
   [[http_service.checks]]

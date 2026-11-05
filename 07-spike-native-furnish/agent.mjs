@@ -161,8 +161,13 @@ design (view), and in a scanned room show or hide the outlines of their real fur
 
 The person can also grab a piece with their laser pointer and move it themselves; the scene says where it is now.
 
-Answer in one short spoken sentence: it is read aloud in the headset. No markdown, no lists. When you call tools,
-write that sentence in the same message as the calls, saying what you did.`;
+Do everything the person asked for in this turn, every piece and every change, calling the tools as many times as it
+takes: "a table with chairs" is a table and its chairs, a TV above a console is both, and a style or a whole room is a
+full room of pieces, not one. Give every place where it goes. If a call fails, fix it and try again. Only what a tool
+has done is done: never say a piece is there unless its call succeeded, and if something could not be done, say so.
+
+When there is nothing left to call, answer in one short spoken sentence: it is read aloud in the headset. After changing
+the room, say what you did, in the past tense. If they only asked a question, answer it. No markdown, no lists.`;
 
 /** The catalogue as one line per piece, for the prompt: its sizes and, for an inventory piece, its collections. */
 export function catalogIndex() {
@@ -835,12 +840,12 @@ export function apply(name, args, ctx) {
   return { ok: true, piece: describe(piece), issues, ...(areaNote ? { area: areaNote } : {}) };
 }
 
-async function chat(messages) {
+async function chat(messages, toolChoice = 'auto') {
   if (!config.hasKey) throw new Error('no META_API_KEY: put it in .env at the repository root');
   const res = await fetch(`${config.base}/chat/completions`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.META_API_KEY}` },
-    body: JSON.stringify({ model: config.model, reasoning_effort: config.effort, messages, tools: TOOLS, tool_choice: 'auto' }),
+    body: JSON.stringify({ model: config.model, reasoning_effort: config.effort, messages, tools: TOOLS, tool_choice: toolChoice }),
   });
   const text = await res.text();
   if (!res.ok) throw new Error(`Meta Model API said ${res.status}: ${text.slice(0, 300)}`);
@@ -864,6 +869,8 @@ controller's laser). There is no real room behind the design here: do not offer 
 real. Making a part in another material is not available in the demo (say so, and offer a colour instead); colours,
 finishes, sizes, swaps and everything else work.` : '';
 
+const MAX_ROUNDS = 8; // of model calls in one turn: a whole room takes a few, and this bounds what one turn can cost
+
 /** One turn: returns { reply, calls }; the scene is changed in place. */
 export async function runTurn({ said, pointing, room, area = null }) {
   // `room` is the design's room (rooms.mjs: dictated, or the scan emptied of its furniture), `pointing` what was
@@ -883,12 +890,26 @@ export async function runTurn({ said, pointing, room, area = null }) {
   const messages = [{ role: 'system', content: SYSTEM + WEB_NOTE }, ...history, { role: 'user', content: JSON.stringify(context) }];
   const calls = [];
   const actions = []; // things for the headset itself to do, such as rescanning
-  for (let round = 0; round < 4; round++) {
+  const words = (msg) => (typeof msg.content === 'string' ? msg.content.trim() : '');
+  // the turn is over when the model has nothing left to call, so the reply is written knowing what actually happened
+  const finished = (text) => {
+    const reply = text || (calls.some((c) => !c.result?.error) ? 'Done.' : 'I could not do that.');
+    remember(said, reply);
+    return { reply, calls, actions };
+  };
+  let answer = null;
+  for (let round = 0; round < MAX_ROUNDS; round++) {
     const msg = await chat(messages);
     messages.push(msg);
-    const text = typeof msg.content === 'string' ? msg.content.trim() : '';
-    if (!msg.tool_calls?.length) { remember(said, text); return { reply: text, calls, actions }; }
-    let needsLook = false;
+    if (!msg.tool_calls?.length) {
+      if (calls.length) return finished(words(msg));
+      // no calls yet: those words may be a real answer, or a promise ("placing it now"). Ask once, so a promise gets
+      // kept; if nothing needed doing, the first words were the answer.
+      if (answer !== null) return finished(answer);
+      answer = words(msg);
+      messages.push({ role: 'user', content: 'Check: did that ask for any change to the room? If so, make it now with the tools. If not, just say ok.' });
+      continue;
+    }
     for (const call of msg.tool_calls) {
       let result;
       try {
@@ -900,11 +921,9 @@ export async function runTurn({ said, pointing, room, area = null }) {
       } catch (e) {
         result = { error: `bad arguments: ${e.message}` };
       }
-      if (result.error || result.issues?.some((i) => i.startsWith('overlaps') || i.startsWith('blocks'))) needsLook = true;
       messages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(result) });
     }
-    // the reply came with the calls and they all landed cleanly: no second round trip
-    if (text && !needsLook) { remember(said, text); return { reply: text, calls, actions }; }
   }
-  return { reply: 'I got stuck arranging that.', calls, actions };
+  // out of rounds: say what got done, with no more calls
+  return finished(words(await chat(messages, 'none')));
 }

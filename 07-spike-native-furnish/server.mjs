@@ -199,6 +199,7 @@ async function turn(req, res, design) {
 }
 
 const server = http.createServer(async (req, res) => {
+  if (req.method === 'HEAD') req.method = 'GET'; // link checkers ask this way; Node leaves the body off a HEAD's answer by itself
   // a visitor's browser names its design; the headset names none and gets the local one
   const asked = String(req.headers['x-maison-design'] ?? '');
   const design = /^[A-Za-z0-9-]{8,64}$/.test(asked) ? `v-${asked}` : 'local';
