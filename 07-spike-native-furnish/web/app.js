@@ -250,12 +250,78 @@ $('highlight').onclick = () => { highlightMode = !highlightMode; $('highlight').
 
 // --- selecting, dragging and turning pieces by hand -------------------------------------------------------------------------
 let selected = null;
-const box = new THREE.Box3Helper(new THREE.Box3(), 0xd9a066); box.visible = false; scene.add(box);
+// the box around a piece turns with it, so the knob stays on its corner: `frame` follows the piece, `box` is measured unturned
+const frame = new THREE.Group(); frame.visible = false; scene.add(frame);
+const box = new THREE.Box3Helper(new THREE.Box3(), 0xd9a066); frame.add(box);
+let framed = null;
+function frameOn(id) {
+  const obj = pieces.get(id)?.obj;
+  framed = obj ? id : null; frame.visible = !!obj;
+  if (!obj) return;
+  const at = obj.position.clone(), q = obj.quaternion.clone();
+  obj.position.set(0, 0, 0); obj.quaternion.identity();
+  box.box.setFromObject(obj);
+  obj.position.copy(at); obj.quaternion.copy(q); obj.updateWorldMatrix(false, true);
+}
 function select(id) {
   selected = id && pieces.get(id)?.obj ? id : null;
-  box.visible = !!selected;
-  if (selected) { box.box.setFromObject(pieces.get(selected).obj); showPiece(); }
+  frameOn(selected);
+  if (selected) { knobToCorner(); showPiece(); }
   else if (panelKind === 'piece') closePanel();
+}
+
+// the rotate knob: on the box's corner nearest you when the piece was selected, always drawn on top, the same size on
+// screen from any distance. It turns anything that can turn: a piece on a wall keeps facing the room, one at a window stays.
+const knob = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d');
+  g.fillStyle = '#d9a066'; g.beginPath(); g.arc(64, 64, 62, 0, Math.PI * 2); g.fill();
+  g.strokeStyle = g.fillStyle = '#2b2925'; g.lineWidth = 11; g.lineCap = 'round';
+  g.beginPath(); g.arc(64, 64, 32, -Math.PI * 0.2, Math.PI * 1.35); g.stroke();
+  g.beginPath(); g.moveTo(102, 28); g.lineTo(100, 56); g.lineTo(72, 50); g.closePath(); g.fill();
+  const map = new THREE.CanvasTexture(c); map.colorSpace = THREE.SRGBColorSpace;
+  const m = new THREE.Mesh(new THREE.CircleGeometry(1, 32), new THREE.MeshBasicMaterial({ map, transparent: true, depthTest: false, toneMapped: false }));
+  m.visible = false; m.renderOrder = 11; scene.add(m);
+  return m;
+})();
+const knobCorner = new THREE.Vector3();
+const canTurn = (p) => !!p?.obj && !['wall', 'window'].includes(p.data.mount);
+function knobToCorner() {
+  const p = pieces.get(selected);
+  if (!canTurn(p)) return;
+  const { min, max } = box.box, me = p.obj.worldToLocal(camera.getWorldPosition(new THREE.Vector3()));
+  knobCorner.set(Math.abs(me.x - min.x) < Math.abs(me.x - max.x) ? min.x : max.x, p.data.mount === 'ceiling' ? min.y : max.y, Math.abs(me.z - min.z) < Math.abs(me.z - max.z) ? min.z : max.z);
+}
+/** Each frame: the box follows its piece, the knob follows its corner and faces you. */
+function followFrame() {
+  const p = pieces.get(framed);
+  if (framed && !p?.obj) frameOn(null);
+  if (!framed) { knob.visible = false; return; }
+  frame.position.copy(p.obj.position); frame.quaternion.copy(p.obj.quaternion);
+  knob.visible = framed === selected && canTurn(p);
+  if (!knob.visible) return;
+  const me = camera.getWorldPosition(tmpV);
+  knob.position.copy(knobCorner).applyQuaternion(frame.quaternion).add(frame.position);
+  camera.getWorldQuaternion(knob.quaternion);
+  knob.scale.setScalar(me.distanceTo(knob.position) * (renderer.xr.isPresenting ? 0.03 : 0.022));
+}
+const onKnob = (o, d) => knob.visible && new THREE.Ray(o, d).distanceToPoint(knob.position) < knob.scale.x * 1.4;
+/** A turn begins: the ray's angle around the piece, on the level of the knob, drives the piece's yaw. */
+function turnStart(o, d) {
+  const obj = pieces.get(selected).obj, turn = { id: selected, plane: new THREE.Plane(new THREE.Vector3(0, 1, 0), -knob.position.y), yaw: obj.rotation.y };
+  turn.from = turnAngle(turn, obj, o, d) ?? Math.atan2(knob.position.x - obj.position.x, knob.position.z - obj.position.z);
+  return turn;
+}
+function turnAngle(turn, obj, o, d) {
+  const at = new THREE.Ray(o, d).intersectPlane(turn.plane, new THREE.Vector3());
+  return at ? Math.atan2(at.x - obj.position.x, at.z - obj.position.z) : null; // aimed away from the knob's level: stay put
+}
+const RIGHT = Math.PI / 2, SNAP = (3 * Math.PI) / 180;
+function turnTo(turn, o, d) {
+  const obj = pieces.get(turn.id)?.obj, now = obj && turnAngle(turn, obj, o, d);
+  if (now === null || now === undefined) return;
+  const yaw = turn.yaw + now - turn.from, square = Math.round(yaw / RIGHT) * RIGHT; // within 3 degrees of square, it is square
+  obj.rotation.y = Math.abs(yaw - square) < SNAP ? square : yaw;
 }
 /** Moves a piece by hand: where it ended up comes back checked (an overlap is moved beside, said in the log). */
 async function sendMove(id, obj) {
@@ -264,7 +330,6 @@ async function sendMove(id, obj) {
     const r = await api('/api/move', { id, at: obj.position.toArray().map(r3), facing: [r3(f.x), 0, r3(f.z)] });
     await apply(r);
     if (r.error) note(r.error); else if (r.issues?.length) note(r.issues.join('; '));
-    if (selected === id) box.box.setFromObject(pieces.get(id).obj);
   } catch (e) { note(e.message); }
 }
 /** The plane a piece moves on: the floor or what it stands on, or its wall. */
@@ -272,7 +337,7 @@ function dragPlane(p) {
   if (p.data.mount === 'wall') return new THREE.Plane(new THREE.Vector3(p.data.facing[0], 0, p.data.facing[2]), -(p.data.facing[0] * p.data.at[0] + p.data.facing[2] * p.data.at[2]));
   return new THREE.Plane(new THREE.Vector3(0, 1, 0), -p.data.at[1]);
 }
-let drag = null; // { id, plane, offset, moved, kind: 'piece' | 'area', start }
+let drag = null; // { id, plane, offset, moved, kind: 'piece' | 'area' | 'turn', start }
 canvas.addEventListener('pointerdown', (e) => {
   if (e.button !== 0) return;
   // a preview being placed: a click sets it down
@@ -285,6 +350,7 @@ canvas.addEventListener('pointerdown', (e) => {
     if (a) { drag.kind = 'area'; drag.area = a; controls.enabled = false; }
     return;
   }
+  if (onKnob(o, d)) { drag.kind = 'turn'; drag.turn = turnStart(o, d); controls.enabled = false; canvas.style.cursor = 'grabbing'; return; }
   if (c?.piece && pieces.get(c.piece)?.data.grab) {
     const p = pieces.get(c.piece), plane = dragPlane(p), hit = new THREE.Ray(o, d).intersectPlane(plane, new THREE.Vector3());
     if (hit) { drag.kind = 'piece'; drag.id = c.piece; drag.plane = plane; drag.offset = p.obj.position.clone().sub(hit); controls.enabled = false; }
@@ -292,18 +358,21 @@ canvas.addEventListener('pointerdown', (e) => {
 });
 canvas.addEventListener('pointermove', (e) => {
   if (placing) { const [o, d] = ndcRay(e); previewAlong(o, d); }
+  if (!drag) { const [o, d] = ndcRay(e); canvas.style.cursor = onKnob(o, d) ? 'grab' : ''; }
   if (!drag?.kind) return;
   if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 4) drag.moved = true;
   if (!drag.moved) return;
   const [o, d] = ndcRay(e);
   if (drag.kind === 'area') { drag.now = areaTo(drag.area, o, d); showArea(drag.now, false); return; }
+  if (drag.kind === 'turn') { turnTo(drag.turn, o, d); return; }
   const hit = new THREE.Ray(o, d).intersectPlane(drag.plane, new THREE.Vector3());
   const p = pieces.get(drag.id);
-  if (hit && p?.obj) { p.obj.position.copy(hit.add(drag.offset)); if (p.data.mount !== 'wall') p.obj.position.y = p.data.at[1]; box.box.setFromObject(p.obj); box.visible = true; }
+  if (hit && p?.obj) { p.obj.position.copy(hit.add(drag.offset)); if (p.data.mount !== 'wall') p.obj.position.y = p.data.at[1]; if (framed !== drag.id) frameOn(drag.id); }
 });
 canvas.addEventListener('pointerup', (e) => {
   const was = drag; drag = null; controls.enabled = true;
   if (!was) return;
+  if (was.kind === 'turn') { canvas.style.cursor = 'grab'; if (was.moved) sendMove(was.turn.id, pieces.get(was.turn.id).obj); return; }
   if (was.placingDrop) { const [o, d] = ndcRay(e); previewAlong(o, d); dropPlacing(); return; }
   if (was.kind === 'area' && was.moved) { showArea(was.now, true); return; }
   if (was.kind === 'piece' && was.moved) { select(was.id); sendMove(was.id, pieces.get(was.id).obj); return; }
@@ -470,7 +539,7 @@ function showPiece() {
     ${p.finishes ? `<div class="row"><label>Finish</label><select id="fin">${['', ...p.finishes].map((f) => `<option value="${esc(f)}" ${f === (p.finish ?? '') ? 'selected' : ''}>${f ? esc(f) : 'as built'}</option>`).join('')}</select></div>` : ''}
     ${parts.length ? `<div class="row"><label>Colours</label>${parts.map(([k, v]) => `<span title="${esc(k)}"><input type="color" data-part="${esc(k)}" value="${/^#[0-9a-f]{6}$/i.test(v) ? v : '#888888'}"> <small>${esc(k)}</small></span>`).join(' ')}</div>` : ''}
     <div class="row"><button class="btn danger" id="del">Remove</button></div>
-    <p class="hint">Drag it to move it; Q and E turn it. Or say what to change: “make this walnut”.</p>`);
+    <p class="hint">Drag it to move it; the corner knob, or Q and E, turn it. Or say what to change: “make this walnut”.</p>`);
   panel.querySelectorAll('[data-turn]').forEach((b) => (b.onclick = () => tool('move', { id: selected, turn: Number(b.dataset.turn) })));
   panel.querySelectorAll('[data-size]').forEach((b) => (b.onclick = async () => { const r = await tool('resize', { id: selected, size: b.dataset.size }); if (r.piece) select(r.piece.id); }));
   const fin = $('fin'); if (fin) fin.onchange = () => tool('material', { id: selected, material: fin.value || 'original' });
@@ -532,10 +601,34 @@ function setBusy(b, t = '') { busy = b; document.body.classList.toggle('busy', b
 let voiceOn = store.get('maison-voice') !== 'off';
 const voiceBtn = $('voice');
 const showVoice = () => { voiceBtn.textContent = voiceOn ? 'Voice on' : 'Voice off'; voiceBtn.setAttribute('aria-pressed', String(voiceOn)); };
-voiceBtn.onclick = () => { voiceOn = !voiceOn; store.set('maison-voice', voiceOn ? 'on' : 'off'); if (!voiceOn) window.speechSynthesis?.cancel(); showVoice(); };
+voiceBtn.onclick = () => { voiceOn = !voiceOn; store.set('maison-voice', voiceOn ? 'on' : 'off'); if (!voiceOn) stopVoice(); showVoice(); };
 showVoice();
-function speak(text) {
-  if (!voiceOn || !text || !('speechSynthesis' in window)) return;
+let voiceNow = null; // the reply playing from the server's voice
+function stopVoice() {
+  try { voiceNow?.stop(); } catch {}
+  voiceNow = null;
+  window.speechSynthesis?.cancel();
+}
+/** Plays the server's WAV on the page's audio context; false if the browser is holding audio back. */
+async function playVoice(b64) {
+  wakeAudio();
+  if (!audioCtx) return false;
+  // resume() can wait for ever without a tap behind it, so it only gets a moment
+  if (audioCtx.state !== 'running') await Promise.race([audioCtx.resume().catch(() => {}), new Promise((r) => setTimeout(r, 300))]);
+  if (audioCtx.state !== 'running') return false;
+  const sound = await audioCtx.decodeAudioData(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)).buffer);
+  stopVoice();
+  const src = audioCtx.createBufferSource();
+  src.buffer = sound; src.connect(audioCtx.destination);
+  src.onended = () => { if (voiceNow === src) voiceNow = null; };
+  src.start(); voiceNow = src;
+  return true;
+}
+/** Says a reply: the server's voice when it sent one, else the browser's own when it has one. */
+async function speak(text, wav) {
+  if (!voiceOn || !text) return;
+  if (wav && await playVoice(wav).catch(() => false)) return;
+  if (!('speechSynthesis' in window)) return;
   const u = new SpeechSynthesisUtterance(text);
   const v = speechSynthesis.getVoices().find((x) => /^en(-|_)/i.test(x.lang) && /natural|google|samantha|daniel/i.test(x.name)) ?? speechSynthesis.getVoices().find((x) => /^en/i.test(x.lang));
   if (v) u.voice = v;
@@ -551,10 +644,11 @@ async function turn(text) {
   // what this turn was about: cleared after it, unless the person has pointed or highlighted again meanwhile
   const sent = { pointing, area };
   try {
-    const r = await api('/api/turn', { text, pointing, area, room: { viewer: viewer() }, voice: false });
+    const r = await api('/api/turn', { text, pointing, area, room: { viewer: viewer() }, voice: voiceOn });
     await apply(r);
-    if (r.reply) { log('maison', r.reply); speak(r.reply); }
+    if (r.reply) { log('maison', r.reply); speak(r.reply, r.voice); }
     showLimit(r.limit);
+    offerDownload();
   } catch (e) {
     log('error', e.message);
     if (e.body?.scene) await apply(e.body);
@@ -564,6 +658,14 @@ async function turn(text) {
     if (area === sent.area) clearArea();
     setBusy(false);
   }
+}
+
+// once, when there is something to keep: the Download button cannot be reached inside VR, so it says how
+let toldDownload = false;
+function offerDownload() {
+  if (toldDownload || !pieces.size) return;
+  toldDownload = true;
+  note(renderer.xr.isPresenting ? 'When you are done, leave VR and press Download to keep your room as a page that opens in any browser.' : 'When you are done, Download keeps your room as a page that opens in any browser.');
 }
 
 $('say').addEventListener('submit', (e) => { e.preventDefault(); const t = $('text').value; $('text').value = ''; turn(t); });
@@ -701,7 +803,7 @@ async function startTalking() {
       if (t - shown > 150) { shown = t; status(`${rec.toggle ? 'Listening… tap the mic again to send' : libraryOpen() ? 'Listening… say what you are looking for' : 'Listening… let go when you are done'}  ${'▮'.repeat(Math.min(8, Math.round(p * 40)))}${'▯'.repeat(8 - Math.min(8, Math.round(p * 40)))}`); }
     };
     src.connect(proc); proc.connect(audioCtx.destination);
-    window.speechSynthesis?.cancel(); // through window: the Quest browser has none, and a bare name would throw
+    stopVoice(); // you are talking now
     $('mic').classList.add('on'); $('libmic')?.classList.add('on'); status(rec.toggle ? 'Listening… tap the mic again to send' : libraryOpen() ? 'Listening… say what you are looking for' : 'Listening… let go when you are done');
     if (rec.stopSoon) stopTalking(); // let go while the microphone was still starting
   } catch (e) {
@@ -808,13 +910,14 @@ const hands = [0, 1].map((i) => {
   const laser = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)]), new THREE.LineBasicMaterial({ color: 0xd9a066 }));
   laser.scale.z = 4; c.add(laser);
   const h = { c, grip, laser, source: null, stick: 0, hold: null, b: false, areaDraft: null };
-  c.addEventListener('connected', (e) => (h.source = e.data));
+  c.addEventListener('connected', (e) => { h.source = e.data; seatPanel(); });
   c.addEventListener('disconnected', () => (h.source = null));
   c.addEventListener('selectstart', () => {
     const [o, d] = aim(c);
     // the library panel, or a preview being placed, take the trigger first
     if (panelHit(o, d)) { h.panelPress = true; return; }
     if (placing) return;
+    if (onKnob(o, d)) { h.turn = turnStart(o, d); return; }
     // on a piece: it may be a hold (move it) or a pull (point at it); off one: a point
     const hit = cast(o, d);
     if (hit?.piece && pieces.get(hit.piece)?.data.grab) {
@@ -828,8 +931,9 @@ const hands = [0, 1].map((i) => {
   c.addEventListener('selectend', () => {
     if (h.panelPress) { h.panelPress = false; const [o, d] = aim(c), ph = panelHit(o, d); if (ph) vrLib.click(ph.uv); return; }
     if (placing) { const [o, d] = aim(c); previewAlong(o, d); dropPlacing(); return; }
+    if (h.turn) { const { id } = h.turn; h.turn = null; sendMove(id, pieces.get(id).obj); return; }
     const hold = h.hold, sweep = h.sweep; h.hold = null; h.sweep = null;
-    if (hold?.moving) { sendMove(hold.id, pieces.get(hold.id).obj); return; }
+    if (hold?.moving) { select(hold.id); sendMove(hold.id, pieces.get(hold.id).obj); return; }
     if (sweep?.drawing) { const [o, d] = aim(c); showArea(areaTo(sweep.draft, o, d), true); return; }
     const [o, d] = aim(c), hit = pointAlong(o, d);
     select(hit?.piece ?? null);
@@ -845,7 +949,13 @@ function aim(c) {
   return [o, d];
 }
 
-// what you said and what Maison3D answered, on a small panel by your left hand
+/** The conversation's panel goes on the right hand; on whichever hand there is, until the right one is seen. */
+function seatPanel() {
+  const hand = hands.find((h) => h.source && h.source.handedness !== 'left') ?? hands.find((h) => h.source);
+  if (hand) hand.grip.add(vrPanel.mesh);
+}
+
+// what you said and what Maison3D answered, on a small panel by your right hand
 const vrPanel = (() => {
   const cv = document.createElement('canvas'); cv.width = 768; cv.height = 384;
   const g = cv.getContext('2d'), tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
@@ -949,13 +1059,14 @@ renderer.xr.addEventListener('sessionstart', () => {
   rig.position.set(v.position[0], 0, v.position[2]);
   rig.rotation.set(0, Math.atan2(-v.forward[0], -v.forward[2]), 0);
   camera.position.set(0, 0, 0); camera.quaternion.identity();
-  const left = hands.find((h) => h.source?.handedness === 'left') ?? hands[0];
-  left.grip.add(vrPanel.mesh);
+  seatPanel();
 });
 renderer.xr.addEventListener('sessionend', () => {
   rig.position.set(0, 0, 0); rig.rotation.set(0, 0, 0);
   if (saved) { camera.position.copy(saved.pos); camera.quaternion.copy(saved.quat); controls.target.copy(saved.target); }
   controls.enabled = true; controls.update();
+  // back from VR is the moment to keep what you made
+  if (pieces.size) { $('exportMenu').hidden = false; status('Done? Download your room.'); }
 });
 
 // Walking: the left stick moves you relative to where you look, the right stick turns you, both smoothly. The room's floor
@@ -1019,6 +1130,8 @@ function xrFrame(t) {
       if (Math.abs(x) > 0.2) { placing.yaw -= x * dt * 1.8; if (placing.pose && !placing.pose.wall) placing.obj.rotation.y = placing.yaw; }
       continue;
     }
+    // the knob held on the laser turns the selected piece
+    if (h.turn) { turnTo(h.turn, o, d); continue; }
     // a held piece follows the laser; the thumbstick turns it
     if (h.hold) {
       const p = pieces.get(h.hold.id);
@@ -1027,7 +1140,7 @@ function xrFrame(t) {
         const at = new THREE.Ray(o, d).intersectPlane(h.hold.plane, new THREE.Vector3());
         if (at) { p.obj.position.copy(at.add(h.hold.offset)); if (p.data.mount !== 'wall') p.obj.position.y = p.data.at[1]; }
         if (Math.abs(x) > 0.2 && p.data.mount !== 'wall') p.obj.rotation.y -= x * dt * 1.8;
-        box.box.setFromObject(p.obj); box.visible = true;
+        if (framed !== h.hold.id) frameOn(h.hold.id);
       }
       continue;
     }
@@ -1067,6 +1180,7 @@ if (new URLSearchParams(location.search).has('debug')) window.__m3d = { hands, p
 renderer.setAnimationLoop((t) => {
   if (renderer.xr.isPresenting) xrFrame(t); else controls.update();
   lighting.tick(t);
+  followFrame();
   renderer.render(scene, camera);
 });
 

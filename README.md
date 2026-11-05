@@ -28,8 +28,10 @@ uses (`/api/tool`):
   In VR, A (or X) opens the library as a panel in front of you: tabs, pages of previews, the laser picks.
   The previews are `web/thumbs/<id>.jpg`, rendered from the models by `npm run thumbs` (with the server running;
   it needs Playwright, and makes only the missing ones).
-- **Move and turn:** drag a piece to move it (on the floor, its wall, or what it stands on). Q and E turn it, Delete
-  removes it. In VR, hold the trigger on a piece to carry it and the thumbstick turns it.
+- **Move and turn:** drag a piece to move it (on the floor, its wall, or what it stands on). A selected piece has a
+  rotate knob on one corner: drag it round to turn the piece (it settles on a right angle within 3°). Q and E turn it
+  too, Delete removes it. In VR, pull the trigger on the knob to do the same, or hold the trigger on a piece to carry
+  it and the thumbstick turns it. Pieces on a wall or at a window have no knob: they keep facing the room.
 - **A piece's panel:** turn it, the next size down or up, its finish, its parts' colours, remove.
 - **The room:** its size in feet, and what the floor, walls and ceiling are made of, with their colours.
 - **Highlight an area:** shift-drag (or the Highlight button) over the floor, a wall or the ceiling; in VR, pull the
@@ -63,7 +65,9 @@ With `MAISON_PUBLIC=1` the server is a public demo:
 - it listens beyond the machine;
 - each visitor's browser keeps its own room (a design per visitor, in memory, kept six hours idle);
 - turns are limited per visitor (30 a day), per address (60) and for the whole day (1,500, the real guard on cost);
-- replies are spoken by the browser.
+- replies are spoken by the server, with [Piper](https://github.com/rhasspy/piper) and a voice trained on the public
+  domain LJ Speech (the Quest browser has no voice of its own, and Meta's Model API transcribes but does not speak);
+  the browser's own voice is the fallback.
 
 Making a part in another material needs mojulo on the server and is off in the demo; colours work.
 
