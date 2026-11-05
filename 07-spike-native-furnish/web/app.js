@@ -532,7 +532,7 @@ function setBusy(b, t = '') { busy = b; document.body.classList.toggle('busy', b
 let voiceOn = store.get('maison-voice') !== 'off';
 const voiceBtn = $('voice');
 const showVoice = () => { voiceBtn.textContent = voiceOn ? 'Voice on' : 'Voice off'; voiceBtn.setAttribute('aria-pressed', String(voiceOn)); };
-voiceBtn.onclick = () => { voiceOn = !voiceOn; store.set('maison-voice', voiceOn ? 'on' : 'off'); if (!voiceOn) speechSynthesis?.cancel(); showVoice(); };
+voiceBtn.onclick = () => { voiceOn = !voiceOn; store.set('maison-voice', voiceOn ? 'on' : 'off'); if (!voiceOn) window.speechSynthesis?.cancel(); showVoice(); };
 showVoice();
 function speak(text) {
   if (!voiceOn || !text || !('speechSynthesis' in window)) return;
@@ -701,10 +701,13 @@ async function startTalking() {
       if (t - shown > 150) { shown = t; status(`${rec.toggle ? 'Listening… tap the mic again to send' : libraryOpen() ? 'Listening… say what you are looking for' : 'Listening… let go when you are done'}  ${'▮'.repeat(Math.min(8, Math.round(p * 40)))}${'▯'.repeat(8 - Math.min(8, Math.round(p * 40)))}`); }
     };
     src.connect(proc); proc.connect(audioCtx.destination);
-    speechSynthesis?.cancel();
+    window.speechSynthesis?.cancel(); // through window: the Quest browser has none, and a bare name would throw
     $('mic').classList.add('on'); $('libmic')?.classList.add('on'); status(rec.toggle ? 'Listening… tap the mic again to send' : libraryOpen() ? 'Listening… say what you are looking for' : 'Listening… let go when you are done');
     if (rec.stopSoon) stopTalking(); // let go while the microphone was still starting
   } catch (e) {
+    // anything that fails once the microphone is open must let it go again
+    try { rec?.src?.disconnect(); rec?.proc?.disconnect(); } catch {}
+    rec?.stream?.getTracks().forEach((t) => t.stop());
     rec = null;
     micFailed(e);
   }
