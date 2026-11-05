@@ -19,8 +19,15 @@ How this becomes a submitted app: [`docs/packaging-proposal.md`](docs/packaging-
 The web client (`07-spike-native-furnish/web/`) does a lot without any model in between: it calls the same tools Muse
 uses (`/api/tool`):
 
-- **Add:** browse the whole library by category or search. A piece goes where you clicked, into your highlighted
-  area, or in front of you.
+- **The library (no judgment, no model):** every piece with its preview picture, by category, or found by its words.
+  Type them, or hold the mic while the library is open: talking then searches the library instead of asking Maison3D
+  (a desktop browser's own speech recognition when it has one, else Meta's transcription; never the chat model).
+  A picked piece comes into the room as a see-through preview on your pointer: on the floor, against the wall it
+  meets, under the ceiling, or on top of a piece. Q and E (the thumbstick in VR) turn it, a click (the trigger) sets
+  it down, Esc (A in VR) cancels. Into a highlighted area it goes straight in, sized to fit.
+  In VR, A (or X) opens the library as a panel in front of you: tabs, pages of previews, the laser picks.
+  The previews are `web/thumbs/<id>.jpg`, rendered from the models by `npm run thumbs` (with the server running;
+  it needs Playwright, and makes only the missing ones).
 - **Move and turn:** drag a piece to move it (on the floor, its wall, or what it stands on). Q and E turn it, Delete
   removes it. In VR, hold the trigger on a piece to carry it and the thumbstick turns it.
 - **A piece's panel:** turn it, the next size down or up, its finish, its parts' colours, remove.

@@ -185,6 +185,38 @@ export function catalogIndex() {
 }
 
 /** Catalogue pieces matching `query`'s words (and the filters), best first. */
+/**
+ * The library searched by its words, no model: what the person said or typed ("walnut sideboard", "round rug",
+ * "65 inch tv", "brass pot lights"), plurals and spoken sizes understood, the pieces matching every word first, a word
+ * in the name counting most. Returns ids, best first.
+ */
+export function searchLibrary(query, max = 60) {
+  const q = String(query).toLowerCase()
+    .replace(/(\d+(?:\.\d+)?)\s*(?:inches|inch|in\b|")/g, '$1in').replace(/(\d+(?:\.\d+)?)\s*(?:feet|foot|ft\b|')/g, '$1ft')
+    .replace(/(\d+)\s*by\s*(\d+)/g, '$1x$2');
+  const STOP = new Set(['a', 'an', 'the', 'some', 'and', 'with', 'for', 'of', 'in', 'on', 'please', 'show', 'me', 'find', 'i', 'want', 'need', 'like', 'any', 'one']);
+  const words = q.split(/[^a-z0-9.x-]+/).filter((w) => w && !STOP.has(w));
+  if (!words.length) return [];
+  const forms = (w) => [...new Set([w, w.replace(/ies$/, 'y'), w.replace(/es$/, ''), w.replace(/s$/, '')])].filter((x) => x.length > 1);
+  const out = [];
+  for (const c of catalogList) {
+    const col = COLLECTIONS.find((x) => x.code === c.collection), cm = col?.mojulo;
+    const name = `${c.name} ${c.id}`.toLowerCase();
+    const text = [c.note, c.kind, c.room, c.sizeName, ...(c.words ?? []), col?.name, col?.card, cm?.fabric?.warp, cm?.accent?.warp, cm?.fabric?.preset, cm?.accent?.preset, cm?.timber, ...Object.values(c.made ?? {})].filter(Boolean).join(' ').toLowerCase();
+    let matched = 0, score = 0;
+    for (const w of words) {
+      const f = forms(w);
+      if (f.some((x) => new RegExp(`(^|[^a-z])${x.replace(/[.]/g, '\\.')}`).test(name))) { matched++; score += 3; }
+      else if (f.some((x) => text.includes(x))) { matched++; score += 1; }
+    }
+    if (matched) out.push([matched, score, c.id]);
+  }
+  out.sort((a, b) => b[0] - a[0] || b[1] - a[1] || a[2].localeCompare(b[2]));
+  // the pieces that match every word the best did; a few near misses only when those are few
+  const best = out[0]?.[0] ?? 0, full = out.filter((x) => x[0] === best);
+  return (full.length >= 3 ? full : out.filter((x) => x[0] >= best - 1)).slice(0, max).map((x) => x[2]);
+}
+
 export function findPieces({ query = '', kind, mount, collection, room, max = 12 } = {}) {
   const words = String(query).toLowerCase().split(/[^a-z0-9-]+/).filter((w) => w.length > 1);
   const hits = [];
@@ -786,7 +818,8 @@ export function apply(name, args, ctx) {
   if (pose.error) return pose;
   const piece = current ?? { id: newId(item), item, ...(fit ? { fit, ...(catalog[item].custom ? { size: entry.size } : {}) } : {}) };
   piece.at = pose.at;
-  piece.facing = areaFacing ?? pose.facing;
+  const given = Array.isArray(args.facing) && args.facing.length === 3 && Math.hypot(args.facing[0], args.facing[2]) > 0.1 ? args.facing : null;
+  piece.facing = areaFacing ?? (given ? [round3(given[0] / Math.hypot(given[0], given[2])), 0, round3(given[2] / Math.hypot(given[0], given[2]))] : pose.facing);
   // what it stands on (a lamp on the side table): a nudge out of another's way keeps it there
   if (placed) { const host = where.on && scene.find((x) => x.id.toLowerCase() === String(where.on).toLowerCase()); if (host) piece.on = host.id; else delete piece.on; }
   // a tall picture is not hung through the ceiling

@@ -141,7 +141,8 @@ export function resolve(where, entry, { room, scene, catalog, pointing, current 
   } else if (where.on) {
     const t = find(where.on, room, scene, catalog);
     if (!t) return { error: `nothing called "${where.on}"; ids are ${ids(room, scene)}` };
-    at = [t.box.c[0], t.top, t.box.c[1]];
+    // on it: where it was asked to go on it (dropped there by hand), else its middle
+    at = Array.isArray(where.at) && where.at.length >= 2 ? [where.at[0], t.top, where.at[where.at.length - 1]] : [t.box.c[0], t.top, t.box.c[1]];
     // a TV, a soundbar, a speaker on a console face the way the console does
     if (entry.facesHost && t.kind === 'piece') autoFace = t.box.v;
     // on a corner console, towards its front, where it is widest

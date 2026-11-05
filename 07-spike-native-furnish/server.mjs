@@ -8,7 +8,7 @@ import { readFile } from 'node:fs/promises';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { config, runTurn, scene, catalog, catalogList, modelPath, parseModel, finish, settings, manualMove, apply as applyTool, sizesOf, windowsOf } from './agent.mjs';
+import { config, runTurn, scene, catalog, catalogList, modelPath, parseModel, finish, settings, manualMove, apply as applyTool, sizesOf, windowsOf, searchLibrary } from './agent.mjs';
 import { decorModel } from './decor.mjs';
 import { walls, sizeOf, mountOf, ceilingOf } from './place.mjs';
 import { frame } from './shell.mjs';
@@ -264,6 +264,17 @@ async function handle(req, res, design) {
     }
     if (req.method === 'POST' && url.pathname === '/api/turn') return await turn(req, res, design);
     if (req.method === 'GET' && url.pathname === '/api/library') return send(res, 200, { pieces: libraryJson() });
+    // the library searched by its words, no model: typed, or said and transcribed
+    if (req.method === 'GET' && url.pathname === '/api/search') return send(res, 200, { q: url.searchParams.get('q') ?? '', ids: searchLibrary(url.searchParams.get('q') ?? '') });
+    // a piece's preview (tools/thumbs.cjs makes them)
+    const thumb = /^\/thumbs\/([A-Za-z0-9._~-]+)\.jpg$/.exec(url.pathname);
+    if (req.method === 'GET' && thumb) {
+      const file = join(WEB, 'thumbs', `${thumb[1]}.jpg`);
+      if (!existsSync(file)) return send(res, 404, { error: 'no preview' });
+      const body = await readFile(file);
+      res.writeHead(200, { 'content-type': 'image/jpeg', 'content-length': body.length, 'cache-control': 'max-age=86400', connection: 'close' });
+      return res.end(body);
+    }
     if (req.method === 'GET' && url.pathname === '/api/export/formats') return send(res, 200, { glb: true, html: true, mojulo: !PUBLIC && mojuloReady() });
     // the design to take away: one GLB of the room and every piece with its lights, or a page that walks round it
     // the design through mojulo (on a laptop with mojulo): its walkable world, a USDZ, its lit GLB, a Godot project, zipped
